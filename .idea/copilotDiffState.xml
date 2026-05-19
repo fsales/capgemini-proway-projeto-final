@@ -3,6 +3,32 @@
   <component name="CopilotDiffPersistence">
     <option name="pendingDiffs">
       <map>
+        <entry key="/BuscaCep (snapshot).kt">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="/BuscaCep (snapshot).kt" />
+              <option name="originalContent" value="package com.example.trabalho3.network&#10;&#10;import com.app.gerenciadorcartoes.network.model.ViaCepResponse&#10;import retrofit2.Response&#10;import retrofit2.http.GET&#10;import retrofit2.http.Path&#10;&#10;interface BuscaCep {&#10;&#10;    @GET(&quot;{cep}/json/&quot;)&#10;    suspend fun getCep(@Path(&quot;cep&quot;) cep: String): Response&lt;ViaCepResponse&gt;&#10;&#10;}" />
+              <option name="updatedContent" value="package com.app.gerenciadorcartoes.network.service&#10;&#10;import com.app.gerenciadorcartoes.network.model.ViaCepResponse&#10;import retrofit2.Response&#10;import retrofit2.http.GET&#10;import retrofit2.http.Path&#10;&#10;interface BuscaCep {&#10;&#10;    @GET(&quot;{cep}/json/&quot;)&#10;    suspend fun getCep(@Path(&quot;cep&quot;) cep: String): Response&lt;ViaCepResponse&gt;&#10;&#10;}" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="/CadastroUsuarioUiState (snapshot).kt">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="/CadastroUsuarioUiState (snapshot).kt" />
+              <option name="updatedContent" value="package com.app.gerenciadorcartoes.ui.feature.cadastrousuario.state&#10;&#10;data class CadastroUsuarioUiState(&#10;    val carregando         : Boolean = false,&#10;    val salvando           : Boolean = false,&#10;    val nome               : String  = &quot;&quot;,&#10;    val cpf                : String  = &quot;&quot;,&#10;    val cep                : String  = &quot;&quot;,&#10;    val endereco           : String  = &quot;&quot;,&#10;    val number             : String  = &quot;&quot;,&#10;    val bairro             : String  = &quot;&quot;,&#10;    val estado             : String  = &quot;&quot;,&#10;    val email              : String  = &quot;&quot;,&#10;    val senha              : String  = &quot;&quot;,&#10;    val confirmarSenha     : String  = &quot;&quot;,&#10;    val erroNome           : String? = null,&#10;    val erroCpf            : String? = null,&#10;    val erroCep            : String? = null,&#10;    val erroEndereco       : String? = null,&#10;    val erroNumber         : String? = null,&#10;    val erroBairro         : String? = null,&#10;    val erroEstado         : String? = null,&#10;    val erroEmail          : String? = null,&#10;    val erroSenha          : String? = null,&#10;    val erroConfirmarSenha : String? = null,&#10;)&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="/RetrofitClient (snapshot).kt">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="/RetrofitClient (snapshot).kt" />
+              <option name="originalContent" value="package com.example.trabalho3.network&#10;&#10;import retrofit2.Retrofit&#10;import retrofit2.converter.gson.GsonConverterFactory&#10;&#10;object RetrofitClient {&#10;&#10;    private const val BASE_URL = &quot;https://viacep.com.br/ws/&quot;&#10;&#10;    val api: BuscaCep by lazy {&#10;        Retrofit.Builder()&#10;            .baseUrl(BASE_URL)&#10;            .addConverterFactory(GsonConverterFactory.create())&#10;            .build()&#10;            .create(BuscaCep::class.java)&#10;    }&#10;&#10;}" />
+              <option name="updatedContent" value="package com.app.gerenciadorcartoes.network.service&#10;&#10;// RetrofitClient removido — a instância BuscaCep agora é provida pelo Hilt via NetworkModule." />
+            </PendingDiffInfo>
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$/app/src/main/java/com/fsales/app/gerenciadorcartoes/data/local/dao/ItemDao.kt">
           <value>
             <PendingDiffInfo>
