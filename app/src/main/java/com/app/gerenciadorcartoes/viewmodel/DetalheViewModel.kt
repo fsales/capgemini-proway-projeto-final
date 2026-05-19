@@ -40,9 +40,7 @@ class DetalheViewModel @Inject constructor(
 
     fun onEvent(event: DetalheEvent) {
         when (event) {
-            DetalheEvent.Voltar  -> viewModelScope.launch { _uiEvent.send(DetalheUiEvent.NavigateBack) }
-            DetalheEvent.Editar  -> viewModelScope.launch { _uiEvent.send(DetalheUiEvent.NavegaParaEditar(id)) }
-            DetalheEvent.Excluir -> excluir()
+            DetalheEvent.Voltar -> viewModelScope.launch { _uiEvent.send(DetalheUiEvent.NavigateBack) }
         }
     }
 
@@ -67,14 +65,4 @@ class DetalheViewModel @Inject constructor(
         }
     }
 
-    private fun excluir() {
-        viewModelScope.launch {
-            runCatching {
-                cartaoRepository.excluirPorId(id)
-                _uiEvent.send(DetalheUiEvent.NavigateBack)
-            }.onFailure { erro ->
-                _uiEvent.send(DetalheUiEvent.MostrarErro(erro.message ?: "Erro ao excluir cartão"))
-            }
-        }
-    }
 }
