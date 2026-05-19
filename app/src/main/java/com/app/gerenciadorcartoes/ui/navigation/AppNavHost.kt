@@ -5,8 +5,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.app.gerenciadorcartoes.ui.feature.cadastraralterar.CadastrarAlterarScreen
+import com.app.gerenciadorcartoes.ui.feature.cadastrousuario.CadastroUsuarioScreen
 import com.app.gerenciadorcartoes.ui.feature.detalhe.DetalheScreen
 import com.app.gerenciadorcartoes.ui.feature.lista.ListaScreen
+import com.app.gerenciadorcartoes.ui.feature.login.LoginScreen
 
 @Composable
 fun AppNavHost() {
@@ -14,8 +16,21 @@ fun AppNavHost() {
 
     NavHost(
         navController    = navController,
-        startDestination = ListaRoute,
+        startDestination = LoginRoute,
     ) {
+
+        composable<LoginRoute> {
+            LoginScreen(
+                onNavigateToLista      = {
+                    navController.navigate(ListaRoute) {
+                        popUpTo<LoginRoute> { inclusive = true }
+                    }
+                },
+                onNavigateParaCadastro = {
+                    navController.navigate(CadastroUsuarioRoute)
+                },
+            )
+        }
 
         composable<ListaRoute> {
             ListaScreen(
@@ -39,6 +54,12 @@ fun AppNavHost() {
 
         composable<CadastrarAlterarRoute> {
             CadastrarAlterarScreen(
+                navigateBack = { navController.popBackStack() },
+            )
+        }
+
+        composable<CadastroUsuarioRoute> {
+            CadastroUsuarioScreen(
                 navigateBack = { navController.popBackStack() },
             )
         }

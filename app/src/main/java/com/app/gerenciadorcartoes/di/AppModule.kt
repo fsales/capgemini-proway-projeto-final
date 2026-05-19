@@ -23,7 +23,6 @@ abstract class AppModule {
     abstract fun bindCartaoRepository(impl: CartaoRepositoryImpl): CartaoRepository
 
     companion object {
-
         @Provides
         @Singleton
         fun provideDatabase(@ApplicationContext context: Context): AppDatabase =

@@ -1,6 +1,7 @@
 package com.app.gerenciadorcartoes.di
 
 import com.app.gerenciadorcartoes.network.service.ApiService
+import com.app.gerenciadorcartoes.network.service.BuscaCep
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
@@ -11,7 +12,9 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -52,4 +55,20 @@ object NetworkModule {
     @Singleton
     fun provideApiService(retrofit: Retrofit): ApiService =
         retrofit.create(ApiService::class.java)
+
+
+    @Provides
+    @Singleton
+    @Named("viacep")
+    fun provideViaCepRetrofit(): Retrofit =
+        Retrofit.Builder()
+            .baseUrl("https://viacep.com.br/ws/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+    // Cria a implementação de BuscaCep a partir do Retrofit dedicado ao ViaCep
+    @Provides
+    @Singleton
+    fun provideBuscaCep(@Named("viacep") retrofit: Retrofit): BuscaCep =
+        retrofit.create(BuscaCep::class.java)
 }

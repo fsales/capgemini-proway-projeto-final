@@ -22,6 +22,7 @@ class ListaViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ListaUiState(carregando = true))
+
     val uiState: StateFlow<ListaUiState> = _uiState.asStateFlow()
 
     private val _uiEvent = Channel<ListaUiEvent>(Channel.BUFFERED)
