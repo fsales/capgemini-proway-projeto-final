@@ -9,6 +9,8 @@
 ## Histórico de Alterações
 
 <!-- Insira uma linha no início a cada atualização: "- YYYY-MM-DD — descrição" -->
+- 2026-05-19 — Adicionado campo `template` ao modelo de domínio `Cartao` e a `CartaoEntity`; migração Room v1→v2; criado `CartaoTemplateCard` e `CartaoTemplateMini` em `ui/components/`; ListaScreen e CadastrarAlterarScreen atualizados com seletor de template visual (Bradesco, Itaú, Nubank, Inter, C6 Bank, Padrão)
+- 2026-05-19 — Downgrade do Android Gradle Plugin para 9.0.0 para compatibilidade com Android Studio; seção de build atualizada
 - 2026-05-15 — Revisão completa: corrigidos tokens IconSize (extraSmall/small/extraLarge), adicionado smallMedium ao Spacing, corrigida Matriz de Estratégia (Repository em vez de DAO, tipos Cartao), corrigida ordem de parâmetros do AppScaffold, documentados CadastrarAlterarUiState.salvando e isEdicao
 - 2026-05-15 — Tradução completa para pt-BR; todos os arquivos da pasta docs/ atualizados
 - 2026-05-15 — Adicionados Guia de Manutenção e Histórico de Alterações; criado .github/copilot-instructions.md para aplicação contínua das regras de atualização
@@ -95,6 +97,7 @@ data class Cartao(
     val bandeira    : String = "",   // "Visa" | "Mastercard" | "Elo" | etc.
     val validade    : String = "",   // "MM/AA" — e.g. "12/28"
     val limite      : Double = 0.0,  // BRL credit limit
+    val template    : String = "default", // card visual: "default"|"bradesco"|"itau"|"nubank"|"inter"|"c6bank"
 )
 ```
 
@@ -497,6 +500,9 @@ Plugins ativos em `:app`:
 - `alias(libs.plugins.ksp)`
 - `alias(libs.plugins.kotlin.serialization)`
 - `alias(libs.plugins.kotlin.compose)`
+
+Plugin Android:
+- `com.android.application` (`libs.plugins.android.application`) = `9.0.0`
 
 ---
 

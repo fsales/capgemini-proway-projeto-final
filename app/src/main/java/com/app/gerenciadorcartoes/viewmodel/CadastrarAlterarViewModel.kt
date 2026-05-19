@@ -60,6 +60,9 @@ class CadastrarAlterarViewModel @Inject constructor(
 
             is CadastrarAlterarEvent.LimiteAlterado ->
                 _uiState.update { it.copy(limite = event.valor, erroLimite = null) }
+
+            is CadastrarAlterarEvent.TemplateAlterado ->
+                _uiState.update { it.copy(template = event.valor) }
         }
     }
 
@@ -79,6 +82,7 @@ class CadastrarAlterarViewModel @Inject constructor(
                             bandeira    = cartao.bandeira,
                             validade    = cartao.validade,
                             limite      = cartao.limite.toString(),
+                            template    = cartao.template,
                             carregando  = false,
                         )
                     }
@@ -106,6 +110,7 @@ class CadastrarAlterarViewModel @Inject constructor(
                     bandeira    = _uiState.value.bandeira.trim(),
                     validade    = _uiState.value.validade.trim(),
                     limite      = _uiState.value.limite.toDoubleOrNull() ?: 0.0,
+                    template    = _uiState.value.template,
                 )
                 if (id == 0L) cartaoRepository.salvar(cartao)
                 else          cartaoRepository.atualizar(cartao)

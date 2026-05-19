@@ -10,6 +10,7 @@ fun CartaoEntity.toDomain(): Cartao = Cartao(
     bandeira    = bandeira,
     validade    = validade,
     limite      = limite,
+    template    = template,
 )
 
 fun Cartao.toEntity(): CartaoEntity = CartaoEntity(
@@ -19,4 +20,5 @@ fun Cartao.toEntity(): CartaoEntity = CartaoEntity(
     bandeira    = bandeira,
     validade    = validade,
     limite      = limite,
+    template    = template,
 )

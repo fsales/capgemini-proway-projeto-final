@@ -9,4 +9,5 @@ data class Cartao(
     val bandeira    : String = "",    // ex: "Visa", "Mastercard", "Elo"
     val validade    : String = "",    // ex: "12/28"
     val limite      : Double = 0.0,
+    val template    : String = "default", // ex: "default", "bradesco", "itau", "nubank", "inter", "c6bank"
 )

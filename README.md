@@ -11,7 +11,7 @@ Aplicativo Android que demonstra **CRUD completo** de cartões usando arquitetur
 | Tecnologia              | Versão     | Grupo / Artefato                                          |
 |-------------------------|------------|-----------------------------------------------------------|
 | Kotlin                  | 2.3.21     | `org.jetbrains.kotlin`                                    |
-| AGP                     | 9.2.1      | `com.android.tools.build:gradle`                          |
+| AGP                     | 9.0.0      | `com.android.tools.build:gradle`                          |
 | KSP                     | 2.3.6      | `com.google.devtools.ksp`                                 |
 | Compose BOM             | 2026.05.00 | `androidx.compose:compose-bom`                            |
 | Navigation Compose      | 2.9.0      | `androidx.navigation:navigation-compose`                  |
