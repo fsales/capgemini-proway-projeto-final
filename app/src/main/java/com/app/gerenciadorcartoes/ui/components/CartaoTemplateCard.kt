@@ -56,47 +56,7 @@ val todosTemplates: List<CartaoTemplateConfig> = listOf(
         gradientEnd   = Color(0xFF6A35BF),
         accentColor   = Color(0xFFBB86FC),
         bankLabel     = "Cartão",
-    ),
-    CartaoTemplateConfig(
-        id            = "bradesco",
-        nomeExibicao  = "Bradesco",
-        gradientStart = Color(0xFF0D0D0D),
-        gradientEnd   = Color(0xFF2A2A2A),
-        accentColor   = Color(0xFFCC0000),
-        bankLabel     = "Bradesco",
-    ),
-    CartaoTemplateConfig(
-        id            = "itau",
-        nomeExibicao  = "Itaú",
-        gradientStart = Color(0xFF002F7A),
-        gradientEnd   = Color(0xFF0053B3),
-        accentColor   = Color(0xFFFF6600),
-        bankLabel     = "Itaú",
-    ),
-    CartaoTemplateConfig(
-        id            = "nubank",
-        nomeExibicao  = "Nubank",
-        gradientStart = Color(0xFF5E0F82),
-        gradientEnd   = Color(0xFF9C27B0),
-        accentColor   = Color(0xFFE040FB),
-        bankLabel     = "Nubank",
-    ),
-    CartaoTemplateConfig(
-        id            = "inter",
-        nomeExibicao  = "Inter",
-        gradientStart = Color(0xFFAA4800),
-        gradientEnd   = Color(0xFFE87722),
-        accentColor   = Color(0xFFFFD580),
-        bankLabel     = "Inter",
-    ),
-    CartaoTemplateConfig(
-        id            = "c6bank",
-        nomeExibicao  = "C6 Bank",
-        gradientStart = Color(0xFF141414),
-        gradientEnd   = Color(0xFF333333),
-        accentColor   = Color(0xFFFFD700),
-        bankLabel     = "C6 Bank",
-    ),
+    )
 )
 
 fun templateConfigById(id: String): CartaoTemplateConfig =
@@ -302,41 +262,6 @@ fun CartaoTemplateMini(
 // =============================================================================
 // Previews
 // =============================================================================
-
-@Preview(showBackground = true, name = "Template – Bradesco")
-@Preview(showBackground = true, name = "Template – Bradesco Dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun TemplateBradescoPreview() {
-    GerenciadorCartoesTheme {
-        CartaoTemplateCard(
-            cartao = Cartao(
-                nomeTitular = "João Silva",
-                finalNumero = "1234",
-                bandeira    = "Visa",
-                validade    = "12/28",
-                template    = "bradesco",
-            ),
-            modifier = Modifier.padding(16.dp),
-        )
-    }
-}
-
-@Preview(showBackground = true, name = "Template – Itaú")
-@Composable
-private fun TemplateItauPreview() {
-    GerenciadorCartoesTheme {
-        CartaoTemplateCard(
-            cartao = Cartao(
-                nomeTitular = "Maria Oliveira",
-                finalNumero = "5678",
-                bandeira    = "Visa",
-                validade    = "08/27",
-                template    = "itau",
-            ),
-            modifier = Modifier.padding(16.dp),
-        )
-    }
-}
 
 @Preview(showBackground = true, name = "Template – Padrão")
 @Composable
