@@ -1,0 +1,18 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="288dp"
+    android:height="288dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="@color/launcher_mark"
+        android:fillType="evenOdd"
+        android:pathData="M54,18A36,36 0 1,1 54,90A36,36 0 1,1 54,18ZM54,34A20,20 0 1,0 54,74A20,20 0 1,0 54,34Z" />
+    <path
+        android:fillColor="@color/launcher_mark"
+        android:pathData="M54,50H88V58H54Z" />
+    <path
+        android:fillColor="@color/launcher_mark"
+        android:fillType="evenOdd"
+        android:pathData="M74,56A14,14 0 1,1 74,84A14,14 0 1,1 74,56ZM74,64A6,6 0 1,0 74,76A6,6 0 1,0 74,64Z" />
+</vector>
+

@@ -1,0 +1,34 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="288dp"
+    android:height="288dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:name="logo_group"
+        android:pivotX="54"
+        android:pivotY="54">
+        <path
+            android:name="g_ring"
+            android:fillColor="@color/launcher_mark"
+            android:fillType="evenOdd"
+            android:pathData="M34,30A24,24 0 1,1 34,78A24,24 0 1,1 34,30ZM34,40A14,14 0 1,0 34,68A14,14 0 1,0 34,40Z" />
+        <path
+            android:name="g_bar"
+            android:fillColor="@color/launcher_mark"
+            android:pathData="M34,50H54V58H34Z" />
+        <path
+            android:name="six_head"
+            android:fillColor="@color/launcher_mark"
+            android:pathData="M60,30H80V38H60Z" />
+        <path
+            android:name="six_stem"
+            android:fillColor="@color/launcher_mark"
+            android:pathData="M60,30H68V60H60Z" />
+        <path
+            android:name="six_ring"
+            android:fillColor="@color/launcher_mark"
+            android:fillType="evenOdd"
+            android:pathData="M74,42A20,20 0 1,1 74,82A20,20 0 1,1 74,42ZM74,54A8,8 0 1,0 74,70A8,8 0 1,0 74,54Z" />
+    </group>
+</vector>
+
