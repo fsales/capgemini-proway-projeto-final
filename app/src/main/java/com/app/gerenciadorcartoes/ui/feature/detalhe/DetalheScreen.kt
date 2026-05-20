@@ -129,32 +129,7 @@ private fun DetalheBody(
 
 @Composable
 private fun CartaoSection(detalhe: CartaoDetalhe) {
-    val spacing           = LocalSpacing.current
-    val currencyFormatter = rememberCurrencyFormatter()
-
-    Column(
-        modifier            = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(spacing.medium),
-    ) {
-        CartaoTemplateCard(cartao = detalhe.cartao)
-
-        Row(
-            modifier              = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(spacing.medium),
-        ) {
-            DetalheMetric(
-                label    = "Instituição financeira",
-                value    = detalhe.instituicao.nome,
-                modifier = Modifier.weight(1f),
-            )
-            DetalheMetric(
-                label               = "Limite total",
-                value               = currencyFormatter.format(detalhe.limiteTotal),
-                modifier            = Modifier.weight(1f),
-                horizontalAlignment = Alignment.End,
-            )
-        }
-    }
+    CartaoTemplateCard(cartao = detalhe.cartao)
 }
 
 @Composable
@@ -207,23 +182,6 @@ private fun LimiteSection(detalhe: CartaoDetalhe) {
             DetalheMetric(
                 label               = "Valor disponível",
                 value               = currencyFormatter.format(detalhe.limiteDisponivel),
-                modifier            = Modifier.weight(1f),
-                horizontalAlignment = Alignment.End,
-            )
-        }
-
-        Row(
-            modifier              = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(spacing.medium),
-        ) {
-            DetalheMetric(
-                label    = "Limite total",
-                value    = currencyFormatter.format(detalhe.limiteTotal),
-                modifier = Modifier.weight(1f),
-            )
-            DetalheMetric(
-                label               = "Percentual de uso",
-                value               = percentFormatter.format(percentualUso),
                 modifier            = Modifier.weight(1f),
                 horizontalAlignment = Alignment.End,
             )

@@ -54,7 +54,7 @@ fun AppTopAppBar(
                 IconButton(onClick = onNavigateBack) {
                     Icon(
                         imageVector        = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = null,
+                        contentDescription = "Voltar",
                     )
                 }
             }

@@ -11,12 +11,12 @@ import com.app.gerenciadorcartoes.ui.feature.lista.ListaScreen
 import com.app.gerenciadorcartoes.ui.feature.login.LoginScreen
 
 @Composable
-fun AppNavHost() {
+fun AppNavHost(startDestination: Any = LoginRoute) {
     val navController = rememberNavController()
 
     NavHost(
         navController    = navController,
-        startDestination = LoginRoute,
+        startDestination = startDestination,
     ) {
 
         composable<LoginRoute> {
