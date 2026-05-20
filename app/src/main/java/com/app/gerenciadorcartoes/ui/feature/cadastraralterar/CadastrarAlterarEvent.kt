@@ -8,5 +8,6 @@ sealed interface CadastrarAlterarEvent {
     data class  BandeiraAlterada(val valor: String)   : CadastrarAlterarEvent
     data class  ValidadeAlterada(val valor: String)   : CadastrarAlterarEvent
     data class  LimiteAlterado(val valor: String)     : CadastrarAlterarEvent
+    data class  TemplateAlterado(val valor: String)   : CadastrarAlterarEvent
 }
 

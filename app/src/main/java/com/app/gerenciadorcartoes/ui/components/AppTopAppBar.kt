@@ -2,6 +2,7 @@
 package com.app.gerenciadorcartoes.ui.components
 
 import android.content.res.Configuration
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -14,20 +15,40 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import com.app.gerenciadorcartoes.ui.theme.GerenciadorCartoesTheme
 
 // TopAppBar padrão — Material 3.
 // onNavigateBack: omita para telas raiz (sem botão de voltar).
+// large: true → título em headlineSmall Bold (visual premium sem altura extra).
 // actions: RowScope — use para ícones extras na direita (Editar, Excluir, etc.).
 @Composable
 fun AppTopAppBar(
     title          : String,
-    onNavigateBack : (() -> Unit)? = null,
-    actions        : @Composable RowScope.() -> Unit = {},
+    subtitle       : String?                          = null,
+    large          : Boolean                          = false,
+    onNavigateBack : (() -> Unit)?                    = null,
+    actions        : @Composable RowScope.() -> Unit  = {},
 ) {
     TopAppBar(
-        title = { Text(text = title) },
+        title = {
+            Column {
+                Text(
+                    text       = title,
+                    style      = if (large) MaterialTheme.typography.headlineSmall
+                                 else       MaterialTheme.typography.titleLarge,
+                    fontWeight = if (large) FontWeight.Bold else null,
+                )
+                if (subtitle != null) {
+                    Text(
+                        text  = subtitle,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                    )
+                }
+            }
+        },
         navigationIcon = {
             if (onNavigateBack != null) {
                 IconButton(onClick = onNavigateBack) {
@@ -52,7 +73,11 @@ fun AppTopAppBar(
 @Composable
 private fun TopAppBarRaizPreview() {
     GerenciadorCartoesTheme {
-        AppTopAppBar(title = "Meus Cartões")
+        AppTopAppBar(
+            title    = "Meus Cartões",
+            subtitle = "Gerencie seus cartões cadastrados",
+            large    = true,
+        )
     }
 }
 

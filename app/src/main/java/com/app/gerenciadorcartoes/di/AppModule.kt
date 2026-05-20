@@ -30,7 +30,7 @@ abstract class AppModule {
                 context,
                 AppDatabase::class.java,
                 "gerenciador-cartoes-db",
-            ).build()
+            ).addMigrations(AppDatabase.MIGRATION_1_2).build()
 
         @Provides
         @Singleton

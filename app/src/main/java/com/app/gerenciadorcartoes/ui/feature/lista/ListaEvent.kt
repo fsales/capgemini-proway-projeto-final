@@ -5,6 +5,8 @@ sealed interface ListaEvent {
     data object NavegaParaNovo : ListaEvent
     /** Clique em item existente — navega para detalhe */
     data class  NavegaParaItem(val id: Long) : ListaEvent
+    /** Ação do menu — navega direto para edição */
+    data class  NavegaParaEditar(val id: Long) : ListaEvent
     /** Exclui um item */
     data class  ExcluirCartao(val id: Long) : ListaEvent
 }

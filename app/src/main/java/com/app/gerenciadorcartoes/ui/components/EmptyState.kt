@@ -23,10 +23,21 @@ import com.app.gerenciadorcartoes.ui.theme.LocalSpacing
 
 @Composable
 fun EmptyState(
-    message  : String,
+    message  : String? = null,
+    title    : String? = null,
+    subtitle : String? = null,
     modifier : Modifier = Modifier,
 ) {
     val spacing = LocalSpacing.current
+    val fallbackTitle = message?.lineSequence()?.firstOrNull().orEmpty()
+    val fallbackSubtitle = message
+        ?.lineSequence()
+        ?.drop(1)
+        ?.joinToString("\n")
+        ?.ifBlank { null }
+
+    val titleText = title ?: fallbackTitle
+    val subtitleText = subtitle ?: fallbackSubtitle
 
     Column(
         modifier            = modifier.fillMaxSize(),
@@ -40,12 +51,23 @@ fun EmptyState(
             tint               = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
         )
         Spacer(modifier = Modifier.height(spacing.medium))
-        Text(
-            text      = message,
-            style     = MaterialTheme.typography.bodyLarge,
-            color     = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-            textAlign = TextAlign.Center,
-        )
+        if (titleText.isNotBlank()) {
+            Text(
+                text      = titleText,
+                style     = MaterialTheme.typography.titleLarge,
+                color     = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center,
+            )
+        }
+        if (!subtitleText.isNullOrBlank()) {
+            Spacer(modifier = Modifier.height(spacing.small))
+            Text(
+                text      = subtitleText,
+                style     = MaterialTheme.typography.bodyLarge,
+                color     = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.68f),
+                textAlign = TextAlign.Center,
+            )
+        }
     }
 }
 
@@ -57,6 +79,9 @@ fun EmptyState(
 @Composable
 private fun EmptyStatePreview() {
     GerenciadorCartoesTheme {
-        EmptyState(message = "Nenhum cartão cadastrado.\nToque em + para adicionar.")
+        EmptyState(
+            title    = "Você ainda não tem cartões",
+            subtitle = "Adicione seu primeiro cartão para começar",
+        )
     }
 }
