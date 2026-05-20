@@ -89,7 +89,6 @@ fun DetalheContent(
         topBar = {
             AppTopAppBar(
                 title          = tituloCartao(uiState.detalhe.cartao),
-                subtitle       = "Detalhes e limite do cartão",
                 onNavigateBack = { onEvent(DetalheEvent.Voltar) },
             )
         },
