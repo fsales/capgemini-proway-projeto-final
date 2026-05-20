@@ -6,6 +6,7 @@ data class CadastrarAlterarUiState(
     val bandeira    : String  = "",
     val validade    : String  = "",
     val limite      : String  = "",
+    val template    : String  = "default",
     val carregando  : Boolean = false,
     val salvando    : Boolean = false,
     // Erros de validação por campo

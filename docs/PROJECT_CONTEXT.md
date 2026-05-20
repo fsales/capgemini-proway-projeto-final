@@ -131,7 +131,7 @@ O Hilt é ancorado por `@HiltAndroidApp` em `GerenciadorCartoesApp`. Dois módul
 | Ferramenta | Versão | Papel |
 |---|---|---|
 | Kotlin | 2.3.21 | Linguagem; compilador K2 |
-| AGP | 9.2.1 | Android Gradle Plugin |
+| AGP | 9.0.0 | Android Gradle Plugin |
 | KSP | 2.3.6 | Geração de código para Hilt e Room (substitui KAPT) |
 | Compose BOM | 2026.05.00 | Fixa versões de todos os artefatos Compose |
 | Hilt | 2.59.2 | Injeção de dependência |

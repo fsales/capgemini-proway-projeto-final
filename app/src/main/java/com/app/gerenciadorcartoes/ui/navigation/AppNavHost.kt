@@ -40,15 +40,15 @@ fun AppNavHost() {
                 onNavigateToItem = { id ->
                     navController.navigate(DetalheRoute(id = id))
                 },
+                onNavigateToEditar = { id ->
+                    navController.navigate(CadastrarAlterarRoute(id = id))
+                },
             )
         }
 
         composable<DetalheRoute> {
             DetalheScreen(
-                navigateBack       = { navController.popBackStack() },
-                onNavigateToEditar = { id ->
-                    navController.navigate(CadastrarAlterarRoute(id = id))
-                },
+                navigateBack = { navController.popBackStack() },
             )
         }
 

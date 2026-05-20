@@ -12,4 +12,5 @@ data class CartaoEntity(
     val bandeira    : String,
     val validade    : String, // MM/AA
     val limite      : Double,
+    val template    : String = "default",
 )

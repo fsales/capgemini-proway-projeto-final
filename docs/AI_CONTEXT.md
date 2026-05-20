@@ -9,6 +9,14 @@
 ## Histórico de Alterações
 
 <!-- Insira uma linha no início a cada atualização: "- YYYY-MM-DD — descrição" -->
+- 2026-05-19 — Tela `Detalhe` simplificada para leitura: removidas ações de Editar/Excluir do AppBar e limpeza de eventos/UI events relacionados no fluxo da feature
+- 2026-05-19 — Botão de 3 pontinhos na Lista atualizado para menu de ações em bottom sheet (Editar e Excluir), evitando popup deslocado sobre/abaixo do card
+- 2026-05-19 — Ação de excluir na Lista refinada: ícone de lixeira direto sobre o card substituído por menu discreto (⋮) com opção “Excluir cartão” em dropdown
+- 2026-05-19 — Botão + do topo refinado com microdetalhes premium (sombra suave, borda translúcida circular e ícone dimensionado por token de design)
+- 2026-05-19 — Estado vazio da Lista refinado com linguagem humana e hierarquia visual (`title` + `subtitle` no `EmptyState`), botão + do topo reforçado com cor primária e fundo em gradiente sutil na tela sem cartões
+- 2026-05-19 — ListaScreen alterada para padrão premium sem FAB sobreposto: ação de adicionar movida para o topo (ícone + em `AppTopAppBar.actions`) e texto do estado vazio atualizado
+- 2026-05-19 — Adicionado campo `template` ao modelo de domínio `Cartao` e a `CartaoEntity`; migração Room v1→v2; criado `CartaoTemplateCard` e `CartaoTemplateMini` em `ui/components/`; ListaScreen e CadastrarAlterarScreen atualizados com seletor de template visual (Bradesco, Itaú, Nubank, Inter, C6 Bank, Padrão)
+- 2026-05-19 — Downgrade do Android Gradle Plugin para 9.0.0 para compatibilidade com Android Studio; seção de build atualizada
 - 2026-05-16 — Adicionada feature Login: LoginUiState, LoginEvent, LoginUiEvent, LoginScreen, LoginViewModel, LoginRoute; AppNavHost atualizado com LoginRoute como startDestination
 - 2026-05-15 — Revisão completa: corrigidos tokens IconSize (extraSmall/small/extraLarge), adicionado smallMedium ao Spacing, corrigida Matriz de Estratégia (Repository em vez de DAO, tipos Cartao), corrigida ordem de parâmetros do AppScaffold, documentados CadastrarAlterarUiState.salvando e isEdicao
 - 2026-05-15 — Tradução completa para pt-BR; todos os arquivos da pasta docs/ atualizados
@@ -98,6 +106,7 @@ data class Cartao(
     val bandeira    : String = "",   // "Visa" | "Mastercard" | "Elo" | etc.
     val validade    : String = "",   // "MM/AA" — e.g. "12/28"
     val limite      : Double = 0.0,  // BRL credit limit
+    val template    : String = "default", // card visual: "default"|"bradesco"|"itau"|"nubank"|"inter"|"c6bank"
 )
 ```
 
@@ -500,6 +509,9 @@ Plugins ativos em `:app`:
 - `alias(libs.plugins.ksp)`
 - `alias(libs.plugins.kotlin.serialization)`
 - `alias(libs.plugins.kotlin.compose)`
+
+Plugin Android:
+- `com.android.application` (`libs.plugins.android.application`) = `9.0.0`
 
 ---
 

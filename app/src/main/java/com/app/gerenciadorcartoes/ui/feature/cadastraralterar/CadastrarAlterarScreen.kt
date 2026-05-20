@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -14,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -31,10 +34,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.app.gerenciadorcartoes.ui.components.AppLoading
 import com.app.gerenciadorcartoes.ui.components.AppScaffold
 import com.app.gerenciadorcartoes.ui.components.AppTopAppBar
+import com.app.gerenciadorcartoes.ui.components.CartaoTemplateMini
+import com.app.gerenciadorcartoes.ui.components.CartaoTemplateCard
+import com.app.gerenciadorcartoes.ui.components.todosTemplates
+import com.app.gerenciadorcartoes.ui.components.templateConfigById
 import com.app.gerenciadorcartoes.ui.feature.cadastraralterar.state.CadastrarAlterarUiState
 import com.app.gerenciadorcartoes.ui.theme.GerenciadorCartoesTheme
 import com.app.gerenciadorcartoes.ui.theme.LocalSpacing
 import com.app.gerenciadorcartoes.viewmodel.CadastrarAlterarViewModel
+import com.app.gerenciadorcartoes.model.Cartao
 
 // =============================================================================
 // Screen — ponto de entrada; coleta ViewModel e roteia UiEvent.
@@ -72,8 +80,7 @@ fun CadastrarAlterarContent(
     snackbarHostState : SnackbarHostState        = remember { SnackbarHostState() },
     onEvent           : (CadastrarAlterarEvent) -> Unit = {},
 ) {
-    val titulo = if (uiState.carregando || uiState.nomeTitular.isNotBlank()) "Editar Cartão"
-                 else "Novo Cartão"
+    val titulo = if (uiState.isEdicao) "Editar Cartão" else "Novo Cartão"
 
     AppScaffold(
         snackbarHostState    = snackbarHostState,
@@ -119,6 +126,35 @@ private fun FormularioBody(
             .imePadding(),
         verticalArrangement = Arrangement.spacedBy(spacing.small),
     ) {
+        // ── Card preview ────────────────────────────────────────────────────
+        CartaoTemplateCard(
+            cartao = Cartao(
+                nomeTitular = uiState.nomeTitular.ifBlank { "Nome do Titular" },
+                finalNumero = uiState.finalNumero.ifBlank { "0000" },
+                bandeira    = uiState.bandeira.ifBlank { "Bandeira" },
+                validade    = uiState.validade.ifBlank { "--/--" },
+                template    = uiState.template,
+            ),
+            modifier = Modifier.padding(vertical = spacing.small),
+        )
+
+        // ── Template picker ─────────────────────────────────────────────────
+        Text(
+            text  = "Escolha o template",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+        )
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(spacing.small),
+        ) {
+            items(todosTemplates) { config ->
+                CartaoTemplateMini(
+                    config   = config,
+                    selected = uiState.template == config.id,
+                    onClick  = { onEvent(CadastrarAlterarEvent.TemplateAlterado(config.id)) },
+                )
+            }
+        }
 
         // Nome do titular
         OutlinedTextField(

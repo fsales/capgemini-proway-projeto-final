@@ -60,6 +60,9 @@ class CadastrarAlterarViewModel @Inject constructor(
 
             is CadastrarAlterarEvent.LimiteAlterado ->
                 _uiState.update { it.copy(limite = event.valor, erroLimite = null) }
+
+            is CadastrarAlterarEvent.TemplateAlterado ->
+                _uiState.update { it.copy(template = event.valor) }
         }
     }
 
@@ -76,10 +79,11 @@ class CadastrarAlterarViewModel @Inject constructor(
                         it.copy(
                             nomeTitular = cartao.nomeTitular,
                             finalNumero = cartao.finalNumero,
-                            bandeira = cartao.bandeira,
-                            validade = cartao.validade,
-                            limite = cartao.limite.toString(),
-                            carregando = false,
+                            bandeira    = cartao.bandeira,
+                            validade    = cartao.validade,
+                            limite      = cartao.limite.toString(),
+                            template    = cartao.template,
+                            carregando  = false,
                         )
                     }
                 } else {
@@ -107,9 +111,10 @@ class CadastrarAlterarViewModel @Inject constructor(
                     id = id,
                     nomeTitular = _uiState.value.nomeTitular.trim(),
                     finalNumero = _uiState.value.finalNumero.trim(),
-                    bandeira = _uiState.value.bandeira.trim(),
-                    validade = _uiState.value.validade.trim(),
-                    limite = _uiState.value.limite.toDoubleOrNull() ?: 0.0,
+                    bandeira    = _uiState.value.bandeira.trim(),
+                    validade    = _uiState.value.validade.trim(),
+                    limite      = _uiState.value.limite.toDoubleOrNull() ?: 0.0,
+                    template    = _uiState.value.template,
                 )
                 if (id == 0L) cartaoRepository.salvar(cartao)
                 else cartaoRepository.atualizar(cartao)

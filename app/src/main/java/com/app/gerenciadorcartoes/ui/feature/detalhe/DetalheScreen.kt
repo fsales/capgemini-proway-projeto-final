@@ -6,23 +6,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -41,9 +32,8 @@ import com.app.gerenciadorcartoes.viewmodel.DetalheViewModel
 // =============================================================================
 @Composable
 fun DetalheScreen(
-    navigateBack       : () -> Unit,
-    onNavigateToEditar : (id: Long) -> Unit,
-    viewModel          : DetalheViewModel = hiltViewModel(),
+    navigateBack : () -> Unit,
+    viewModel    : DetalheViewModel = hiltViewModel(),
 ) {
     val uiState          by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -51,9 +41,8 @@ fun DetalheScreen(
     LaunchedEffect(viewModel) {
         viewModel.uiEvent.collect { event ->
             when (event) {
-                DetalheUiEvent.NavigateBack         -> navigateBack()
-                is DetalheUiEvent.NavegaParaEditar  -> onNavigateToEditar(event.id)
-                is DetalheUiEvent.MostrarErro       -> snackbarHostState.showSnackbar(event.mensagem)
+                DetalheUiEvent.NavigateBack    -> navigateBack()
+                is DetalheUiEvent.MostrarErro  -> snackbarHostState.showSnackbar(event.mensagem)
             }
         }
     }
@@ -74,43 +63,12 @@ fun DetalheContent(
     snackbarHostState : SnackbarHostState = remember { SnackbarHostState() },
     onEvent           : (DetalheEvent) -> Unit = {},
 ) {
-    var confirmarExclusao by remember { mutableStateOf(false) }
-
-    if (confirmarExclusao) {
-        AlertDialog(
-            onDismissRequest = { confirmarExclusao = false },
-            title   = { Text("Excluir cartão") },
-            text    = { Text("Confirma a exclusão deste cartão?") },
-            confirmButton = {
-                TextButton(onClick = {
-                    onEvent(DetalheEvent.Excluir)
-                    confirmarExclusao = false
-                }) { Text("Excluir") }
-            },
-            dismissButton = {
-                TextButton(onClick = { confirmarExclusao = false }) { Text("Cancelar") }
-            },
-        )
-    }
-
     AppScaffold(
         snackbarHostState = snackbarHostState,
         topBar = {
             AppTopAppBar(
                 title          = "Detalhes do Cartão",
                 onNavigateBack = { onEvent(DetalheEvent.Voltar) },
-                actions = {
-                    IconButton(onClick = { onEvent(DetalheEvent.Editar) }) {
-                        Icon(imageVector = Icons.Default.Edit, contentDescription = "Editar")
-                    }
-                    IconButton(onClick = { confirmarExclusao = true }) {
-                        Icon(
-                            imageVector        = Icons.Default.Delete,
-                            contentDescription = "Excluir",
-                            tint               = MaterialTheme.colorScheme.error,
-                        )
-                    }
-                },
             )
         },
     ) { paddingValues ->

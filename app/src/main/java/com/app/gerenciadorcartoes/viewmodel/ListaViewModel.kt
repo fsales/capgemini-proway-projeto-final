@@ -37,6 +37,9 @@ class ListaViewModel @Inject constructor(
             is ListaEvent.NavegaParaItem ->
                 viewModelScope.launch { _uiEvent.send(ListaUiEvent.NavegaParaItem(event.id)) }
 
+            is ListaEvent.NavegaParaEditar ->
+                viewModelScope.launch { _uiEvent.send(ListaUiEvent.NavegaParaEditar(event.id)) }
+
             ListaEvent.NavegaParaNovo ->
                 viewModelScope.launch { _uiEvent.send(ListaUiEvent.NavegaParaNovo) }
 

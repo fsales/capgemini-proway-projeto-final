@@ -5,6 +5,8 @@ package com.app.gerenciadorcartoes.ui.feature.lista
 sealed interface ListaUiEvent {
     /** Navega para tela de detalhe/edição de item existente */
     data class  NavegaParaItem(val id: Long)          : ListaUiEvent
+    /** Navega direto para tela de edição */
+    data class  NavegaParaEditar(val id: Long)        : ListaUiEvent
     /** Navega para tela de criação de novo item */
     data object NavegaParaNovo                         : ListaUiEvent
     /** Mostra um erro */
