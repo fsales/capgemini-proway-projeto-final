@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Vector SOURCE do AnimatedVectorDrawable do system splash.
+    O <group name="card"> começa em scale=0.01 e será animado para scale=1
+    pelo ObjectAnimator em res/animator/splash_scale_in.xml.
+    Viewport 24×24 — safe zone idêntica ao ic_splash_logo_static.xml.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <group
+        android:name="card"
+        android:pivotX="12"
+        android:pivotY="12"
+        android:translateY="14">
+
+        <!-- ① Corpo do cartão — branco, cantos arredondados -->
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M7.3,8 L16.7,8 Q18,8 18,9.3 L18,14.7 Q18,16 16.7,16 L7.3,16 Q6,16 6,14.7 L6,9.3 Q6,8 7.3,8 Z" />
+
+        <!-- ② Tarja magnética -->
+        <path
+            android:fillColor="#FF003B8C"
+            android:pathData="M6,10.2 L18,10.2 L18,11.5 L6,11.5 Z" />
+
+        <!-- ③ Chip EMV -->
+        <path
+            android:fillColor="#FF003B8C"
+            android:pathData="M7.9,8.4 L9.6,8.4 Q10,8.4 10,8.8 L10,9.7 Q10,10.1 9.6,10.1 L7.9,10.1 Q7.5,10.1 7.5,9.7 L7.5,8.8 Q7.5,8.4 7.9,8.4 Z" />
+
+        <!-- ④ Dígitos do cartão — 3 grupos de 4 pontos -->
+        <path android:fillColor="#FF003B8C" android:pathData="M7.5,12.2 L7.9,12.2 L7.9,12.7 L7.5,12.7 Z" />
+        <path android:fillColor="#FF003B8C" android:pathData="M8.1,12.2 L8.5,12.2 L8.5,12.7 L8.1,12.7 Z" />
+        <path android:fillColor="#FF003B8C" android:pathData="M8.7,12.2 L9.1,12.2 L9.1,12.7 L8.7,12.7 Z" />
+        <path android:fillColor="#FF003B8C" android:pathData="M9.3,12.2 L9.7,12.2 L9.7,12.7 L9.3,12.7 Z" />
+        <path android:fillColor="#FF003B8C" android:pathData="M10.5,12.2 L10.9,12.2 L10.9,12.7 L10.5,12.7 Z" />
+        <path android:fillColor="#FF003B8C" android:pathData="M11.1,12.2 L11.5,12.2 L11.5,12.7 L11.1,12.7 Z" />
+        <path android:fillColor="#FF003B8C" android:pathData="M11.7,12.2 L12.1,12.2 L12.1,12.7 L11.7,12.7 Z" />
+        <path android:fillColor="#FF003B8C" android:pathData="M12.3,12.2 L12.7,12.2 L12.7,12.7 L12.3,12.7 Z" />
+        <path android:fillColor="#FF003B8C" android:pathData="M13.5,12.2 L13.9,12.2 L13.9,12.7 L13.5,12.7 Z" />
+        <path android:fillColor="#FF003B8C" android:pathData="M14.1,12.2 L14.5,12.2 L14.5,12.7 L14.1,12.7 Z" />
+        <path android:fillColor="#FF003B8C" android:pathData="M14.7,12.2 L15.1,12.2 L15.1,12.7 L14.7,12.7 Z" />
+        <path android:fillColor="#FF003B8C" android:pathData="M15.3,12.2 L15.7,12.2 L15.7,12.7 L15.3,12.7 Z" />
+
+        <!-- ⑤ Linha nome -->
+        <path android:fillColor="#FF003B8C" android:pathData="M7.5,14.2 L12.5,14.2 L12.5,14.7 L7.5,14.7 Z" />
+
+        <!-- ⑥ Linha validade -->
+        <path android:fillColor="#FF003B8C" android:pathData="M13.5,14.2 L16.5,14.2 L16.5,14.7 L13.5,14.7 Z" />
+
+    </group>
+
+</vector>
+

@@ -91,7 +91,11 @@ fun CadastrarAlterarContent(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { onEvent(CadastrarAlterarEvent.Salvar) }) {
+            FloatingActionButton(
+                onClick          = { onEvent(CadastrarAlterarEvent.Salvar) },
+                containerColor   = MaterialTheme.colorScheme.tertiaryContainer,
+                contentColor     = MaterialTheme.colorScheme.onTertiaryContainer,
+            ) {
                 Icon(imageVector = Icons.Default.Check, contentDescription = "Salvar")
             }
         },
@@ -142,7 +146,7 @@ private fun FormularioBody(
         Text(
             text  = "Escolha o template",
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+            color = MaterialTheme.colorScheme.tertiary,
         )
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(spacing.small),

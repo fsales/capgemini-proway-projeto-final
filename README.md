@@ -25,9 +25,9 @@ Aplicativo Android que demonstra **CRUD completo** de cartões usando arquitetur
 
 ---
 
-### Bibliotecas não-padrão — descrição detalhada
+## Branding de inicialização
 
-> As bibliotecas abaixo **não fazem parte** de um projeto Android novo criado pelo Android Studio. Cada uma foi adicionada com um propósito específico.
+- Splash Screen customizada com API oficial Android (`Theme.SplashScreen` + `installSplashScreen()` em `MainActivity`).
 
 ---
 

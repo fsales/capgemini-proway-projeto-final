@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ícone "camuflado": preenchido com a mesma cor do fundo navy (#001432).
+     Um vector vazio é ignorado pelo Android (ele cai de volta para o launcher icon).
+     Com esta cor idêntica ao fundo, o ícone fica completamente invisível durante
+     o system splash — o branded moment (círculo + cartão + texto) fica 100% no Compose. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#001432"
+        android:pathData="M0,0 L108,0 L108,108 L0,108 Z" />
+</vector>
+

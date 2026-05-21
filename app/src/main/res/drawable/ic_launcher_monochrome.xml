@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Monochrome: silhueta do cartão (só o corpo + chip + tarja como recortes) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <group
+        android:pivotX="12"
+        android:pivotY="12"
+        android:scaleX="0.85"
+        android:scaleY="0.85">
+
+        <!-- Corpo do cartão -->
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M7.3,8 L16.7,8 Q18,8 18,9.3 L18,14.7 Q18,16 16.7,16 L7.3,16 Q6,16 6,14.7 L6,9.3 Q6,8 7.3,8 Z" />
+
+        <!-- Tarja (subtrai do branco usando alpha) -->
+        <path
+            android:fillColor="#44000000"
+            android:pathData="M6,10.2 L18,10.2 L18,11.5 L6,11.5 Z" />
+
+        <!-- Chip -->
+        <path
+            android:fillColor="#44000000"
+            android:pathData="M7.9,8.4 L9.6,8.4 Q10,8.4 10,8.8 L10,9.7 Q10,10.1 9.6,10.1 L7.9,10.1 Q7.5,10.1 7.5,9.7 L7.5,8.8 Q7.5,8.4 7.9,8.4 Z" />
+
+    </group>
+</vector>

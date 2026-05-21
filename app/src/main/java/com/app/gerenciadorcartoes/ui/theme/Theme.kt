@@ -12,15 +12,61 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary   = Purple80,
-    secondary = PurpleGrey80,
-    tertiary  = Pink80,
+    primary = MdThemeDarkPrimary,
+    onPrimary = MdThemeDarkOnPrimary,
+    primaryContainer = MdThemeDarkPrimaryContainer,
+    onPrimaryContainer = MdThemeDarkOnPrimaryContainer,
+    secondary = MdThemeDarkSecondary,
+    onSecondary = MdThemeDarkOnSecondary,
+    secondaryContainer = MdThemeDarkSecondaryContainer,
+    onSecondaryContainer = MdThemeDarkOnSecondaryContainer,
+    tertiary = MdThemeDarkTertiary,
+    onTertiary = MdThemeDarkOnTertiary,
+    tertiaryContainer = MdThemeDarkTertiaryContainer,
+    onTertiaryContainer = MdThemeDarkOnTertiaryContainer,
+    error = MdThemeDarkError,
+    onError = MdThemeDarkOnError,
+    errorContainer = MdThemeDarkErrorContainer,
+    onErrorContainer = MdThemeDarkOnErrorContainer,
+    background = MdThemeDarkBackground,
+    onBackground = MdThemeDarkOnBackground,
+    surface = MdThemeDarkSurface,
+    onSurface = MdThemeDarkOnSurface,
+    surfaceVariant = MdThemeDarkSurfaceVariant,
+    onSurfaceVariant = MdThemeDarkOnSurfaceVariant,
+    outline = MdThemeDarkOutline,
+    inverseOnSurface = MdThemeDarkInverseOnSurface,
+    inverseSurface = MdThemeDarkInverseSurface,
+    inversePrimary = MdThemeDarkInversePrimary,
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary   = Purple40,
-    secondary = PurpleGrey40,
-    tertiary  = Pink40,
+    primary = MdThemeLightPrimary,
+    onPrimary = MdThemeLightOnPrimary,
+    primaryContainer = MdThemeLightPrimaryContainer,
+    onPrimaryContainer = MdThemeLightOnPrimaryContainer,
+    secondary = MdThemeLightSecondary,
+    onSecondary = MdThemeLightOnSecondary,
+    secondaryContainer = MdThemeLightSecondaryContainer,
+    onSecondaryContainer = MdThemeLightOnSecondaryContainer,
+    tertiary = MdThemeLightTertiary,
+    onTertiary = MdThemeLightOnTertiary,
+    tertiaryContainer = MdThemeLightTertiaryContainer,
+    onTertiaryContainer = MdThemeLightOnTertiaryContainer,
+    error = MdThemeLightError,
+    onError = MdThemeLightOnError,
+    errorContainer = MdThemeLightErrorContainer,
+    onErrorContainer = MdThemeLightOnErrorContainer,
+    background = MdThemeLightBackground,
+    onBackground = MdThemeLightOnBackground,
+    surface = MdThemeLightSurface,
+    onSurface = MdThemeLightOnSurface,
+    surfaceVariant = MdThemeLightSurfaceVariant,
+    onSurfaceVariant = MdThemeLightOnSurfaceVariant,
+    outline = MdThemeLightOutline,
+    inverseOnSurface = MdThemeLightInverseOnSurface,
+    inverseSurface = MdThemeLightInverseSurface,
+    inversePrimary = MdThemeLightInversePrimary,
 )
 
 // Ponto de entrada do tema.
@@ -29,7 +75,7 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun GerenciadorCartoesTheme(
     darkTheme    : Boolean = isSystemInDarkTheme(),
-    dynamicColor : Boolean = true,
+    dynamicColor : Boolean = false,
     content      : @Composable () -> Unit,
 ) {
     val colorScheme = when {

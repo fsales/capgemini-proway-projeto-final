@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">GerenciadorCartoes</string>
+    <string name="app_name">G3 Bank</string>
+
+    <!-- Splash Screen -->
+    <string name="splash_tagline">Seus cartões, no controle</string>
+    <string name="splash_copyright">G3 Bank © 2026</string>
 </resources>

@@ -2,6 +2,10 @@ package com.app.gerenciadorcartoes.ui.navigation
 
 import kotlinx.serialization.Serializable
 
+// Destino: splash screen (tela inicial — exibe marca e navega para login)
+@Serializable
+object SplashRoute
+
 // Destino: tela de login (tela inicial do app)
 @Serializable
 object LoginRoute

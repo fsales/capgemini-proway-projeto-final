@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Animação do system splash: cartão sobe de baixo do círculo para o centro.
+    translateY: 14 viewport-units (fora da área visível) → 0 (centro).
+    translateY é a propriedade mais confiável do VectorDrawable — sem depender de alpha.
+    decelerate_quint: arranca rápido, desacelera suavemente no destino.
+-->
+<objectAnimator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:propertyName="translateY"
+    android:valueFrom="14"
+    android:valueTo="0"
+    android:duration="450"
+    android:interpolator="@android:interpolator/decelerate_quint" />
+
+

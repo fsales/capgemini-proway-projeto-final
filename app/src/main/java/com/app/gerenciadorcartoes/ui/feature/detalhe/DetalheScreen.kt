@@ -235,7 +235,7 @@ private fun DetalheMetric(
         Text(
             text  = label,
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.68f),
+            color = MaterialTheme.colorScheme.tertiary,
         )
         Text(
             text      = value,

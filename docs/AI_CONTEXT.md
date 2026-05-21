@@ -9,6 +9,7 @@
 ## Histórico de Alterações
 
 <!-- Insira uma linha no início a cada atualização: "- YYYY-MM-DD — descrição" -->
+- 2026-05-20 — Splash ajustada: logo reduzida em `ic_splash_logo_static` para melhor proporção visual no lançamento
 - 2026-05-19 — Tela `Detalhe` simplificada para leitura: removidas ações de Editar/Excluir do AppBar e limpeza de eventos/UI events relacionados no fluxo da feature
 - 2026-05-19 — Botão de 3 pontinhos na Lista atualizado para menu de ações em bottom sheet (Editar e Excluir), evitando popup deslocado sobre/abaixo do card
 - 2026-05-19 — Ação de excluir na Lista refinada: ícone de lixeira direto sobre o card substituído por menu discreto (⋮) com opção “Excluir cartão” em dropdown
