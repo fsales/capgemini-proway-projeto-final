@@ -156,7 +156,7 @@ class AjustarLimiteViewModel @Inject constructor(
                         mensagem   = "Limite atualizado com sucesso.",
                     )
                 }
-                _uiEvent.send(AjustarLimiteUiEvent.MostrarMensagem("Limite atualizado com sucesso."))
+                _uiEvent.send(AjustarLimiteUiEvent.NavigateBack)
             }.onFailure { erro ->
                 _uiState.update {
                     it.copy(
