@@ -21,6 +21,16 @@
     <string name="dialog_btn_confirmar">Confirmar</string>
     <string name="dialog_btn_cancelar">Cancelar</string>
 
+    <!-- AppTopAppBar — acessibilidade -->
+    <string name="topbar_voltar">Voltar</string>
+
+    <!-- Detalhe Screen -->
+    <string name="detalhe_titulo">Detalhes do Cartão</string>
+
+    <!-- Ações comuns — contentDescription de ícones -->
+    <string name="cd_editar">Editar</string>
+    <string name="cd_excluir">Excluir</string>
+
     <!-- Lista Screen — TopAppBar -->
     <string name="lista_menu_mais_opcoes">Mais opções</string>
     <string name="lista_titulo">Meus Cartões</string>

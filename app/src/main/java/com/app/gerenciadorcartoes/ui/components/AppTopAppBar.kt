@@ -23,8 +23,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import com.app.gerenciadorcartoes.R
 import com.app.gerenciadorcartoes.ui.theme.GerenciadorCartoesTheme
 import com.app.gerenciadorcartoes.ui.theme.LocalIconSize
 import com.app.gerenciadorcartoes.ui.theme.LocalSpacing
@@ -66,7 +68,7 @@ fun AppTopAppBar(
                 onNavigateBack != null -> IconButton(onClick = onNavigateBack) {
                     Icon(
                         imageVector        = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Voltar",
+                        contentDescription = stringResource(R.string.topbar_voltar),
                     )
                 }
                 leadingIcon != null -> leadingIcon()
@@ -89,7 +91,7 @@ private fun TopAppBarMarcaPreview() {
         val spacing  = LocalSpacing.current
         val iconSize = LocalIconSize.current
         AppTopAppBar(
-            title       = "G3 Bank",
+            title       = stringResource(R.string.app_name),
             leadingIcon = {
                 Box(
                     modifier         = Modifier
@@ -117,8 +119,8 @@ private fun TopAppBarMarcaPreview() {
 private fun TopAppBarRaizPreview() {
     GerenciadorCartoesTheme {
         AppTopAppBar(
-            title    = "Meus Cartões",
-            subtitle = "Gerencie seus cartões cadastrados",
+            title    = stringResource(R.string.lista_titulo),
+            subtitle = stringResource(R.string.lista_subtitulo),
             large    = true,
         )
     }
@@ -131,7 +133,7 @@ private fun TopAppBarRaizPreview() {
 private fun TopAppBarVoltarPreview() {
     GerenciadorCartoesTheme {
         AppTopAppBar(
-            title          = "Detalhes do Cartão",
+            title          = stringResource(R.string.detalhe_titulo),
             onNavigateBack = {},
         )
     }
@@ -144,16 +146,19 @@ private fun TopAppBarVoltarPreview() {
 private fun TopAppBarAcoesPreview() {
     GerenciadorCartoesTheme {
         AppTopAppBar(
-            title          = "Detalhes do Cartão",
+            title          = stringResource(R.string.detalhe_titulo),
             onNavigateBack = {},
             actions        = {
                 IconButton(onClick = {}) {
-                    Icon(imageVector = Icons.Default.Edit, contentDescription = "Editar")
+                    Icon(
+                        imageVector        = Icons.Default.Edit,
+                        contentDescription = stringResource(R.string.cd_editar),
+                    )
                 }
                 IconButton(onClick = {}) {
                     Icon(
                         imageVector        = Icons.Default.Delete,
-                        contentDescription = "Excluir",
+                        contentDescription = stringResource(R.string.cd_excluir),
                         tint               = MaterialTheme.colorScheme.error,
                     )
                 }
