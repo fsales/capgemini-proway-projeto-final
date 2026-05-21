@@ -14,29 +14,15 @@ class CartaoDetalheRepositoryImpl @Inject constructor(
     override fun observarDetalhePorId(id: Long): Flow<CartaoDetalhe?> =
         cartaoRepository.observarPorId(id).map { cartao ->
             cartao?.let(::montarDetalheMockado)
-        }
+    }
 
     // Ponto de troca futura: substituir este mock por dados reais de fatura/limite.
-    private fun montarDetalheMockado(cartao: Cartao): CartaoDetalhe {
-        val percentualMockado = percentualMockado(cartao)
-        return CartaoDetalhe(
+    private fun montarDetalheMockado(cartao: Cartao): CartaoDetalhe =
+        CartaoDetalhe(
             cartao          = cartao,
             instituicao     = InstituicaoFinanceira(nome = instituicaoPorTemplate(cartao.template)),
-            limiteUtilizado = cartao.limite * percentualMockado,
+            limiteUtilizado = LIMITE_UTILIZADO_PADRAO,
         )
-    }
-
-    private fun percentualMockado(cartao: Cartao): Double {
-        val referencia = cartao.id.takeIf { it > 0L }
-            ?: cartao.finalNumero.toLongOrNull()
-            ?: 0L
-
-        return when ((referencia % 3L).toInt()) {
-            0    -> 0.34
-            1    -> 0.67
-            else -> 0.86
-        }
-    }
 
     private fun instituicaoPorTemplate(template: String): String =
         when (template) {
@@ -47,4 +33,8 @@ class CartaoDetalheRepositoryImpl @Inject constructor(
             "c6bank"   -> "C6 Bank"
             else       -> "Cartão"
         }
+
+    private companion object {
+        const val LIMITE_UTILIZADO_PADRAO = 500.0
+    }
 }

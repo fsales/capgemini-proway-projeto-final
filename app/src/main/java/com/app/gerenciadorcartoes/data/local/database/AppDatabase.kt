@@ -11,7 +11,7 @@ import com.app.gerenciadorcartoes.data.local.entity.CadastroUsuarioEntity
 
 @Database(
     entities     = [CartaoEntity::class, CadastroUsuarioEntity::class],
-    version      = 2,
+    version      = 3,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -23,6 +23,27 @@ abstract class AppDatabase : RoomDatabase() {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL(
                     "ALTER TABLE cartoes ADD COLUMN template TEXT NOT NULL DEFAULT 'default'"
+                )
+            }
+        }
+
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS CadastroUsuario (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        nome TEXT NOT NULL,
+                        cpf TEXT NOT NULL,
+                        cep INTEGER NOT NULL,
+                        endereco TEXT NOT NULL,
+                        number TEXT NOT NULL,
+                        bairro TEXT NOT NULL,
+                        estado TEXT NOT NULL,
+                        email TEXT NOT NULL,
+                        senha TEXT NOT NULL
+                    )
+                    """.trimIndent()
                 )
             }
         }
