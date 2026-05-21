@@ -4,12 +4,15 @@
     <style name="Theme.GerenciadorCartoes" parent="android:Theme.Material.Light.NoActionBar" />
 
     <style name="Theme.GerenciadorCartoes.Splash" parent="Theme.SplashScreen">
-        <!-- Fundo completo da tela — navy profundo -->
+        <!-- Fundo navy — igual ao Compose splash -->
         <item name="windowSplashScreenBackground">@color/splash_background</item>
-        <!-- Círculo atrás do ícone — roxo primário (visível sobre o navy) -->
+        <!-- AVD: cartão escala de 0→1 com overshoot (efeito "pop") -->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_animated</item>
+        <!-- Círculo azul elétrico ao redor do ícone — igual ao Compose splash -->
         <item name="windowSplashScreenIconBackgroundColor">@color/splash_icon_background</item>
-        <!-- Ícone estático — sem AnimatedVectorDrawable, sem corte -->
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo_static</item>
+        <!-- Duração mínima alinhada com a animação AVD (400ms) + margem de 50ms -->
+        <item name="windowSplashScreenAnimationDuration">450</item>
         <item name="postSplashScreenTheme">@style/Theme.GerenciadorCartoes</item>
     </style>
+
 </resources>
