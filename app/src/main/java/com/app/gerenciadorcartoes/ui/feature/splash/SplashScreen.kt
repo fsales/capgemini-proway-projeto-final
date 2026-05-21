@@ -104,7 +104,7 @@ fun SplashContent(
 
             // Nome do app — destaque máximo
             Text(
-                text       = "G6 Bank",
+                text       = "G3 Bank",
                 style      = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.Bold,
                 color      = Color.White,
@@ -122,7 +122,7 @@ fun SplashContent(
 
         // Versão discreta no rodapé
         Text(
-            text     = "G6 Bank © 2026",
+            text     = "G3 Bank © 2026",
             style    = MaterialTheme.typography.labelSmall,
             color    = Color.White.copy(alpha = 0.30f),
             modifier = Modifier
