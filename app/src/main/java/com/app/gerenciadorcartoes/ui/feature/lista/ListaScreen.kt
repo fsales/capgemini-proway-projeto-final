@@ -10,10 +10,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
@@ -54,6 +56,7 @@ import com.app.gerenciadorcartoes.ui.components.ConfirmacaoDialog
 import com.app.gerenciadorcartoes.ui.components.EmptyState
 import com.app.gerenciadorcartoes.ui.feature.lista.state.ListaUiState
 import com.app.gerenciadorcartoes.ui.theme.GerenciadorCartoesTheme
+import com.app.gerenciadorcartoes.ui.theme.LocalIconSize
 import com.app.gerenciadorcartoes.ui.theme.LocalSpacing
 import com.app.gerenciadorcartoes.viewmodel.ListaViewModel
 
@@ -105,7 +108,8 @@ fun ListaContent(
     var cartaoParaAcoes   by remember { mutableStateOf<Cartao?>(null) }
     var confirmarDeslogar by remember { mutableStateOf(false) }
     var menuExpandido     by remember { mutableStateOf(false) }
-    val spacing = LocalSpacing.current
+    val spacing  = LocalSpacing.current
+    val iconSize = LocalIconSize.current
 
     // ── Diálogo: confirmar logout ─────────────────────────────────────────────
     if (confirmarDeslogar) {
@@ -194,9 +198,26 @@ fun ListaContent(
         },
         topBar = {
             AppTopAppBar(
-                title    = stringResource(R.string.lista_titulo),
-                subtitle = stringResource(R.string.lista_subtitulo),
-                large    = true,
+                title       = stringResource(R.string.app_name),
+                subtitle    = stringResource(R.string.lista_subtitulo),
+                large       = true,
+                leadingIcon = {
+                    // Marca da app: círculo azul com ícone de cartão — identidade G3 Bank
+                    Box(
+                        modifier         = Modifier
+                            .padding(start = spacing.small)
+                            .size(spacing.extraLarge)
+                            .background(MaterialTheme.colorScheme.primary, CircleShape),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector        = Icons.Default.CreditCard,
+                            contentDescription = null,
+                            tint               = MaterialTheme.colorScheme.onPrimary,
+                            modifier           = Modifier.size(iconSize.small),
+                        )
+                    }
+                },
                 actions  = {
                     // Menu overflow ⋮ — ações secundárias (logout, etc.)
                     Box {

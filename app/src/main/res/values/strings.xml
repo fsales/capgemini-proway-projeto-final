@@ -24,7 +24,7 @@
     <!-- Lista Screen — TopAppBar -->
     <string name="lista_menu_mais_opcoes">Mais opções</string>
     <string name="lista_titulo">Meus Cartões</string>
-    <string name="lista_subtitulo">Gerencie seus cartões cadastrados</string>
+    <string name="lista_subtitulo">Gerencie seus cartões</string>
 
     <!-- Lista Screen — FAB -->
     <string name="lista_fab_novo_cartao">Novo cartão</string>
