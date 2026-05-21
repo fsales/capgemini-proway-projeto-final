@@ -13,5 +13,7 @@ sealed interface ListaUiEvent {
     data class  MostrarErro(val mensagem: String)     : ListaUiEvent
     /** Mostra uma mensagem */
     data class  MostrarMensagem(val mensagem: String) : ListaUiEvent
+    /** Desloga e volta para o Login */
+    data object NavegaParaLogin                        : ListaUiEvent
 }
 

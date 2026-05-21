@@ -56,6 +56,11 @@ fun AppNavHost(startDestination: Any = LoginRoute) {
                 onNavigateToEditar = { id ->
                     navController.navigate(CadastrarAlterarRoute(id = id))
                 },
+                onDeslogar = {
+                    navController.navigate(LoginRoute) {
+                        popUpTo<ListaRoute> { inclusive = true }   // limpa toda a back stack
+                    }
+                },
             )
         }
 

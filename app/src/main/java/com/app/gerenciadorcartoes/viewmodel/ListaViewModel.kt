@@ -44,6 +44,9 @@ class ListaViewModel @Inject constructor(
                 viewModelScope.launch { _uiEvent.send(ListaUiEvent.NavegaParaNovo) }
 
             is ListaEvent.ExcluirCartao -> excluir(event.id)
+
+            ListaEvent.Deslogar ->
+                viewModelScope.launch { _uiEvent.send(ListaUiEvent.NavegaParaLogin) }
         }
     }
 

@@ -4,4 +4,54 @@
     <!-- Splash Screen -->
     <string name="splash_tagline">Seus cartões, no controle</string>
     <string name="splash_copyright">G3 Bank © 2026</string>
+
+    <!-- Login Screen -->
+    <string name="login_bem_vindo">Bem-vindo de volta</string>
+    <string name="login_subtitulo">Entre na sua conta para continuar</string>
+    <string name="login_campo_usuario">Usuário</string>
+    <string name="login_campo_senha">Senha</string>
+    <string name="login_btn_entrar">Entrar</string>
+    <string name="login_esqueceu_senha">Esqueceu a senha?</string>
+    <string name="login_nao_tem_conta">Não tem conta?</string>
+    <string name="login_btn_cadastrar">Cadastrar-se</string>
+    <string name="login_erro_usuario">Informe o usuário</string>
+    <string name="login_erro_senha">Informe a senha</string>
+
+    <!-- ConfirmacaoDialog — rótulos padrão dos botões -->
+    <string name="dialog_btn_confirmar">Confirmar</string>
+    <string name="dialog_btn_cancelar">Cancelar</string>
+
+    <!-- AppTopAppBar — acessibilidade -->
+    <string name="topbar_voltar">Voltar</string>
+
+    <!-- Detalhe Screen -->
+    <string name="detalhe_titulo">Detalhes do Cartão</string>
+
+    <!-- Ações comuns — contentDescription de ícones -->
+    <string name="cd_editar">Editar</string>
+    <string name="cd_excluir">Excluir</string>
+
+    <!-- Lista Screen — TopAppBar -->
+    <string name="lista_menu_mais_opcoes">Mais opções</string>
+    <string name="lista_titulo">Meus Cartões</string>
+    <string name="lista_subtitulo">Gerencie seus cartões</string>
+
+    <!-- Lista Screen — FAB -->
+    <string name="lista_fab_novo_cartao">Novo cartão</string>
+
+    <!-- Lista Screen — BottomSheet de ações -->
+    <string name="lista_acao_editar">Editar cartão</string>
+    <string name="lista_menu_cartao">Menu do cartão</string>
+
+    <!-- Lista Screen — estado vazio -->
+    <string name="lista_vazia_titulo">Você ainda não tem cartões</string>
+    <string name="lista_vazia_subtitulo">Adicione seu primeiro cartão para começar</string>
+
+    <!-- Lista Screen — diálogos -->
+    <string name="lista_dialog_deslogar_titulo">Sair da conta</string>
+    <string name="lista_dialog_deslogar_mensagem">Deseja encerrar sua sessão?</string>
+    <string name="lista_dialog_deslogar_confirmar">Sair</string>
+    <string name="lista_dialog_excluir_titulo">Excluir cartão</string>
+    <string name="lista_dialog_excluir_mensagem">Deseja remover o cartão de %s?</string>
+    <string name="lista_dialog_excluir_confirmar">Excluir</string>
 </resources>

@@ -27,10 +27,10 @@ class LoginViewModel @Inject constructor() : ViewModel() {
     fun onEvent(event: LoginEvent) {
         when (event) {
             is LoginEvent.Usuario ->
-                _uiState.update { it.copy(usuario = event.valor) }
+                _uiState.update { it.copy(usuario = event.valor, erroUsuario = null) }
 
             is LoginEvent.Senha ->
-                _uiState.update { it.copy(senha = event.valor) }
+                _uiState.update { it.copy(senha = event.valor, erroSenha = null) }
 
             LoginEvent.Entrar -> entrar()
 
@@ -42,18 +42,17 @@ class LoginViewModel @Inject constructor() : ViewModel() {
     private fun entrar() {
         if (!validar()) return
         viewModelScope.launch {
+            _uiState.update { it.copy(carregando = true) }
             runCatching {
                 verificarCredenciais(
                     usuario = _uiState.value.usuario,
-                    senha = _uiState.value.senha,
+                    senha   = _uiState.value.senha,
                 )
-
                 _uiEvent.send(LoginUiEvent.NavegaParaLista)
             }.onFailure { erro ->
+                _uiState.update { it.copy(carregando = false) }
                 _uiEvent.send(
-                    LoginUiEvent.MostrarErro(
-                        erro.message ?: "Usuário ou senha incorretos"
-                    )
+                    LoginUiEvent.MostrarErro(erro.message ?: "Usuário ou senha incorretos")
                 )
             }
         }
@@ -65,10 +64,11 @@ class LoginViewModel @Inject constructor() : ViewModel() {
         val s = _uiState.value
 
         if (s.usuario.isBlank()) {
-
+            _uiState.update { it.copy(erroUsuario = "Informe o usuário") }
             valido = false
         }
         if (s.senha.isBlank()) {
+            _uiState.update { it.copy(erroSenha = "Informe a senha") }
             valido = false
         }
         return valido
@@ -85,4 +85,3 @@ class LoginViewModel @Inject constructor() : ViewModel() {
         }
     }
 }
-

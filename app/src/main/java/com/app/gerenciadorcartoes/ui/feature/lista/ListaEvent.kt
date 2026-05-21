@@ -9,4 +9,6 @@ sealed interface ListaEvent {
     data class  NavegaParaEditar(val id: Long) : ListaEvent
     /** Exclui um item */
     data class  ExcluirCartao(val id: Long) : ListaEvent
+    /** Usuário confirmou sair da conta */
+    data object Deslogar : ListaEvent
 }
