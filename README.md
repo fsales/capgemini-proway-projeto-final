@@ -6,16 +6,16 @@
 
 <p align="center">
   <strong>Seus cartões, no controle.</strong><br/>
-  Aplicativo Android nativo para gerenciamento de cartões de crédito e débito.
+  Aplicativo Android nativo para gerenciamento de cartões de crédito.
 </p>
 
 <p align="center">
-  <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-7F52FF?style=flat-square&logo=kotlin&logoColor=white"/>
-  <img alt="Android" src="https://img.shields.io/badge/Android-3DDC84?style=flat-square&logo=android&logoColor=white"/>
-  <img alt="Compose" src="https://img.shields.io/badge/Jetpack_Compose-4285F4?style=flat-square&logo=jetpackcompose&logoColor=white"/>
-  <img alt="Architecture" src="https://img.shields.io/badge/Architecture-MVVM_+_UDF-orange?style=flat-square"/>
-  <img alt="DI" src="https://img.shields.io/badge/DI-Hilt-red?style=flat-square"/>
-  <img alt="DB" src="https://img.shields.io/badge/DB-Room-blue?style=flat-square"/>
+  <img alt="Kotlin" src="https://img.shields.io/badge/Linguagem-Kotlin-7F52FF?style=flat-square&logo=kotlin&logoColor=white"/>
+  <img alt="Android" src="https://img.shields.io/badge/Min_SDK-API_28%2B-3DDC84?style=flat-square&logo=android&logoColor=white"/>
+  <img alt="Compose" src="https://img.shields.io/badge/UI-Jetpack_Compose-4285F4?style=flat-square&logo=jetpackcompose&logoColor=white"/>
+  <img alt="Architecture" src="https://img.shields.io/badge/Arquitetura-MVVM_%2B_UDF-FF6B35?style=flat-square"/>
+  <img alt="DI" src="https://img.shields.io/badge/DI-Hilt-B22222?style=flat-square"/>
+  <img alt="DB" src="https://img.shields.io/badge/DB-Room-1565C0?style=flat-square"/>
 </p>
 
 <p align="center">
@@ -32,7 +32,7 @@
 
 ## 📱 Sobre o App
 
-**G3 Bank** é um aplicativo Android que permite ao usuário **cadastrar, visualizar, editar e excluir** seus cartões de crédito e débito em um único lugar. O projeto utiliza as tecnologias mais modernas do ecossistema Android, seguindo arquitetura **MVVM estrita com Fluxo de Dados Unidirecional (UDF)**.
+**G3 Bank** é um aplicativo Android que permite ao usuário **cadastrar, visualizar, editar e excluir** seus cartões de crédito em um único lugar. O projeto utiliza as tecnologias mais modernas do ecossistema Android, seguindo arquitetura **MVVM estrita com Fluxo de Dados Unidirecional (UDF)**.
 
 > Desenvolvido como projeto de conclusão de curso Android, demonstrando boas práticas de engenharia de software mobile.
 
@@ -56,15 +56,9 @@
 
 ## 🖼️ Capturas de Tela
 
-<p align="center">
-  <img src="docs/screens/Screenshot_20260521_214259.png" alt="Tela 1" width="200"/>
-  &nbsp;&nbsp;
-  <img src="docs/screens/Screenshot_20260521_214529.png" alt="Tela 2" width="200"/>
-  &nbsp;&nbsp;
-  <img src="docs/screens/Screenshot_20260521_214703.png" alt="Tela 3" width="200"/>
-  &nbsp;&nbsp;
-  <img src="docs/screens/Screenshot_20260521_214723.png" alt="Tela 4" width="200"/>
-</p>
+| | | | |
+|:---:|:---:|:---:|:---:|
+| ![Tela 1](docs/screens/Screenshot_20260521_214259.png) | ![Tela 2](docs/screens/Screenshot_20260521_214529.png) | ![Tela 3](docs/screens/Screenshot_20260521_214703.png) | ![Tela 4](docs/screens/Screenshot_20260521_214723.png) |
 
 ---
 
