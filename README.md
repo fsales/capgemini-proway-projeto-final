@@ -18,6 +18,16 @@
   <img alt="DB" src="https://img.shields.io/badge/DB-Room-blue?style=flat-square"/>
 </p>
 
+<p align="center">
+  <strong>👥 Equipe</strong><br/><br/>
+  Caio Albuquerque &nbsp;·&nbsp;
+  Fabio de Oliveira &nbsp;·&nbsp;
+  Felipe Suzuki &nbsp;·&nbsp;
+  Gustavo de Souza &nbsp;·&nbsp;
+  Rafael Alexandre &nbsp;·&nbsp;
+  Victor Vieira
+</p>
+
 ---
 
 ## 📱 Sobre o App
