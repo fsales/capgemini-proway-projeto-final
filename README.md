@@ -1,6 +1,3 @@
-<p align="center">
-  <img src="docs/assets/banner.png" alt="G3 Bank Banner" width="100%"/>
-</p>
 
 <h1 align="center">💳 G3 Bank</h1>
 
