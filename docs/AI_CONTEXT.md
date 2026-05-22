@@ -9,19 +9,6 @@
 ## Histórico de Alterações
 
 - <!-- Insira uma linha no início a cada atualização: "- YYYY-MM-DD — descrição" -->
-- 2026-05-22 — `CadastroUsuarioScreen` corrigida: progresso sem percentual, erros inline por campo via `MarcarCamposObrigatorios` event ao tentar avançar sem preencher, subtítulos específicos por etapa e remoção de código redundante
-- 2026-05-22 — `CadastroUsuarioViewModel` agora valida formato de e-mail e inconsistência entre senha/confirmação em tempo de digitação e no submit
-- 2026-05-22 — `CadastroUsuarioScreen` evoluída para wizard: progresso percentual no topo, bloqueio visual/click de etapas futuras e microtexto dinâmico na CTA
-- 2026-05-21 — Máscaras aplicadas em `CadastroUsuario` para CPF/CEP/número/UF com teclado contextual por campo e testes unitários de formatação
-- 2026-05-21 — `CadastroUsuarioScreen` migrada de abas para stepper visual guiado com ações `Anterior/Próximo/Cadastrar`
-- 2026-05-21 — Corrigida duplicação de indicador de validação nos campos `Senha` e `Confirmar senha` em `CadastroUsuarioScreen`
-- 2026-05-21 — `CadastroUsuarioScreen` aprimorada com animação de abas, foco automático entre campos e indicadores visuais de validação
-- 2026-05-21 — `CadastroUsuarioScreen` modernizada com abas Material 3, validação inline por campo e estados visuais para CEP
-- 2026-05-21 — `CadastroUsuarioScreen` reorganizada em cabeçalho + cards de seção com largura responsiva e textos externalizados
-- 2026-05-21 — Corrigido `ListaScreen`: botão Cancelar no diálogo de deslogar agora fecha o modal via `onDismiss`
-- 2026-05-21 — `retrofit-kotlinx-serialization-converter` migrado para artefato oficial do Retrofit 3 (`com.squareup.retrofit2:converter-kotlinx-serialization`)
-- 2026-05-21 — Dependência `converter-gson` padronizada para Version Catalog (`libs.retrofit.converter.gson`) no módulo `:app`
-- 2026-05-21 — Sessão persistente implementada com DataStore + EncryptedSharedPreferences; Splash decide Login/Lista e login/logout atualizam sessão
 - 2026-05-20 — Splash ajustada: logo reduzida em `ic_splash_logo_static` para melhor proporção visual no lançamento
 - 2026-05-19 — Tela `Detalhe` simplificada para leitura: removidas ações de Editar/Excluir do AppBar e limpeza de eventos/UI events relacionados no fluxo da feature
 - 2026-05-19 — Botão de 3 pontinhos na Lista atualizado para menu de ações em bottom sheet (Editar e Excluir), evitando popup deslocado sobre/abaixo do card
@@ -51,7 +38,7 @@
 | Arquitetura | MVVM · Fluxo de Dados Unidirecional · Separação em camadas |
 | DI | Hilt 2.59.2 (KSP — sem KAPT) |
 | Persistência | Room 2.8.4 (reativo via `Flow`) |
-| Sessão | DataStore Preferences 1.0.0 + `androidx.security:security-crypto:1.1.0` |
+| Sessão | DataStore Preferences + Android Keystore AES-256-GCM (`DataStoreEncryptor`) |
 | Navegação | Navigation Compose 2.9.0 — **apenas rotas type-safe** |
 | Min SDK | 28 (Android 9 Pie) |
 | Target/Compile SDK | 36 |
@@ -75,14 +62,23 @@ app/src/main/java/com/app/gerenciadorcartoes/
 │   ├── dao/CartaoDao.kt              @Dao — leituras reativas com Flow + escritas suspend
 │   ├── database/AppDatabase.kt       @Database v1 — expõe cartaoDao()
 │   ├── entity/CartaoEntity.kt        @Entity("cartoes")
+│   ├── security/
+│   │   ├── DataStoreEncryptor.kt     Android Keystore AES-256-GCM — cifra valores PII no DataStore
+│   │   └── SenhaHasher.kt            PBKDF2/HmacSHA-256 com salt aleatório — hash de senhas
 │   └── session/
 │       ├── SessionManager.kt         Contrato de sessão persistente
-│       └── SessionManagerImpl.kt     DataStore + EncryptedSharedPreferences
+│       └── SessionManagerImpl.kt     DataStore — única fonte de verdade da sessão
 │
 ├── repository/
+│   ├── CadastroUsuarioRepository.kt  Interface — apenas tipos de domínio (CadastroUsuario)
+│   ├── CadastroUsuarioRepositoryImpl.kt @Singleton — delega para CadastroUsuarioDao + mapper
+│   ├── CartaoDetalheRepository.kt
+│   ├── CartaoDetalheRepositoryImpl.kt
 │   ├── CartaoRepository.kt           Interface — apenas tipos de domínio
 │   ├── CartaoRepositoryImpl.kt       @Singleton — delega para CartaoDao + mapper
-│   └── mapper/CartaoMapper.kt        funções de extensão toDomain() / toEntity()
+│   └── mapper/
+│       ├── CadastroUsuarioMapper.kt  funções de extensão toDomain() / toEntity()
+│       └── CartaoMapper.kt           funções de extensão toDomain() / toEntity()
 │
 ├── network/
 │   └── service/ApiService.kt         Placeholder Retrofit — sem endpoints ativos
@@ -526,8 +522,7 @@ Gerenciado via `gradle/libs.versions.toml`. Entradas principais:
 | `libs.androidx.room.runtime` | `androidx.room:room-runtime` | 2.8.4 |
 | `libs.androidx.room.ktx` | `androidx.room:room-ktx` | 2.8.4 |
 | `libs.androidx.room.compiler` | `androidx.room:room-compiler` (ksp) | 2.8.4 |
-| `libs.androidx-datastore-preferences` | `androidx.datastore:datastore-preferences` | 1.0.0 |
-| `libs.androidx-security-crypto` | `androidx.security:security-crypto` | 1.1.0 |
+| `libs.androidx-datastore-preferences` | `androidx.datastore:datastore-preferences` | 1.2.1 |
 | `libs.androidx.navigation.compose` | `androidx.navigation:navigation-compose` | 2.9.0 |
 | `libs.androidx.hilt.navigation.compose` | `androidx.hilt:hilt-navigation-compose` | 1.2.0 |
 | `libs.retrofit` | `com.squareup.retrofit2:retrofit` | 3.0.0 |

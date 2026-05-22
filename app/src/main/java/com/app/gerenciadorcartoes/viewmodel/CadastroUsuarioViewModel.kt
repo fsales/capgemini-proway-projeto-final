@@ -2,7 +2,9 @@ package com.app.gerenciadorcartoes.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.app.gerenciadorcartoes.model.CadastroUsuario
 import com.app.gerenciadorcartoes.network.service.BuscaCep
+import com.app.gerenciadorcartoes.repository.CadastroUsuarioRepository
 import com.app.gerenciadorcartoes.ui.feature.cadastrousuario.CadastroUsuarioEvent
 import com.app.gerenciadorcartoes.ui.feature.cadastrousuario.CadastroUsuarioUiEvent
 import com.app.gerenciadorcartoes.ui.feature.cadastrousuario.emailEstruturalmenteValido
@@ -24,7 +26,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CadastroUsuarioViewModel @Inject constructor(
-    private val buscaCep: BuscaCep,
+    private val buscaCep                  : BuscaCep,
+    private val cadastroUsuarioRepository : CadastroUsuarioRepository,
 ) : ViewModel() {
 
     companion object {
@@ -34,9 +37,9 @@ class CadastroUsuarioViewModel @Inject constructor(
         private const val SENHA_MIN_LENGTH       = 6
         private const val MSG_CAMPO_OBRIGATORIO  = "Campo obrigatório"
         private const val MSG_EMAIL_INVALIDO     = "E-mail inválido"
+        // Compilada uma única vez para toda a vida útil da aplicação
+        private val EMAIL_REGEX = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
     }
-
-    private val emailRegex = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
 
     private val _uiState = MutableStateFlow(CadastroUsuarioUiState())
     val uiState: StateFlow<CadastroUsuarioUiState> = _uiState.asStateFlow()
@@ -111,7 +114,7 @@ class CadastroUsuarioViewModel @Inject constructor(
                         erroEmail = when {
                             email.isBlank()  -> null
                             email.length < 3 -> null  // ainda digitando
-                            else             -> if (emailRegex.matches(email)) null else MSG_EMAIL_INVALIDO
+                            else             -> if (EMAIL_REGEX.matches(email)) null else MSG_EMAIL_INVALIDO
                         },
                     )
                 }
@@ -192,7 +195,7 @@ class CadastroUsuarioViewModel @Inject constructor(
                 val erroEmail = when {
                     s.email.isBlank()                    -> MSG_CAMPO_OBRIGATORIO
                     !emailEstruturalmenteValido(s.email) -> MSG_EMAIL_INVALIDO
-                    !emailRegex.matches(s.email)         -> MSG_EMAIL_INVALIDO
+                    !EMAIL_REGEX.matches(s.email)         -> MSG_EMAIL_INVALIDO
                     else                                 -> null
                 }
                 val valido = erroNome == null && erroCpf == null && erroEmail == null
@@ -269,8 +272,33 @@ class CadastroUsuarioViewModel @Inject constructor(
     private fun submeterCadastro() {
         viewModelScope.launch {
             _uiState.update { it.copy(carregando = true) }
+            val s = _uiState.value
             runCatching {
-                // TODO: substituir por chamada real ao backend
+                // Verifica duplicidade de e-mail antes de persistir
+                if (cadastroUsuarioRepository.buscarPorEmail(s.email) != null) {
+                    _uiState.update {
+                        it.copy(
+                            carregando                = false,
+                            erroEmail                 = "E-mail já cadastrado",
+                            etapaAtual                = ETAPA_DADOS_PESSOAIS,
+                            focarPrimeiroCampoComErro = true,
+                        )
+                    }
+                    return@launch
+                }
+                cadastroUsuarioRepository.salvar(
+                    CadastroUsuario(
+                        nome     = s.nome.trim(),
+                        cpf      = s.cpf,
+                        cep      = s.cep,
+                        endereco = s.endereco.trim(),
+                        number   = s.number.trim(),
+                        bairro   = s.bairro.trim(),
+                        estado   = s.estado,
+                        email    = s.email.trim(),
+                        senha    = s.senha,
+                    )
+                )
                 _uiState.update { it.copy(carregando = false) }
                 _uiEvent.send(CadastroUsuarioUiEvent.MostrarMensagem("Cadastro realizado com sucesso!"))
                 _uiEvent.send(CadastroUsuarioUiEvent.NavigateBack)

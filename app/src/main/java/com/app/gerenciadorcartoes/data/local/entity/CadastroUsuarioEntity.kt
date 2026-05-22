@@ -1,9 +1,13 @@
 package com.app.gerenciadorcartoes.data.local.entity
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "CadastroUsuario")
+@Entity(
+    tableName = "CadastroUsuario",
+    indices   = [Index(value = ["email"], unique = true)],
+)
 data class CadastroUsuarioEntity(
 
     @PrimaryKey(autoGenerate = true)
@@ -13,7 +17,7 @@ data class CadastroUsuarioEntity(
 
     val cpf: String = "",
 
-    val cep: Int = 0,
+    val cep: String = "",
 
     val endereco: String = "",
 

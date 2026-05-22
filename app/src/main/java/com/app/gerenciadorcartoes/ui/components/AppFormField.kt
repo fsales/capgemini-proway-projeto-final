@@ -28,17 +28,18 @@ import com.app.gerenciadorcartoes.ui.theme.LocalIconSize
  *
  * Wraps [OutlinedTextField] adicionando:
  * - Ícone de validação inline (✓ ou ✗) controlado por [showValidationIcon].
- * - [errorMessage] e [hintText] exibidos no `supportingText`.
+ * - [errorMessage] exibido no `supportingText` quando presente.
+ * - [hintText] exibido como `placeholder` dentro do campo quando está vazio.
  * - Vinculação opcional a um [FocusRequester].
  * - `singleLine = true` enforçado.
  *
- * @param value          Valor atual do campo.
- * @param onValueChange  Callback chamado a cada mudança de texto.
- * @param label          Label flutuante do campo.
- * @param errorMessage   Mensagem de erro; `null` = sem erro.
- * @param hintText       Dica exibida como `placeholder` e `supportingText` quando o campo está vazio.
- * @param showValidationIcon `true` exibe ícone ✓/✗ no trailing; `false` omite (ex: campo com busy indicator).
- * @param focusRequester FocusRequester para gerenciamento de foco via código.
+ * @param value              Valor atual do campo.
+ * @param onValueChange      Callback chamado a cada mudança de texto.
+ * @param label              Label flutuante do campo.
+ * @param errorMessage       Mensagem de erro; `null` = sem erro.
+ * @param hintText           Dica exibida como `placeholder` dentro do campo quando está vazio.
+ * @param showValidationIcon `true` exibe ícone ✓/✗ no trailing; `false` omite.
+ * @param focusRequester     FocusRequester para gerenciamento de foco via código.
  */
 @Composable
 fun AppFormField(
@@ -65,7 +66,7 @@ fun AppFormField(
         value            = value,
         onValueChange    = onValueChange,
         label            = { Text(label) },
-        placeholder      = hintText?.let { { Text(it, color = MaterialTheme.colorScheme.outline) } },
+        placeholder      = hintText?.let { hint -> { Text(hint, color = MaterialTheme.colorScheme.outline) } },
         leadingIcon      = leadingIcon,
         trailingIcon     = {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -79,11 +80,7 @@ fun AppFormField(
             }
         },
         isError          = errorMessage != null,
-        supportingText   = when {
-            errorMessage != null                -> { { Text(errorMessage) } }
-            hintText != null && value.isBlank() -> { { Text(hintText, color = MaterialTheme.colorScheme.outline) } }
-            else                                -> null
-        },
+        supportingText   = errorMessage?.let { msg -> { Text(msg) } },
         visualTransformation = visualTransformation,
         keyboardOptions  = keyboardOptions,
         keyboardActions  = keyboardActions,
@@ -135,11 +132,10 @@ private fun AppFormFieldPreenchidoPreview() {
 private fun AppFormFieldErroPreview() {
     GerenciadorCartoesTheme {
         AppFormField(
-            value        = "jo",
+            value         = "jo",
             onValueChange = {},
-            label        = "Nome",
-            errorMessage = "Nome é obrigatório",
+            label         = "Nome",
+            errorMessage  = "Nome é obrigatório",
         )
     }
 }
-
