@@ -80,11 +80,15 @@
 | Tecnologia | Uso |
 |---|---|
 | **Room** | Banco de dados local SQLite reativo |
+| **DataStore Preferences** | Persistência de sessão de login |
+| **AndroidX Security Crypto** | Criptografia de dados sensíveis de sessão |
 
 ### Rede *(infraestrutura provisionada)*
 | Tecnologia | Uso |
 |---|---|
 | **Retrofit** | Cliente HTTP type-safe |
+| **Retrofit Gson Converter** | Conversor JSON via Gson |
+| **Retrofit Kotlinx Converter** | Conversor JSON via kotlinx-serialization |
 | **OkHttp** | Interceptor de logging |
 | **kotlinx-serialization** | Serialização JSON + rotas |
 

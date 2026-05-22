@@ -2,6 +2,7 @@ package com.app.gerenciadorcartoes.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.app.gerenciadorcartoes.data.local.session.SessionManager
 import com.app.gerenciadorcartoes.repository.CartaoRepository
 import com.app.gerenciadorcartoes.ui.feature.lista.ListaEvent
 import com.app.gerenciadorcartoes.ui.feature.lista.ListaUiEvent
@@ -19,6 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ListaViewModel @Inject constructor(
     private val cartaoRepository: CartaoRepository,
+    private val sessionManager: SessionManager,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ListaUiState(carregando = true))
@@ -45,8 +47,7 @@ class ListaViewModel @Inject constructor(
 
             is ListaEvent.ExcluirCartao -> excluir(event.id)
 
-            ListaEvent.Deslogar ->
-                viewModelScope.launch { _uiEvent.send(ListaUiEvent.NavegaParaLogin) }
+            ListaEvent.Deslogar -> deslogar()
         }
     }
 
@@ -70,6 +71,17 @@ class ListaViewModel @Inject constructor(
                 _uiEvent.send(ListaUiEvent.MostrarMensagem("Cartão removido com sucesso"))
             }.onFailure { erro ->
                 _uiEvent.send(ListaUiEvent.MostrarErro(erro.message ?: "Erro ao remover cartão"))
+            }
+        }
+    }
+
+    private fun deslogar() {
+        viewModelScope.launch {
+            runCatching {
+                sessionManager.logout()
+                _uiEvent.send(ListaUiEvent.NavegaParaLogin)
+            }.onFailure { erro ->
+                _uiEvent.send(ListaUiEvent.MostrarErro(erro.message ?: "Erro ao encerrar sessão"))
             }
         }
     }

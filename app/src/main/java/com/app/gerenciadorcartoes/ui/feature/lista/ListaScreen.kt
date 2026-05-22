@@ -117,7 +117,8 @@ fun ListaContent(
             titulo        = stringResource(R.string.lista_dialog_deslogar_titulo),
             mensagem      = stringResource(R.string.lista_dialog_deslogar_mensagem),
             textConfirmar = stringResource(R.string.lista_dialog_deslogar_confirmar),
-            onConfirmar   = { onEvent(ListaEvent.Deslogar) }
+            onConfirmar   = { onEvent(ListaEvent.Deslogar) },
+            onDismiss     = { confirmarDeslogar = false },
         )
     }
 

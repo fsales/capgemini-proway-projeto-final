@@ -38,7 +38,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.app.gerenciadorcartoes.R
 import com.app.gerenciadorcartoes.ui.feature.splash.state.SplashUiState
 import com.app.gerenciadorcartoes.ui.theme.GerenciadorCartoesTheme
-import com.app.gerenciadorcartoes.ui.viewmodel.SplashViewModel
+import com.app.gerenciadorcartoes.viewmodel.SplashViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -47,6 +47,7 @@ private val SplashBg = Color(0xFF001432)
 // ── Nível 1: Screen ───────────────────────────────────────────────────────────
 @Composable
 fun SplashScreen(
+    navigateToLista: () -> Unit,
     navigateToLogin: () -> Unit,
     viewModel: SplashViewModel = hiltViewModel(),
 ) {
@@ -55,6 +56,7 @@ fun SplashScreen(
     LaunchedEffect(viewModel) {
         viewModel.uiEvent.collect { event ->
             when (event) {
+                SplashUiEvent.NavigateToLista -> navigateToLista()
                 SplashUiEvent.NavigateToLogin -> navigateToLogin()
             }
         }

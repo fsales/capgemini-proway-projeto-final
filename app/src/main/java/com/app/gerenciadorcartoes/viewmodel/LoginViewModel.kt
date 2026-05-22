@@ -2,6 +2,7 @@ package com.app.gerenciadorcartoes.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.app.gerenciadorcartoes.data.local.session.SessionManager
 import com.app.gerenciadorcartoes.ui.feature.login.LoginEvent
 import com.app.gerenciadorcartoes.ui.feature.login.LoginUiEvent
 import com.app.gerenciadorcartoes.ui.feature.login.state.LoginUiState
@@ -16,7 +17,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class LoginViewModel @Inject constructor() : ViewModel() {
+class LoginViewModel @Inject constructor(
+    private val sessionManager: SessionManager,
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
@@ -48,6 +51,7 @@ class LoginViewModel @Inject constructor() : ViewModel() {
                     usuario = _uiState.value.usuario,
                     senha   = _uiState.value.senha,
                 )
+                sessionManager.saveSession(_uiState.value.usuario)
                 _uiEvent.send(LoginUiEvent.NavegaParaLista)
             }.onFailure { erro ->
                 _uiState.update { it.copy(carregando = false) }

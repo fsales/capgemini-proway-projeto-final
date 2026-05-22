@@ -33,7 +33,7 @@
 | Retrofit                | 3.0.0      | `com.squareup.retrofit2:retrofit`                         |
 | OkHttp                  | 5.3.2      | `com.squareup.okhttp3:logging-interceptor`                |
 | kotlinx-serialization   | 1.11.0     | `org.jetbrains.kotlinx:kotlinx-serialization-json`        |
-| Serialization Converter | 1.0.0      | `com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter` |
+| Serialization Converter | 3.0.0      | `com.squareup.retrofit2:converter-kotlinx-serialization` |
 
 ---
 

@@ -14,19 +14,24 @@ import com.app.gerenciadorcartoes.ui.feature.login.LoginScreen
 import com.app.gerenciadorcartoes.ui.feature.splash.SplashScreen
 
 @Composable
-fun AppNavHost(startDestination: Any = LoginRoute) {
+fun AppNavHost(startDestination: Any = SplashRoute) {
     val navController = rememberNavController()
 
     NavHost(
         navController    = navController,
-        startDestination = SplashRoute,       // ← splash como início
+        startDestination = startDestination,
     ) {
 
         composable<SplashRoute> {
             SplashScreen(
+                navigateToLista = {
+                    navController.navigate(ListaRoute) {
+                        popUpTo<SplashRoute> { inclusive = true }
+                    }
+                },
                 navigateToLogin = {
                     navController.navigate(LoginRoute) {
-                        popUpTo<SplashRoute> { inclusive = true }  // remove splash da back stack
+                        popUpTo<SplashRoute> { inclusive = true }
                     }
                 },
             )

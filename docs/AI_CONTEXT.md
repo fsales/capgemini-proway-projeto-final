@@ -9,6 +9,10 @@
 ## Histórico de Alterações
 
 <!-- Insira uma linha no início a cada atualização: "- YYYY-MM-DD — descrição" -->
+- 2026-05-21 — Corrigido `ListaScreen`: botão Cancelar no diálogo de deslogar agora fecha o modal via `onDismiss`
+- 2026-05-21 — `retrofit-kotlinx-serialization-converter` migrado para artefato oficial do Retrofit 3 (`com.squareup.retrofit2:converter-kotlinx-serialization`)
+- 2026-05-21 — Dependência `converter-gson` padronizada para Version Catalog (`libs.retrofit.converter.gson`) no módulo `:app`
+fa- 2026-05-21 — Sessão persistente implementada com DataStore + EncryptedSharedPreferences; Splash decide Login/Lista e login/logout atualizam sessão
 - 2026-05-20 — Splash ajustada: logo reduzida em `ic_splash_logo_static` para melhor proporção visual no lançamento
 - 2026-05-19 — Tela `Detalhe` simplificada para leitura: removidas ações de Editar/Excluir do AppBar e limpeza de eventos/UI events relacionados no fluxo da feature
 - 2026-05-19 — Botão de 3 pontinhos na Lista atualizado para menu de ações em bottom sheet (Editar e Excluir), evitando popup deslocado sobre/abaixo do card
@@ -38,6 +42,7 @@
 | Arquitetura | MVVM · Fluxo de Dados Unidirecional · Separação em camadas |
 | DI | Hilt 2.59.2 (KSP — sem KAPT) |
 | Persistência | Room 2.8.4 (reativo via `Flow`) |
+| Sessão | DataStore Preferences 1.0.0 + `androidx.security:security-crypto:1.1.0` |
 | Navegação | Navigation Compose 2.9.0 — **apenas rotas type-safe** |
 | Min SDK | 28 (Android 9 Pie) |
 | Target/Compile SDK | 36 |
@@ -60,7 +65,10 @@ app/src/main/java/com/app/gerenciadorcartoes/
 │   ├── converter/                    (vazio — reservado para @TypeConverters)
 │   ├── dao/CartaoDao.kt              @Dao — leituras reativas com Flow + escritas suspend
 │   ├── database/AppDatabase.kt       @Database v1 — expõe cartaoDao()
-│   └── entity/CartaoEntity.kt        @Entity("cartoes")
+│   ├── entity/CartaoEntity.kt        @Entity("cartoes")
+│   └── session/
+│       ├── SessionManager.kt         Contrato de sessão persistente
+│       └── SessionManagerImpl.kt     DataStore + EncryptedSharedPreferences
 │
 ├── repository/
 │   ├── CartaoRepository.kt           Interface — apenas tipos de domínio
@@ -88,7 +96,8 @@ app/src/main/java/com/app/gerenciadorcartoes/
         ├── LoginViewModel.kt
         ├── ListaViewModel.kt
         ├── DetalheViewModel.kt
-        └── CadastrarAlterarViewModel.kt
+        ├── CadastrarAlterarViewModel.kt
+        └── SplashViewModel.kt
 ```
 
 > **ViewModels ficam em `viewmodel/`** — irmão de `ui/`, não dentro dela.  
@@ -346,9 +355,13 @@ composable<XRoute> { XScreen(navigateBack = { navController.popBackStack() }) }
 
 | Objeto/Classe | Significado | Início? |
 |---|---|---|
-| `ListaRoute` | Lista de todos os cartões | ✅ sim |
+| `SplashRoute` | Verificação de sessão na abertura do app | ✅ sim |
+| `LoginRoute` | Autenticação do usuário | não |
+| `ListaRoute` | Lista de todos os cartões | não |
 | `DetalheRoute(id: Long)` | Detalhe somente leitura | não |
+| `AjustarLimiteRoute(id: Long)` | Ajuste de limite de um cartão | não |
 | `CadastrarAlterarRoute(id: Long = 0L)` | Criar (`id=0`) ou editar (`id>0`) | não |
+| `CadastroUsuarioRoute` | Cadastro de novo usuário | não |
 
 ---
 
@@ -499,9 +512,13 @@ Gerenciado via `gradle/libs.versions.toml`. Entradas principais:
 | `libs.androidx.room.runtime` | `androidx.room:room-runtime` | 2.8.4 |
 | `libs.androidx.room.ktx` | `androidx.room:room-ktx` | 2.8.4 |
 | `libs.androidx.room.compiler` | `androidx.room:room-compiler` (ksp) | 2.8.4 |
+| `libs.androidx-datastore-preferences` | `androidx.datastore:datastore-preferences` | 1.0.0 |
+| `libs.androidx-security-crypto` | `androidx.security:security-crypto` | 1.1.0 |
 | `libs.androidx.navigation.compose` | `androidx.navigation:navigation-compose` | 2.9.0 |
 | `libs.androidx.hilt.navigation.compose` | `androidx.hilt:hilt-navigation-compose` | 1.2.0 |
 | `libs.retrofit` | `com.squareup.retrofit2:retrofit` | 3.0.0 |
+| `libs.retrofit.converter.gson` | `com.squareup.retrofit2:converter-gson` | 3.0.0 |
+| `libs.retrofit.kotlinx.serialization.converter` | `com.squareup.retrofit2:converter-kotlinx-serialization` | 3.0.0 |
 | `libs.okhttp.logging.interceptor` | `com.squareup.okhttp3:logging-interceptor` | 5.3.2 |
 | `libs.kotlinx.serialization.json` | `org.jetbrains.kotlinx:kotlinx-serialization-json` | 1.11.0 |
 

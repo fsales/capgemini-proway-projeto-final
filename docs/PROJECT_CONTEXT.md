@@ -28,6 +28,7 @@ Aplicativo Android que demonstra um **CRUD completo** (Create, Read, Update, Del
 
 - Hilt para injeção de dependência
 - Room (reativo via `Flow`) como única fonte de dados ativa
+- Sessão persistente de login com DataStore Preferences + EncryptedSharedPreferences
 - Navigation Compose 2 com rotas type-safe
 - Retrofit + OkHttp provisionados para integração futura com API (ainda não ativo)
 
@@ -96,6 +97,21 @@ CadastrarAlterarRoute
 
 O diretório `data/local/converter/` existe mas está atualmente vazio — nenhum `@TypeConverters` é necessário para o schema atual.
 
+### Sessão persistente (produção)
+
+| Item | Valor |
+|---|---|
+| Contrato | `data/local/session/SessionManager.kt` |
+| Implementação | `SessionManagerImpl` |
+| Store principal | `DataStore<Preferences>` (`session.preferences_pb`) |
+| Fallback criptografado | `EncryptedSharedPreferences` (`session_secure_prefs`) |
+| Chaves | `session_is_logged_in`, `session_usuario_logado`, `session_last_login_time` |
+
+Fluxo aplicado:
+- Login com sucesso salva sessão (`saveSession(usuario)`) antes de navegar.
+- Splash verifica `isLoggedIn()` e direciona para `ListaRoute` ou `LoginRoute`.
+- Logout limpa sessão (`logout()`) antes de voltar para login.
+
 ---
 
 ## 6. Camada de Rede (Provisionada, Não Ativa)
@@ -119,7 +135,7 @@ O Hilt é ancorado por `@HiltAndroidApp` em `GerenciadorCartoesApp`. Dois módul
 
 | Módulo | Tipo Kotlin | Fornece |
 |---|---|---|
-| `AppModule` | `abstract class` | `AppDatabase`, `CartaoDao`, `@Binds CartaoRepository → CartaoRepositoryImpl` |
+| `AppModule` | `abstract class` | `AppDatabase`, `CartaoDao`, `DataStore<Preferences>`, `EncryptedSharedPreferences`, `@Binds CartaoRepository → CartaoRepositoryImpl`, `@Binds SessionManager → SessionManagerImpl` |
 | `NetworkModule` | `object` | `Json`, `OkHttpClient`, `Retrofit`, `ApiService` |
 
 `AppModule` é abstract pois combina `@Binds` (abstract) e `@Provides` (concreto, dentro do `companion object`).
@@ -136,12 +152,15 @@ O Hilt é ancorado por `@HiltAndroidApp` em `GerenciadorCartoesApp`. Dois módul
 | Compose BOM | 2026.05.00 | Fixa versões de todos os artefatos Compose |
 | Hilt | 2.59.2 | Injeção de dependência |
 | Room | 2.8.4 | Banco de dados SQLite local |
+| DataStore Preferences | 1.0.0 | Persistência de sessão reativa |
+| AndroidX Security Crypto | 1.1.0 | Criptografia de fallback para dados de sessão |
 | Navigation Compose | 2.9.0 | Navegação Composable type-safe |
 | Hilt Navigation Compose | 1.2.0 | `hiltViewModel()` dentro de `composable<T> {}` |
 | Retrofit | 3.0.0 | Cliente HTTP (provisionado, não ativo) |
+| Retrofit Gson Converter | 3.0.0 | Conversor Gson para integrações que usam JSON via Gson |
 | OkHttp | 5.3.2 | Engine HTTP + `LoggingInterceptor` |
 | kotlinx-serialization | 1.11.0 | Serialização JSON + rotas do Navigation Compose 2 |
-| Serialization Converter | 1.0.0 | Adaptador Retrofit ↔ kotlinx-serialization |
+| Serialization Converter | 3.0.0 | `com.squareup.retrofit2:converter-kotlinx-serialization` |
 
 Build features habilitadas em `app/build.gradle.kts`:
 - `compose = true`
@@ -180,7 +199,10 @@ app/src/main/java/com/app/gerenciadorcartoes/
 │   ├── converter/                    (vazio — reservado para futuros @TypeConverters)
 │   ├── dao/CartaoDao.kt              @Dao — leituras com Flow + escritas suspend
 │   ├── database/AppDatabase.kt       @Database v1 — declara CartaoEntity, expõe cartaoDao()
-│   └── entity/CartaoEntity.kt        @Entity("cartoes") — espelha os campos de Cartao 1-a-1
+│   ├── entity/CartaoEntity.kt        @Entity("cartoes") — espelha os campos de Cartao 1-a-1
+│   └── session/
+│       ├── SessionManager.kt         contrato de sessão
+│       └── SessionManagerImpl.kt     DataStore + EncryptedSharedPreferences
 │
 ├── repository/
 │   ├── CartaoRepository.kt           Interface — contrato de domínio (apenas tipos Cartao)
