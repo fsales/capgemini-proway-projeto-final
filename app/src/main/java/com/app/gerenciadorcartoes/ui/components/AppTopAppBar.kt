@@ -2,7 +2,9 @@
 package com.app.gerenciadorcartoes.ui.components
 
 import android.content.res.Configuration
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
@@ -20,6 +22,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,9 +48,28 @@ fun AppTopAppBar(
     leadingIcon    : (@Composable () -> Unit)?        = null,
     actions        : @Composable RowScope.() -> Unit  = {},
 ) {
+    // Light: fundo azul suave (primaryContainer) — moderno e on-brand sem ser agressivo.
+    // Dark : superfície navy padrão — já está escura e não precisa de intervenção.
+    val isDark   = isSystemInDarkTheme()
+    val spacing  = LocalSpacing.current
+    val colors = if (isDark) {
+        TopAppBarDefaults.topAppBarColors()
+    } else {
+        TopAppBarDefaults.topAppBarColors(
+            containerColor             = MaterialTheme.colorScheme.primaryContainer,
+            titleContentColor          = MaterialTheme.colorScheme.onPrimaryContainer,
+            navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            actionIconContentColor     = MaterialTheme.colorScheme.onPrimaryContainer,
+        )
+    }
+
     TopAppBar(
+        modifier = Modifier.padding(bottom = spacing.small),
         title = {
-            Column {
+            Column(
+                modifier            = Modifier.padding(vertical = spacing.extraSmall),
+                verticalArrangement = Arrangement.spacedBy(spacing.extraSmall / 2),
+            ) {
                 Text(
                     text       = title,
                     style      = if (large) MaterialTheme.typography.headlineSmall
@@ -75,6 +97,7 @@ fun AppTopAppBar(
             }
         },
         actions = actions,
+        colors  = colors,
     )
 }
 
