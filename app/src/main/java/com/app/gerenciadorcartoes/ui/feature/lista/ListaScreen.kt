@@ -202,7 +202,8 @@ fun ListaContent(
                 subtitle    = stringResource(R.string.lista_subtitulo),
                 large       = true,
                 leadingIcon = {
-                    // Marca da app: círculo azul com ícone de cartão — identidade G3 Bank
+                    // Círculo azul (primary) sobre fundo lavanda (primaryContainer) em light,
+                    // e sobre fundo navy em dark — contraste adequado nos dois temas.
                     Box(
                         modifier         = Modifier
                             .padding(start = spacing.small)
