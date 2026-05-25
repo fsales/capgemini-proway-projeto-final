@@ -11,7 +11,7 @@ import com.app.gerenciadorcartoes.data.local.entity.CadastroUsuarioEntity
 
 @Database(
     entities     = [CartaoEntity::class, CadastroUsuarioEntity::class],
-    version      = 5,
+    version      = 6,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -91,6 +91,14 @@ abstract class AppDatabase : RoomDatabase() {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL(
                     "CREATE UNIQUE INDEX IF NOT EXISTS index_CadastroUsuario_email ON CadastroUsuario(email)"
+                )
+            }
+        }
+
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "ALTER TABLE cartoes ADD COLUMN bloqueado TEXT NOT NULL DEFAULT 'false'"
                 )
             }
         }

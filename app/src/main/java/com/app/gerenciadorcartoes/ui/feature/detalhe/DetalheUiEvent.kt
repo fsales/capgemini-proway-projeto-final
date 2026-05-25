@@ -4,4 +4,5 @@ sealed interface DetalheUiEvent {
     data object NavigateBack                          : DetalheUiEvent
     data class  NavigateToAjustarLimite(val id: Long) : DetalheUiEvent
     data class  MostrarErro(val mensagem: String)     : DetalheUiEvent
+    data class  MostrarMensagem(val mensagem: String) : DetalheUiEvent
 }

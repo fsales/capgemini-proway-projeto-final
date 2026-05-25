@@ -13,4 +13,5 @@ data class CartaoEntity(
     val validade    : String, // MM/AA
     val limite      : Double,
     val template    : String = "default",
+    val bloqueado   : Boolean = false,
 )

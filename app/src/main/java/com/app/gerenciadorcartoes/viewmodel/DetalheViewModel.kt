@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.app.gerenciadorcartoes.network.service.ApiService
 import com.app.gerenciadorcartoes.repository.CartaoDetalheRepository
 import com.app.gerenciadorcartoes.repository.CartaoRepository
 import com.app.gerenciadorcartoes.ui.feature.detalhe.DetalheEvent
@@ -25,6 +26,7 @@ class DetalheViewModel @Inject constructor(
     savedStateHandle              : SavedStateHandle,
     private val cartaoRepository  : CartaoRepository,
     private val detalheRepository : CartaoDetalheRepository,
+    private val apiService        : ApiService,
 ) : ViewModel() {
 
     private val route : DetalheRoute = savedStateHandle.toRoute()
@@ -46,6 +48,7 @@ class DetalheViewModel @Inject constructor(
             DetalheEvent.AjustarLimite -> viewModelScope.launch {
                 _uiEvent.send(DetalheUiEvent.NavigateToAjustarLimite(id))
             }
+            DetalheEvent.BloquearCartao -> bloquearCartao()
         }
     }
 
@@ -66,6 +69,35 @@ class DetalheViewModel @Inject constructor(
             }.onFailure { erro ->
                 _uiState.update { it.copy(carregando = false, erro = erro.message) }
                 _uiEvent.send(DetalheUiEvent.MostrarErro(erro.message ?: "Erro ao carregar cartão"))
+            }
+        }
+    }
+
+    private fun bloquearCartao() {
+        viewModelScope.launch {
+            runCatching {
+                val cartao = _uiState.value.detalhe.cartao
+                val novoStatusBloqueio = !cartao.bloqueado
+
+                // Chamar API para bloquear ou desbloquear
+                if (novoStatusBloqueio) {
+                    apiService.blockCard(cartao.id.toInt())
+                } else {
+                    apiService.unblockCard(cartao.id.toInt())
+                }
+
+                // Atualizar no banco de dados local
+                cartaoRepository.atualizarBloqueio(cartao.id, novoStatusBloqueio)
+
+                // Enviar mensagem de sucesso
+                val mensagem = if (novoStatusBloqueio) {
+                    "Cartão bloqueado com sucesso"
+                } else {
+                    "Cartão desbloqueado com sucesso"
+                }
+                _uiEvent.send(DetalheUiEvent.MostrarMensagem(mensagem))
+            }.onFailure { erro ->
+                _uiEvent.send(DetalheUiEvent.MostrarErro(erro.message ?: "Erro ao bloquear cartão"))
             }
         }
     }

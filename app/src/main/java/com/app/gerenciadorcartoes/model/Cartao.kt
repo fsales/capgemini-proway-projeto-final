@@ -10,4 +10,5 @@ data class Cartao(
     val validade    : String = "",    // ex: "12/28"
     val limite      : Double = 0.0,
     val template    : String = "default", // ex: "default", "bradesco", "itau", "nubank", "inter", "c6bank"
+    val bloqueado   : Boolean  = false
 )
