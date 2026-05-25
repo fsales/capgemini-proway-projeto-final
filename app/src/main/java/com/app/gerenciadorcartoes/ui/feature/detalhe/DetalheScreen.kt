@@ -18,6 +18,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -56,6 +57,7 @@ private val PtBrLocale: Locale = Locale.forLanguageTag("pt-BR")
 fun DetalheScreen(
     navigateBack              : () -> Unit,
     onNavigateToAjustarLimite : (Long) -> Unit,
+    onNavigateToFatura        : (Long) -> Unit,
     viewModel                 : DetalheViewModel = hiltViewModel(),
 ) {
     val uiState           by viewModel.uiState.collectAsStateWithLifecycle()
@@ -66,6 +68,7 @@ fun DetalheScreen(
             when (event) {
                 DetalheUiEvent.NavigateBack               -> navigateBack()
                 is DetalheUiEvent.NavigateToAjustarLimite -> onNavigateToAjustarLimite(event.id)
+                is DetalheUiEvent.NavigateToFatura        -> onNavigateToFatura(event.id)
                 is DetalheUiEvent.MostrarErro             -> snackbarHostState.showSnackbar(event.mensagem)
             }
         }
@@ -130,6 +133,7 @@ private fun DetalheBody(
         LimiteSection(
             detalhe          = detalhe,
             onAjustarLimite = { onEvent(DetalheEvent.AjustarLimite) },
+            onVerFaturas    = { onEvent(DetalheEvent.VerFaturas) },
         )
     }
 }
@@ -143,6 +147,7 @@ private fun CartaoSection(detalhe: CartaoDetalhe) {
 private fun LimiteSection(
     detalhe          : CartaoDetalhe,
     onAjustarLimite : () -> Unit,
+    onVerFaturas    : () -> Unit,
 ) {
     val spacing              = LocalSpacing.current
     val currencyFormatter    = rememberCurrencyFormatter()

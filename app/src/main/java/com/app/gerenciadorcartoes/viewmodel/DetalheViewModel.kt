@@ -46,6 +46,9 @@ class DetalheViewModel @Inject constructor(
             DetalheEvent.AjustarLimite -> viewModelScope.launch {
                 _uiEvent.send(DetalheUiEvent.NavigateToAjustarLimite(id))
             }
+            DetalheEvent.VerFaturas -> viewModelScope.launch {
+                _uiEvent.send(DetalheUiEvent.NavigateToFatura(id))
+            }
         }
     }
 

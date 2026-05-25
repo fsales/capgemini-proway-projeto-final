@@ -9,6 +9,7 @@ import com.app.gerenciadorcartoes.ui.feature.ajustarlimite.AjustarLimiteScreen
 import com.app.gerenciadorcartoes.ui.feature.cadastraralterar.CadastrarAlterarScreen
 import com.app.gerenciadorcartoes.ui.feature.cadastrousuario.CadastroUsuarioScreen
 import com.app.gerenciadorcartoes.ui.feature.detalhe.DetalheScreen
+import com.app.gerenciadorcartoes.ui.feature.fatura.FaturaScreen
 import com.app.gerenciadorcartoes.ui.feature.lista.ListaScreen
 import com.app.gerenciadorcartoes.ui.feature.login.LoginScreen
 import com.app.gerenciadorcartoes.ui.feature.splash.SplashScreen
@@ -21,7 +22,6 @@ fun AppNavHost(startDestination: Any = SplashRoute) {
         navController    = navController,
         startDestination = startDestination,
     ) {
-
         composable<SplashRoute> {
             SplashScreen(
                 navigateToLista = {
@@ -75,6 +75,15 @@ fun AppNavHost(startDestination: Any = SplashRoute) {
                 onNavigateToAjustarLimite = { id ->
                     navController.navigate(AjustarLimiteRoute(id = id))
                 },
+                onNavigateToFatura = { id ->
+                    navController.navigate(FaturaRoute(id = id))
+                },
+            )
+        }
+
+        composable<FaturaRoute> {
+            FaturaScreen(
+                navigateBack = { navController.popBackStack() },
             )
         }
 

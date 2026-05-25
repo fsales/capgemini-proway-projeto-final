@@ -18,6 +18,10 @@ object ListaRoute
 @Serializable
 data class DetalheRoute(val id: Long)
 
+// Destino: faturas de um cartão específico
+@Serializable
+data class FaturaRoute(val id: Long)
+
 // Destino: ajuste do limite de um cartão específico
 @Serializable
 data class AjustarLimiteRoute(val id: Long)

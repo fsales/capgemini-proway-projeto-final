@@ -9,6 +9,8 @@
 ## Histórico de Alterações
 
 - <!-- Insira uma linha no início a cada atualização: "- YYYY-MM-DD — descrição" -->
+- 2026-05-22 — Renomeada a feature de `Extrato` para `Fatura` em classes, pacotes, rota (`FaturaRoute`) e navegação a partir de `Detalhe`
+- 2026-05-22 — Adicionada feature `Extrato` com navegação a partir de `Detalhe` (`ExtratoRoute(id)`), mock de faturas agrupadas e ação renomeada para "Faturas"
 - 2026-05-20 — Splash ajustada: logo reduzida em `ic_splash_logo_static` para melhor proporção visual no lançamento
 - 2026-05-19 — Tela `Detalhe` simplificada para leitura: removidas ações de Editar/Excluir do AppBar e limpeza de eventos/UI events relacionados no fluxo da feature
 - 2026-05-19 — Botão de 3 pontinhos na Lista atualizado para menu de ações em bottom sheet (Editar e Excluir), evitando popup deslocado sobre/abaixo do card
@@ -95,6 +97,7 @@ app/src/main/java/com/app/gerenciadorcartoes/
     │   ├── login/                    LoginEvent · LoginUiEvent · LoginScreen · state/LoginUiState
     │   ├── lista/                    ListaEvent · ListaUiEvent · ListaScreen · state/ListaUiState
     │   ├── detalhe/                  DetalheEvent · DetalheUiEvent · DetalheScreen · state/DetalheUiState
+    |   |── fatura/                   FaturaEvent · FaturaUiEvent · FaturaScreen · state/FaturaUiState
     │   ├── cadastraralterar/         CadastrarAlterarEvent · CadastrarAlterarUiEvent
     │   │                             CadastrarAlterarScreen · state/CadastrarAlterarUiState
     │   └── cadastrousuario/          CadastroUsuarioEvent · CadastroUsuarioUiEvent
@@ -103,6 +106,7 @@ app/src/main/java/com/app/gerenciadorcartoes/
         ├── LoginViewModel.kt
         ├── ListaViewModel.kt
         ├── DetalheViewModel.kt
+        |── FaturaViewModel.kt
         ├── CadastrarAlterarViewModel.kt
         ├── CadastroUsuarioViewModel.kt
         └── SplashViewModel.kt
@@ -367,6 +371,7 @@ composable<XRoute> { XScreen(navigateBack = { navController.popBackStack() }) }
 | `LoginRoute` | Autenticação do usuário | não |
 | `ListaRoute` | Lista de todos os cartões | não |
 | `DetalheRoute(id: Long)` | Detalhe somente leitura | não |
+| `FaturaRoute(id: Long)` | Faturas/mock de lançamentos por mês para o cartão selecionado
 | `AjustarLimiteRoute(id: Long)` | Ajuste de limite de um cartão | não |
 | `CadastrarAlterarRoute(id: Long = 0L)` | Criar (`id=0`) ou editar (`id>0`) | não |
 | `CadastroUsuarioRoute` | Cadastro de novo usuário | não |
