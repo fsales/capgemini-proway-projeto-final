@@ -100,14 +100,6 @@ google-credential-play    = { group = "androidx.credentials", name = "credential
 google-identity-googleid  = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleIdentityGoogleid" }
 google-play-services-auth = { group = "com.google.android.gms", name = "play-services-auth",               version.ref = "playServicesAuth" }
 
-# Firebase
-firebase-bom              = { group = "com.google.firebase", name = "firebase-bom",                        version.ref = "firebaseBom" }
-firebase-auth              = { group = "com.google.firebase", name = "firebase-auth" }
-google-credential-manager = { group = "androidx.credentials", name = "credentials",                         version.ref = "credentialManager" }
-google-credential-play    = { group = "androidx.credentials", name = "credentials-play-services-auth",      version.ref = "credentialManager" }
-google-identity-googleid  = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleIdentityGoogleid" }
-google-play-services-auth = { group = "com.google.android.gms", name = "play-services-auth",               version.ref = "playServicesAuth" }
-
 [plugins]
 android-application  = { id = "com.android.application",                   version.ref = "agp" }
 android-library      = { id = "com.android.library",                       version.ref = "agp" }

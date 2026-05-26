@@ -8,6 +8,7 @@ import com.app.gerenciadorcartoes.data.local.session.SessionManager
 import com.app.gerenciadorcartoes.network.model.BlockCardRequest
 import com.app.gerenciadorcartoes.network.service.ApiService
 import com.app.gerenciadorcartoes.repository.CartaoDetalheRepository
+import com.app.gerenciadorcartoes.repository.CartaoRepository
 import com.app.gerenciadorcartoes.ui.feature.detalhe.DetalheEvent
 import com.app.gerenciadorcartoes.ui.feature.detalhe.DetalheUiEvent
 import com.app.gerenciadorcartoes.ui.feature.detalhe.state.DetalheUiState
