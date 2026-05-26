@@ -34,4 +34,12 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
           chmod +x gradlew
+          # Create placeholder Google services resources for CI (avoids missing google-services.json errors)
+          mkdir -p app/src/debug/res/values
+          cat > app/src/debug/res/values/google_services_placeholder.xml <<'XML'
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+            <string name="default_web_client_id">ci-placeholder</string>
+          </resources>
+          XML
           ./gradlew :app:testDebugUnitTest --tests "com.app.gerenciadorcartoes.architecture.*" -x kspDebugUnitTestKotlin -x processDebugGoogleServices --no-daemon --info
