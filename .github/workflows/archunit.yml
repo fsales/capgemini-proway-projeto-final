@@ -34,4 +34,4 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
           chmod +x gradlew
-          ./gradlew :app:testDebugUnitTest --tests "com.app.gerenciadorcartoes.architecture.*" -x kspDebugUnitTestKotlin --no-daemon --info
+          ./gradlew :app:testDebugUnitTest --tests "com.app.gerenciadorcartoes.architecture.*" -x kspDebugUnitTestKotlin -x processDebugGoogleServices --no-daemon --info
