@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.app.gerenciadorcartoes.model.CadastroUsuario
-import com.app.gerenciadorcartoes.network.service.BuscaCep
 import com.app.gerenciadorcartoes.repository.CadastroUsuarioRepository
 import com.app.gerenciadorcartoes.repository.SessaoRepository
 import com.app.gerenciadorcartoes.ui.feature.cadastrousuario.CadastroUsuarioEvent
@@ -26,7 +25,6 @@ import javax.inject.Inject
 @HiltViewModel
 class CadastroUsuarioViewModel @Inject constructor(
     savedStateHandle                      : SavedStateHandle,
-    private val buscaCep                  : BuscaCep,
     private val sessaoRepository          : SessaoRepository,
     private val cadastroUsuarioRepository : CadastroUsuarioRepository,
 ) : ViewModel() {
@@ -363,14 +361,14 @@ class CadastroUsuarioViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(buscandoCep = true) }
             runCatching {
-                val body = buscaCep.getCep(cep).takeIf { it.isSuccessful }?.body()
-                if (body != null) {
+                val endereco = cadastroUsuarioRepository.buscarEnderecoPorCep(cep)
+                if (endereco != null) {
                     _uiState.update {
                         it.copy(
-                            endereco     = body.logradouro,
-                            bairro       = body.bairro,
-                            cidade       = body.localidade,
-                            estado       = body.uf,
+                            endereco     = endereco.logradouro,
+                            bairro       = endereco.bairro,
+                            cidade       = endereco.cidade,
+                            estado       = endereco.estado,
                             erroCep      = null,
                             erroEndereco = null,
                             erroBairro   = null,
