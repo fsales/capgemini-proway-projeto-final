@@ -2,6 +2,7 @@ package com.app.gerenciadorcartoes.di
 
 import com.app.gerenciadorcartoes.network.service.ApiService
 import com.app.gerenciadorcartoes.network.service.BuscaCep
+import com.app.gerenciadorcartoes.network.ssl.UnsafeSslConfig
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -37,6 +38,11 @@ object NetworkModule {
                     level = HttpLoggingInterceptor.Level.BODY
                 },
             )
+            // ⚠️ UnsafeSslConfig: aceita qualquer certificado SSL.
+            // Necessário porque o servidor de treinamento usa certificado não confiável pelo Android.
+            // NÃO use em produção.
+            .sslSocketFactory(UnsafeSslConfig.sslSocketFactory, UnsafeSslConfig.trustManager)
+            .hostnameVerifier { _, _ -> true }
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)

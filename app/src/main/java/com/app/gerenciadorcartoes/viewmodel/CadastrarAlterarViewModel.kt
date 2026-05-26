@@ -4,7 +4,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.app.gerenciadorcartoes.data.local.session.SessionManager
 import com.app.gerenciadorcartoes.model.Cartao
+import com.app.gerenciadorcartoes.network.model.AddCardRequest
+import com.app.gerenciadorcartoes.network.service.ApiService
 import com.app.gerenciadorcartoes.repository.CartaoRepository
 import com.app.gerenciadorcartoes.ui.feature.cadastraralterar.CadastrarAlterarEvent
 import com.app.gerenciadorcartoes.ui.feature.cadastraralterar.CadastrarAlterarUiEvent
@@ -12,6 +15,7 @@ import com.app.gerenciadorcartoes.ui.feature.cadastraralterar.state.CadastrarAlt
 import com.app.gerenciadorcartoes.ui.navigation.CadastrarAlterarRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,6 +28,8 @@ import javax.inject.Inject
 class CadastrarAlterarViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val cartaoRepository: CartaoRepository,
+    private val apiService: ApiService,
+    private val sessionManager: SessionManager,
 ) : ViewModel() {
 
     private val route: CadastrarAlterarRoute = savedStateHandle.toRoute()
@@ -116,7 +122,10 @@ class CadastrarAlterarViewModel @Inject constructor(
                     limite      = _uiState.value.limite.toDoubleOrNull() ?: 0.0,
                     template    = _uiState.value.template,
                 )
-                if (id == 0L) cartaoRepository.salvar(cartao)
+                if (id == 0L){
+                    cartaoRepository.salvar(cartao)
+                    enviarCartaoParaApi(cartao)
+                }
                 else cartaoRepository.atualizar(cartao)
                 _uiEvent.send(CadastrarAlterarUiEvent.NavigateBack)
             }.onFailure { erro ->
@@ -150,6 +159,27 @@ class CadastrarAlterarViewModel @Inject constructor(
             _uiState.update { it.copy(erroLimite = "Limite inválido") }; valid = false
         }
         return valid
+    }
+
+
+    private suspend fun enviarCartaoParaApi(cartao: Cartao) {
+        runCatching {
+            val email = sessionManager.getUsuarioLogado().firstOrNull() ?: return
+            apiService.addCard(
+                AddCardRequest(
+                    idUsuario   = email,
+                    id = cartao.id.toString(),
+                    nomeTitular = cartao.nomeTitular,
+                    finalNumero = cartao.finalNumero,
+                    bandeira    = cartao.bandeira,
+                    validade    = cartao.validade,
+                    limite      = cartao.limite,
+                    template    = cartao.template,
+                    bloqueado   = cartao.bloqueado,
+                )
+            )
+        }
+        // Erros de rede não propagam: o save local já foi concluído com sucesso.
     }
 }
 
