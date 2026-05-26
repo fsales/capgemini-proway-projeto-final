@@ -1,11 +1,13 @@
 package com.app.gerenciadorcartoes.network.model
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class ViaCepResponse(
-    @SerializedName("logradouro") val logradouro : String = "",
-    @SerializedName("bairro")     val bairro     : String = "",
-    @SerializedName("localidade") val localidade : String = "",
-    @SerializedName("uf")         val uf         : String = "",
+    @SerialName("logradouro") val logradouro : String = "",
+    @SerialName("bairro")     val bairro     : String = "",
+    @SerialName("localidade") val localidade : String = "",
+    @SerialName("uf")         val uf         : String = "",
 )
 

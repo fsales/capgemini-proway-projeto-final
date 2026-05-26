@@ -8,6 +8,7 @@ import com.app.gerenciadorcartoes.repository.SessaoRepository
 import com.app.gerenciadorcartoes.ui.feature.splash.SplashUiEvent
 import com.app.gerenciadorcartoes.ui.feature.splash.state.SplashUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,11 +33,10 @@ class SplashViewModel @Inject constructor(
     init {
         verificarSessao()
     }
-
     private fun verificarSessao() {
         viewModelScope.launch {
             runCatching {
-                delay(2_200L)
+                delay(DURACAO_SPLASH_MS)
                 val autenticado = sessaoRepository.verificarSessaoInicial()
                 _uiState.update { it.copy(carregando = false) }
                 if (autenticado) {
@@ -59,10 +59,15 @@ class SplashViewModel @Inject constructor(
                     null -> _uiEvent.send(SplashUiEvent.NavigateToLogin)
                 }
             }.onFailure { erro ->
+                if (erro is CancellationException) throw erro
                 Log.e("SplashViewModel", "Erro ao verificar sessão — redirecionando para Login", erro)
                 _uiState.update { it.copy(carregando = false) }
                 _uiEvent.send(SplashUiEvent.NavigateToLogin)
             }
         }
+    }
+
+    private companion object {
+        const val DURACAO_SPLASH_MS = 2_200L
     }
 }

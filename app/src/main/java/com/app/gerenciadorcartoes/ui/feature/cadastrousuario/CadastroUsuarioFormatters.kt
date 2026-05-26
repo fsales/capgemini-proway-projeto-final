@@ -35,6 +35,8 @@ internal fun formatUf(text: String): String =
     text.filter { it.isLetter() }.uppercase().take(2)
 
 /** Valida estruturalmente o e-mail: deve ter @, domínio e TLD com ≥ 2 chars. */
+private val EMAIL_ESTRUTURAL_REGEX = Regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]{2,}$")
+
 internal fun emailEstruturalmenteValido(email: String): Boolean =
-    email.isNotBlank() && Regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]{2,}$").matches(email)
+    email.isNotBlank() && EMAIL_ESTRUTURAL_REGEX.matches(email)
 

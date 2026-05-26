@@ -90,9 +90,9 @@ fun LoginScreen(
 ) {
     val uiState           by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState  = remember { SnackbarHostState() }
-    val activity           = LocalActivity.current
+    val activity           = LocalActivity.current ?: return
     val scope              = rememberCoroutineScope()
-    val credentialManager  = remember(activity) { CredentialManager.create(activity!!) }
+    val credentialManager  = remember(activity) { CredentialManager.create(activity) }
     val webClientId        = stringResource(R.string.default_web_client_id)
 
     // ── Deferred para o resultado do legacy launcher ──────────────────────────
@@ -138,7 +138,7 @@ fun LoginScreen(
                     val request = GetCredentialRequest.Builder()
                         .addCredentialOption(option)
                         .build()
-                    val result   = credentialManager.getCredential(activity!!, request)
+                    val result   = credentialManager.getCredential(activity, request)
                     GoogleIdTokenCredential.createFrom(result.credential.data).idToken
                 }
 
@@ -161,7 +161,7 @@ fun LoginScreen(
                         .requestIdToken(webClientId)
                         .requestEmail()
                         .build()
-                    val client = GoogleSignIn.getClient(activity!!, gso)
+                    val client = GoogleSignIn.getClient(activity, gso)
                     // signOut força seletor de conta (sem auto-select)
                     client.signOut().addOnCompleteListener {
                         legacyLauncher.launch(client.signInIntent)

@@ -1,5 +1,6 @@
 package com.app.gerenciadorcartoes.network.firebase
 
+import com.app.gerenciadorcartoes.model.ColisaoContaException
 import com.app.gerenciadorcartoes.model.UsuarioAuth
 import com.app.gerenciadorcartoes.network.auth.AuthDataSource
 import com.google.firebase.auth.FirebaseAuth
@@ -30,8 +31,11 @@ class FirebaseAuthDataSource @Inject constructor(
         try {
             return firebaseAuth.signInWithCredential(credential).await()
                 .user?.toUsuarioAuth() ?: throw Exception("Falha ao autenticar com provedor externo")
-        } catch (_: FirebaseAuthUserCollisionException) {
-            throw Exception("Este e-mail já possui uma conta criada com senha. Faça login com e-mail e senha.")
+        } catch (e: FirebaseAuthUserCollisionException) {
+            throw ColisaoContaException(
+                email   = e.email ?: "",
+                idToken = idToken,
+            )
         } catch (e: FirebaseAuthException) {
             throw Exception(
                 e.message?.takeIf { it.isNotBlank() } ?: "Falha ao autenticar com Google. Tente novamente."

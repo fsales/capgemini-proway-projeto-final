@@ -38,6 +38,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.app.gerenciadorcartoes.R
 import com.app.gerenciadorcartoes.ui.feature.splash.state.SplashUiState
 import com.app.gerenciadorcartoes.ui.theme.GerenciadorCartoesTheme
+import com.app.gerenciadorcartoes.ui.theme.LocalSpacing
 import com.app.gerenciadorcartoes.viewmodel.SplashViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -73,6 +74,7 @@ fun SplashScreen(
 fun SplashContent(
     uiState: SplashUiState = SplashUiState(),
 ) {
+    val spacing = LocalSpacing.current
     // ── Fase 1: ícone sobe com spring (mesmo tema da animação AVD do system splash)
     val iconOffsetY = remember { Animatable(80f) }
 
@@ -135,7 +137,7 @@ fun SplashContent(
                 )
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(spacing.extraLarge))
 
             // Título desliza para cima + aparece
             Text(
@@ -147,7 +149,7 @@ fun SplashContent(
                     .graphicsLayer { translationY = titleOffsetY.value * density; alpha = titleAlpha.value },
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(spacing.small))
 
             // Tagline aparece por último
             Text(

@@ -125,8 +125,7 @@ fun ListaContent(
         )
     }
 
-    if (cartaoParaExcluir != null) {
-        val cartao = cartaoParaExcluir!!
+    cartaoParaExcluir?.let { cartao ->
         ConfirmacaoDialog(
             titulo        = stringResource(R.string.lista_dialog_excluir_titulo),
             mensagem      = stringResource(R.string.lista_dialog_excluir_mensagem, cartao.nomeTitular),
@@ -136,8 +135,7 @@ fun ListaContent(
         )
     }
 
-    if (cartaoParaAcoes != null) {
-        val cartaoSelecionado = cartaoParaAcoes!!
+    cartaoParaAcoes?.let { cartaoSelecionado ->
         ModalBottomSheet(
             onDismissRequest = { cartaoParaAcoes = null },
         ) {

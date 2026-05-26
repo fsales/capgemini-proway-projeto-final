@@ -9,7 +9,7 @@ object SplashRoute
 object LoginRoute
 
 @Serializable
-data class ListaRoute(val mensagemCadastro: String = "")
+data class ListaRoute(val exibirConfirmacao: Boolean = false)
 
 @Serializable
 data class DetalheRoute(val id: Long)

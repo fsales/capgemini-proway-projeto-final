@@ -8,6 +8,7 @@ import com.app.gerenciadorcartoes.ui.feature.login.LoginEvent
 import com.app.gerenciadorcartoes.ui.feature.login.LoginUiEvent
 import com.app.gerenciadorcartoes.ui.feature.login.state.LoginUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -59,6 +60,7 @@ class LoginViewModel @Inject constructor(
                 _uiState.update { it.copy(carregando = false) }
                 _uiEvent.send(LoginUiEvent.NavegaParaLista)
             }.onFailure { erro ->
+                if (erro is CancellationException) throw erro
                 _uiState.update { it.copy(carregando = false) }
                 _uiEvent.send(LoginUiEvent.MostrarErro(erro.message ?: "Usuário ou senha incorretos"))
             }
@@ -84,6 +86,7 @@ class LoginViewModel @Inject constructor(
                         )
                 }
             }.onFailure { erro ->
+                if (erro is CancellationException) throw erro
                 _uiState.update { it.copy(carregando = false) }
                 _uiEvent.send(
                     LoginUiEvent.MostrarErro(

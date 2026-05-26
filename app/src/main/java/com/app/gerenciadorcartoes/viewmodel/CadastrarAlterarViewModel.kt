@@ -11,6 +11,7 @@ import com.app.gerenciadorcartoes.ui.feature.cadastraralterar.CadastrarAlterarUi
 import com.app.gerenciadorcartoes.ui.feature.cadastraralterar.state.CadastrarAlterarUiState
 import com.app.gerenciadorcartoes.ui.navigation.CadastrarAlterarRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,7 +30,7 @@ class CadastrarAlterarViewModel @Inject constructor(
     private val route: CadastrarAlterarRoute = savedStateHandle.toRoute()
     private val id: Long = route.id
 
-    private val _uiState = MutableStateFlow(CadastrarAlterarUiState(carregando = id != 0L))
+    private val _uiState = MutableStateFlow(CadastrarAlterarUiState(carregando = id != 0L, modoEdicao = id != 0L))
     val uiState: StateFlow<CadastrarAlterarUiState> = _uiState.asStateFlow()
 
     private val _uiEvent = Channel<CadastrarAlterarUiEvent>(Channel.BUFFERED)
@@ -91,6 +92,7 @@ class CadastrarAlterarViewModel @Inject constructor(
                     _uiEvent.send(CadastrarAlterarUiEvent.NavigateBack)
                 }
             }.onFailure { erro ->
+                if (erro is CancellationException) throw erro
                 _uiState.update { it.copy(carregando = false) }
                 _uiEvent.send(
                     CadastrarAlterarUiEvent.MostrarErro(
@@ -121,6 +123,7 @@ class CadastrarAlterarViewModel @Inject constructor(
                 else          cartaoRepository.atualizar(cartao)
                 _uiEvent.send(CadastrarAlterarUiEvent.NavigateBack)
             }.onFailure { erro ->
+                if (erro is CancellationException) throw erro
                 _uiState.update { it.copy(salvando = false) }
                 _uiEvent.send(
                     CadastrarAlterarUiEvent.MostrarErro(

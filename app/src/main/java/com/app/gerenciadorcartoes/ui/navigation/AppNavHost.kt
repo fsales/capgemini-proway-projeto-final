@@ -136,15 +136,13 @@ fun AppNavHost(startDestination: Any = SplashRoute) {
             val route = backStackEntry.toRoute<CadastroUsuarioRoute>()
             CadastroUsuarioScreen(
                 navigateBack    = { navController.navigateUp() },
-                navigateToLista = { mensagem ->
+                navigateToLista = { _ ->
                     if (route.modoEdicao) {
-                        // Edição: volta ao ListaRoute já existente (substitui) com a mensagem
-                        navController.navigate(ListaRoute(mensagemCadastro = mensagem)) {
+                        navController.navigate(ListaRoute(exibirConfirmacao = true)) {
                             popUpTo<ListaRoute> { inclusive = true }
                         }
                     } else {
-                        // Cadastro novo: remove LoginRoute + navega para Lista
-                        navController.navigate(ListaRoute(mensagemCadastro = mensagem)) {
+                        navController.navigate(ListaRoute(exibirConfirmacao = true)) {
                             popUpTo<LoginRoute> { inclusive = true }
                         }
                     }
