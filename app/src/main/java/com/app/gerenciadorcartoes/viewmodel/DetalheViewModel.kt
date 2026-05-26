@@ -4,7 +4,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.app.gerenciadorcartoes.data.local.session.SessionManager
+import com.app.gerenciadorcartoes.network.model.BlockCardRequest
+import com.app.gerenciadorcartoes.network.service.ApiService
 import com.app.gerenciadorcartoes.repository.CartaoDetalheRepository
+import com.app.gerenciadorcartoes.repository.CartaoRepository
 import com.app.gerenciadorcartoes.ui.feature.detalhe.DetalheEvent
 import com.app.gerenciadorcartoes.ui.feature.detalhe.DetalheUiEvent
 import com.app.gerenciadorcartoes.ui.feature.detalhe.state.DetalheUiState
@@ -15,6 +19,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -24,6 +29,9 @@ import javax.inject.Inject
 class DetalheViewModel @Inject constructor(
     savedStateHandle              : SavedStateHandle,
     private val detalheRepository : CartaoDetalheRepository,
+    private val cartaoRepository : CartaoRepository,
+    private val sessionManager    : SessionManager,
+    private val apiService        : ApiService,
 ) : ViewModel() {
 
     private val route : DetalheRoute = savedStateHandle.toRoute()
@@ -45,6 +53,7 @@ class DetalheViewModel @Inject constructor(
             DetalheEvent.AjustarLimite -> viewModelScope.launch {
                 _uiEvent.send(DetalheUiEvent.NavigateToAjustarLimite(id))
             }
+            DetalheEvent.BloquearCartao -> bloquearCartao()
         }
     }
 
@@ -66,6 +75,37 @@ class DetalheViewModel @Inject constructor(
                 if (erro is CancellationException) throw erro
                 _uiState.update { it.copy(carregando = false, erro = erro.message) }
                 _uiEvent.send(DetalheUiEvent.MostrarErro(erro.message ?: "Erro ao carregar cartão"))
+            }
+        }
+    }
+
+    private fun bloquearCartao() {
+        viewModelScope.launch {
+            runCatching {
+                val cartao = _uiState.value.detalhe.cartao
+                val novoStatusBloqueio = !cartao.bloqueado
+
+                // Chamar API para bloquear ou desbloquear
+
+                val userId = sessionManager.getSessionUserId().firstOrNull() ?: throw Exception("Usuário não autenticado")
+                if (novoStatusBloqueio) {
+                    apiService.blockCard(BlockCardRequest(userId,cartao.id.toString()))
+                } else {
+                    apiService.unblockCard(BlockCardRequest(userId, cartao.id.toString()))
+                }
+
+                // Atualizar no banco de dados local
+                cartaoRepository.atualizarBloqueio(cartao.id, novoStatusBloqueio)
+
+                // Enviar mensagem de sucesso
+                val mensagem = if (novoStatusBloqueio) {
+                    "Cartão bloqueado com sucesso"
+                } else {
+                    "Cartão desbloqueado com sucesso"
+                }
+                _uiEvent.send(DetalheUiEvent.MostrarMensagem(mensagem))
+            }.onFailure { erro ->
+                _uiEvent.send(DetalheUiEvent.MostrarErro(erro.message ?: "Erro ao bloquear cartão"))
             }
         }
     }

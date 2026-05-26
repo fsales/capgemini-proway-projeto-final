@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 7,
-    "identityHash": "478c44f4d113d4d542b513b1aad61a1a",
+    "identityHash": "4b21496fbb07cb84a07addc6b6ed50e1",
     "entities": [
       {
         "tableName": "cartoes",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nomeTitular` TEXT NOT NULL, `finalNumero` TEXT NOT NULL, `bandeira` TEXT NOT NULL, `validade` TEXT NOT NULL, `limite` REAL NOT NULL, `template` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nomeTitular` TEXT NOT NULL, `finalNumero` TEXT NOT NULL, `bandeira` TEXT NOT NULL, `validade` TEXT NOT NULL, `limite` REAL NOT NULL, `template` TEXT NOT NULL, `bloqueado` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -48,6 +48,12 @@
             "fieldPath": "template",
             "columnName": "template",
             "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bloqueado",
+            "columnName": "bloqueado",
+            "affinity": "INTEGER",
             "notNull": true
           }
         ],
@@ -159,7 +165,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '478c44f4d113d4d542b513b1aad61a1a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4b21496fbb07cb84a07addc6b6ed50e1')"
     ]
   }
 }

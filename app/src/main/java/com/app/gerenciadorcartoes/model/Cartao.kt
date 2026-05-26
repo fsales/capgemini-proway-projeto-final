@@ -11,4 +11,5 @@ data class Cartao(
     val limite      : Double = 0.0,
     val limiteMaximo: Double = 0.0,
     val template    : String = "default", // ex: "default", "bradesco", "itau", "nubank", "inter", "c6bank"
+    val bloqueado   : Boolean  = false
 )

@@ -30,6 +30,9 @@ class CartaoRepositoryImpl @Inject constructor(
     override suspend fun atualizarLimite(id: Long, limite: Double) =
         cartaoDao.atualizarLimite(id, limite)
 
+    override suspend fun atualizarBloqueio(id: Long, novoStatusBloqueio: Boolean) =
+        cartaoDao.atualizarBloqueio(id, novoStatusBloqueio)
+
     override suspend fun excluirPorId(id: Long) =
         cartaoDao.excluirPorId(id)
 }
