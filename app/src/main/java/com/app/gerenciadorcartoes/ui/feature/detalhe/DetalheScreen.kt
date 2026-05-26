@@ -172,8 +172,13 @@ private fun LimiteSection(
                 text  = "Limite",
                 style = MaterialTheme.typography.titleLarge,
             )
-            Button(onClick = onAjustarLimite) {
-                Text(text = "Ajustar limite")
+            Row(horizontalArrangement = Arrangement.spacedBy(spacing.small)) {
+                OutlinedButton(onClick = onVerFaturas) {
+                    Text(text = "Faturas")
+                }
+                Button(onClick = onAjustarLimite) {
+                    Text(text = "Ajustar limite")
+                }
             }
         }
 
