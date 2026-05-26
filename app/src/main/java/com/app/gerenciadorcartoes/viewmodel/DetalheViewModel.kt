@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.app.gerenciadorcartoes.repository.CartaoDetalheRepository
-import com.app.gerenciadorcartoes.repository.CartaoRepository
 import com.app.gerenciadorcartoes.ui.feature.detalhe.DetalheEvent
 import com.app.gerenciadorcartoes.ui.feature.detalhe.DetalheUiEvent
 import com.app.gerenciadorcartoes.ui.feature.detalhe.state.DetalheUiState
@@ -23,7 +22,6 @@ import javax.inject.Inject
 @HiltViewModel
 class DetalheViewModel @Inject constructor(
     savedStateHandle              : SavedStateHandle,
-    private val cartaoRepository  : CartaoRepository,
     private val detalheRepository : CartaoDetalheRepository,
 ) : ViewModel() {
 

@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -11,6 +12,15 @@ android {
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
+        }
+    }
+
+    signingConfigs {
+        named("debug") {
+            storeFile     = file("keystore/debug.keystore")
+            storePassword = "android"
+            keyAlias      = "androiddebugkey"
+            keyPassword   = "android"
         }
     }
 
@@ -24,6 +34,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("debug")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -73,6 +86,13 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.google.credential.manager)
+    implementation(libs.google.credential.play)
+    implementation(libs.google.identity.googleid)
+    implementation(libs.google.play.services.auth)
     implementation(libs.retrofit.converter.gson)
     implementation(libs.retrofit)
     implementation(libs.okhttp.logging.interceptor)

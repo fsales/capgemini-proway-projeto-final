@@ -148,7 +148,6 @@ class AjustarLimiteViewModel @Inject constructor(
             }
             runCatching {
                 cartaoRepository.atualizarLimite(id, novoLimite)
-            }.onSuccess {
                 _uiState.update {
                     it.copy(
                         novoLimite = novoLimite,

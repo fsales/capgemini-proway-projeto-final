@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -69,6 +70,7 @@ fun ListaScreen(
     onNavigateToItem   : (id: Long) -> Unit,
     onNavigateToEditar : (id: Long) -> Unit,
     onDeslogar         : () -> Unit,
+    onNavigateToPerfil : (userId: String) -> Unit,
     viewModel          : ListaViewModel = hiltViewModel(),
 ) {
     val uiState          by viewModel.uiState.collectAsStateWithLifecycle()
@@ -81,6 +83,7 @@ fun ListaScreen(
                 is ListaUiEvent.NavegaParaEditar -> onNavigateToEditar(event.id)
                 ListaUiEvent.NavegaParaNovo      -> onNavigateToNovo()
                 ListaUiEvent.NavegaParaLogin     -> onDeslogar()
+                is ListaUiEvent.NavegaParaPerfil -> onNavigateToPerfil(event.userId)
                 is ListaUiEvent.MostrarErro      -> snackbarHostState.showSnackbar(event.mensagem)
                 is ListaUiEvent.MostrarMensagem  -> snackbarHostState.showSnackbar(event.mensagem)
             }
@@ -199,9 +202,11 @@ fun ListaContent(
         },
         topBar = {
             AppTopAppBar(
-                title       = stringResource(R.string.app_name),
-                subtitle    = stringResource(R.string.lista_subtitulo),
-                large       = true,
+                title         = stringResource(R.string.app_name),
+                subtitle      = stringResource(R.string.lista_subtitulo),
+                subtitleLine2 = uiState.primeiroNome
+                    ?.let { stringResource(R.string.lista_saudacao, it) },
+                large         = true,
                 leadingIcon = {
                     // Círculo azul (primary) sobre fundo lavanda (primaryContainer) em light,
                     // e sobre fundo navy em dark — contraste adequado nos dois temas.
@@ -233,6 +238,20 @@ fun ListaContent(
                             expanded         = menuExpandido,
                             onDismissRequest = { menuExpandido = false },
                         ) {
+                            DropdownMenuItem(
+                                text        = { Text(stringResource(R.string.lista_menu_meu_perfil)) },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector        = Icons.Default.AccountCircle,
+                                        contentDescription = null,
+                                    )
+                                },
+                                onClick = {
+                                    menuExpandido = false
+                                    onEvent(ListaEvent.NavegaParaPerfil)
+                                },
+                            )
+                            HorizontalDivider()
                             DropdownMenuItem(
                                 text        = { Text(stringResource(R.string.lista_dialog_deslogar_titulo)) },
                                 leadingIcon = {
@@ -350,6 +369,7 @@ private fun ListaComItensPreview() {
     GerenciadorCartoesTheme {
         ListaContent(
             uiState = ListaUiState(
+                nomeUsuario = "João Silva",
                 cartoes = listOf(
                     Cartao(1L, "João Silva",    "1234", "Visa",       "12/28", 5_000.0),
                     Cartao(2L, "Maria Santos",  "5678", "Mastercard", "08/26", 10_000.0),
@@ -359,3 +379,19 @@ private fun ListaComItensPreview() {
         )
     }
 }
+
+@Preview(showBackground = true, name = "Lista – Sem nome (fallback)")
+@Composable
+private fun ListaSemNomePreview() {
+    GerenciadorCartoesTheme {
+        ListaContent(
+            uiState = ListaUiState(
+                nomeUsuario = null,
+                cartoes = listOf(
+                    Cartao(1L, "Ana Costa", "4321", "Visa", "06/27", 3_000.0),
+                ),
+            ),
+        )
+    }
+}
+

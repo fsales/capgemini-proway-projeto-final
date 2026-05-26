@@ -47,17 +47,20 @@ private val SplashBg = Color(0xFF001432)
 // ── Nível 1: Screen ───────────────────────────────────────────────────────────
 @Composable
 fun SplashScreen(
-    navigateToLista: () -> Unit,
-    navigateToLogin: () -> Unit,
-    viewModel: SplashViewModel = hiltViewModel(),
+    navigateToLista              : () -> Unit,
+    navigateToLogin              : () -> Unit,
+    navigateToCadastroIncompleto : (userId: String, email: String, nome: String) -> Unit,
+    viewModel                    : SplashViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(viewModel) {
         viewModel.uiEvent.collect { event ->
             when (event) {
-                SplashUiEvent.NavigateToLista -> navigateToLista()
-                SplashUiEvent.NavigateToLogin -> navigateToLogin()
+                SplashUiEvent.NavigateToLista  -> navigateToLista()
+                SplashUiEvent.NavigateToLogin  -> navigateToLogin()
+                is SplashUiEvent.NavigateToCadastroIncompleto ->
+                    navigateToCadastroIncompleto(event.userId, event.email, event.nome)
             }
         }
     }

@@ -70,7 +70,8 @@ com.app.gerenciadorcartoes/
 ├── MainActivity.kt                 @AndroidEntryPoint — única Activity; chama AppNavHost()
 │
 ├── model/                          ← APENAS modelos de domínio puros (zero framework)
-│   └── Cartao.kt
+│   ├── Cartao.kt
+│   └── UsuarioAuth.kt              id/email/nome — zero importações Android ou Firebase
 │
 ├── data/local/                     ← APENAS código Room
 │   ├── converter/                  (vazio — reservado para @TypeConverters futuros)
@@ -83,8 +84,16 @@ com.app.gerenciadorcartoes/
 │   ├── CartaoRepositoryImpl.kt     ÚNICA classe que importa CartaoDao / CartaoEntity
 │   └── mapper/CartaoMapper.kt      ÚNICA localização dos mappers toDomain/toEntity
 │
-├── network/
-│   └── service/ApiService.kt       Placeholder — sem endpoints ativos
+├── network/                        ← clientes de APIs externas (HTTP, Auth, etc.) — provedor-agnóstico
+│   ├── auth/
+│   │   └── AuthDataSource.kt       Interface — expõe apenas UsuarioAuth / primitivos; zero dependência de provedor
+│   ├── firebase/
+│   │   └── FirebaseAuthDataSource.kt ÚNICA classe que importa o SDK do provedor de auth atual
+│   ├── model/
+│   │   └── ViaCepResponse.kt       DTO de resposta HTTP — confinado a network/; não vaza ao domínio
+│   └── service/
+│       ├── ApiService.kt           Placeholder de cliente HTTP — sem endpoints ativos
+│       └── BuscaCep.kt             Interface de cliente HTTP — ViaCEP
 │
 ├── di/                             ← APENAS módulos Hilt
 │   ├── AppModule.kt
@@ -112,8 +121,14 @@ com.app.gerenciadorcartoes/
 - ✅ **SEMPRE** coloque ViewModels em `viewmodel/` (fora de `ui/`)
 - ✅ **SEMPRE** coloque `XUiState` em `ui/feature/<nome>/state/XUiState.kt`
 - ✅ **SEMPRE** coloque `XEvent` e `XUiEvent` em `ui/feature/<nome>/`
+- ✅ **SEMPRE** coloque a **interface** de autenticação externa em `network/auth/`
+- ✅ **SEMPRE** coloque a **implementação** do provedor de auth em `network/<provedor>/` (ex: `network/firebase/`)
+- ✅ **SEMPRE** coloque DTOs de resposta de rede em `network/model/`
+- ✅ **SEMPRE** coloque interfaces de clientes HTTP externos em `network/service/`
 - ❌ **NUNCA** crie um ViewModel dentro de `ui/feature/`
 - ❌ **NUNCA** coloque código Room (Entity, Dao) fora do pacote `data/local/`
+- ❌ **NUNCA** deixe `ViaCepResponse` ou qualquer DTO de rede vazar para fora de `network/`
+- ❌ **NUNCA** importe funções de `ui/` dentro de um ViewModel — se uma função é usada apenas pelo ViewModel, declare-a como `private fun` no final do mesmo arquivo
 
 ---
 
@@ -123,9 +138,12 @@ com.app.gerenciadorcartoes/
 
 | ❌ NUNCA | ✅ DEVE SER ASSIM |
 |---|---|
-| `model/Cartao.kt` importar qualquer framework | `Cartao` tem zero importações além de stdlib Kotlin |
-| `CartaoRepository` expor `CartaoEntity`, `CartaoDao` ou tipo Retrofit | Interface expõe apenas `Cartao`, `Long`, `Unit`, `Flow`, `Boolean` |
+| `model/Cartao.kt` ou `model/UsuarioAuth.kt` importar qualquer framework | Modelos de domínio têm zero importações além de stdlib Kotlin |
+| `CartaoRepository` expor `CartaoEntity`, `CartaoDao` ou DTOs de rede | Interface expõe apenas `Cartao`, `Long`, `Unit`, `Flow`, `Boolean` |
 | Qualquer classe além de `CartaoRepositoryImpl` importar `CartaoEntity` | `CartaoRepositoryImpl` é a barreira exclusiva entre domínio e dados |
+| Qualquer classe além de `FirebaseAuthDataSource` importar o SDK do provedor de auth | `FirebaseAuthDataSource` é a barreira exclusiva do SDK de autenticação em uso |
+| `AuthDataSource` expor tipos do provedor de auth (`FirebaseUser`, `FirebaseAuth`, etc.) | Interface expõe apenas `UsuarioAuth` / primitivos |
+| `ViaCepResponse` usado fora do pacote `network/` | DTOs de rede ficam em `network/model/` e não vazam para camadas superiores |
 | ViewModel importar `CartaoDao` diretamente | ViewModel injeta `CartaoRepository` (interface) |
 | Composable calcular, validar ou transformar dados | Toda lógica fica no ViewModel; Composable apenas renderiza `UiState` |
 | `XContent` receber ou instanciar ViewModel | `hiltViewModel()` é chamado somente em `XScreen` |
@@ -409,7 +427,7 @@ interface CartaoRepository {
 | Banco de dados | `Database` | `AppDatabase` |
 | Interface Repository | `Repository` | `CartaoRepository` |
 | Implementação Repository | `RepositoryImpl` | `CartaoRepositoryImpl` |
-| Serviço Retrofit | `Service` | `ApiService` |
+| Cliente HTTP externo | `Service` | `ApiService` |
 | ViewModel | `ViewModel` | `ListaViewModel` |
 | Estado da UI | `UiState` | `ListaUiState` |
 | Evento do usuário (UI→VM) | `Event` | `ListaEvent` |
@@ -534,7 +552,7 @@ abstract class AppModule {
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
     @Provides @Singleton
-    fun provideRetrofit(...): Retrofit = ...
+    fun provideXClient(...): XClient = ...  // cliente HTTP, SDK externo, etc.
 }
 ```
 

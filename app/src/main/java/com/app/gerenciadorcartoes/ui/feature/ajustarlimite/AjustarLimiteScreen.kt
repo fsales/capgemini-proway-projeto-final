@@ -87,7 +87,6 @@ fun AjustarLimiteScreen(
     AjustarLimiteContent(
         uiState           = uiState,
         snackbarHostState = snackbarHostState,
-        onNavigateBack    = navigateBack,
         onEvent           = viewModel::onEvent,
     )
 }
@@ -99,7 +98,6 @@ fun AjustarLimiteScreen(
 fun AjustarLimiteContent(
     uiState           : AjustarLimiteUiState = AjustarLimiteUiState(),
     snackbarHostState : SnackbarHostState    = remember { SnackbarHostState() },
-    onNavigateBack    : () -> Unit = {},
     onEvent           : (AjustarLimiteEvent) -> Unit = {},
 ) {
     val currencyFormatter = rememberCurrencyFormatter()
@@ -109,7 +107,7 @@ fun AjustarLimiteContent(
         topBar = {
             AppTopAppBar(
                 title          = "Ajustar limite",
-                onNavigateBack = onNavigateBack,
+                onNavigateBack = { onEvent(AjustarLimiteEvent.Voltar) },
             )
         },
     ) { paddingValues ->
@@ -119,7 +117,6 @@ fun AjustarLimiteContent(
                 uiState           = uiState,
                 paddingValues     = paddingValues,
                 currencyFormatter = currencyFormatter,
-                onNavigateBack    = onNavigateBack,
                 onEvent           = onEvent,
             )
         }
@@ -143,7 +140,6 @@ private fun AjustarLimiteBody(
     uiState           : AjustarLimiteUiState,
     paddingValues     : PaddingValues,
     currencyFormatter : NumberFormat,
-    onNavigateBack    : () -> Unit,
     onEvent           : (AjustarLimiteEvent) -> Unit,
 ) {
     val spacing = LocalSpacing.current
@@ -192,7 +188,7 @@ private fun AjustarLimiteBody(
             horizontalArrangement = Arrangement.spacedBy(spacing.medium),
         ) {
             OutlinedButton(
-                onClick  = onNavigateBack,
+                onClick  = { onEvent(AjustarLimiteEvent.Voltar) },
                 modifier = Modifier.weight(1f),
                 enabled  = !uiState.salvando,
             ) {

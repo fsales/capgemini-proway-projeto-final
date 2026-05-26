@@ -43,6 +43,7 @@ import com.app.gerenciadorcartoes.ui.theme.LocalSpacing
 fun AppTopAppBar(
     title          : String,
     subtitle       : String?                          = null,
+    subtitleLine2  : String?                          = null,
     large          : Boolean                          = false,
     onNavigateBack : (() -> Unit)?                    = null,
     leadingIcon    : (@Composable () -> Unit)?        = null,
@@ -81,6 +82,13 @@ fun AppTopAppBar(
                         text  = subtitle,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                    )
+                }
+                if (subtitleLine2 != null) {
+                    Text(
+                        text  = subtitleLine2,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.70f),
                     )
                 }
             }

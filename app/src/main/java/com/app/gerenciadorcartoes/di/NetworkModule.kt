@@ -66,7 +66,6 @@ object NetworkModule {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-    // Cria a implementação de BuscaCep a partir do Retrofit dedicado ao ViaCep
     @Provides
     @Singleton
     fun provideBuscaCep(@Named("viacep") retrofit: Retrofit): BuscaCep =
