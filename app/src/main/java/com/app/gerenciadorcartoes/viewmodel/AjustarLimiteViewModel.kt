@@ -18,6 +18,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
+import java.util.Locale
 import javax.inject.Inject
 import kotlin.math.abs
 
@@ -54,8 +56,9 @@ class AjustarLimiteViewModel @Inject constructor(
 
             is AjustarLimiteEvent.NovoLimiteAlterado ->
                 _uiState.update {
+                    val limiteMaximo = limiteMaximoValido(it.limiteMaximo)
                     it.copy(
-                        novoLimite = event.valor.coerceIn(LIMITE_MINIMO, LIMITE_MAXIMO),
+                        novoLimite = event.valor.coerceIn(LIMITE_MINIMO, limiteMaximo),
                         erroLimite = null,
                         mensagem   = null,
                     )
@@ -71,6 +74,7 @@ class AjustarLimiteViewModel @Inject constructor(
                         _uiState.update {
                             it.copy(
                                 limiteAtual      = LIMITE_PADRAO,
+                                limiteMaximo     = LIMITE_PADRAO,
                                 novoLimite       = it.novoLimite.takeIf { limite -> limite > 0.0 } ?: LIMITE_PADRAO,
                                 cartaoEncontrado = false,
                                 carregando       = false,
@@ -79,11 +83,21 @@ class AjustarLimiteViewModel @Inject constructor(
                             )
                         }
                     } else {
-                        val limiteAtual = cartao.limite.takeIf { it > 0.0 } ?: LIMITE_PADRAO
+                        val limiteMaximo = limiteMaximoValido(
+                            cartao.limiteMaximo.takeIf { it > 0.0 } ?: cartao.limite
+                        )
+                        val limiteAtual = cartao.limite
+                            .takeIf { it > 0.0 }
+                            ?.coerceAtMost(limiteMaximo)
+                            ?: limiteMaximo
                         _uiState.update { state ->
+                            val novoLimite = state.novoLimite
+                                .takeIf { it > 0.0 }
+                                ?: limiteAtual
                             state.copy(
                                 limiteAtual       = limiteAtual,
-                                novoLimite        = state.novoLimite.takeIf { it > 0.0 } ?: limiteAtual,
+                                limiteMaximo      = limiteMaximo,
+                                novoLimite        = novoLimite.coerceIn(LIMITE_MINIMO, limiteMaximo),
                                 cartaoFinalNumero = cartao.finalNumero,
                                 cartaoEncontrado  = true,
                                 carregando        = false,
@@ -107,11 +121,12 @@ class AjustarLimiteViewModel @Inject constructor(
     private fun validarParaConfirmacao() {
         val state      = _uiState.value
         val novoLimite = state.novoLimite
+        val limiteMaximo = limiteMaximoValido(state.limiteMaximo)
 
         val erro = when {
             !state.cartaoEncontrado           -> "Não há cartão disponível para salvar este limite."
             novoLimite <= 0.0                -> "O limite deve ser maior que zero."
-            novoLimite > LIMITE_MAXIMO       -> "O limite máximo permitido é R$ 10.000,00."
+            novoLimite > limiteMaximo        -> "O limite máximo permitido é ${formatarMoeda(limiteMaximo)}."
             abs(novoLimite - state.limiteAtual) < 0.01 -> "O novo limite deve ser diferente do atual."
             else                             -> null
         }
@@ -175,9 +190,14 @@ class AjustarLimiteViewModel @Inject constructor(
         }
     }
 
+    private fun limiteMaximoValido(limiteMaximo: Double): Double =
+        maxOf(LIMITE_MINIMO, limiteMaximo.takeIf { it > 0.0 } ?: LIMITE_PADRAO)
+
+    private fun formatarMoeda(valor: Double): String =
+        NumberFormat.getCurrencyInstance(Locale.forLanguageTag("pt-BR")).format(valor)
+
     private companion object {
         const val LIMITE_MINIMO = 1.0
         const val LIMITE_PADRAO = 1_000.0
-        const val LIMITE_MAXIMO = 10_000.0
     }
 }
