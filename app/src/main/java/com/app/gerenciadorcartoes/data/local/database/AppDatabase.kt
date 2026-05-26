@@ -10,7 +10,7 @@ import com.app.gerenciadorcartoes.data.local.entity.CadastroUsuarioEntity
 
 @Database(
     entities     = [CartaoEntity::class, CadastroUsuarioEntity::class],
-    version      = 7,
+    version      = 8,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {

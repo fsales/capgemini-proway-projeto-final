@@ -1,6 +1,7 @@
 package com.app.gerenciadorcartoes.repository
 
 import com.app.gerenciadorcartoes.model.CadastroUsuario
+import com.app.gerenciadorcartoes.model.Endereco
 
 interface CadastroUsuarioRepository {
 
@@ -35,4 +36,10 @@ interface CadastroUsuarioRepository {
      * deve ser aproveitado sem exigir re-cadastro do usuário.
      */
     suspend fun atualizarUserId(id: Long, novoUserId: String)
+
+    /**
+     * Busca endereço por CEP usando a API ViaCEP.
+     * Retorna `null` se não encontrar ou se houve falha na requisição.
+     */
+    suspend fun buscarEnderecoPorCep(cep: String): Endereco?
 }

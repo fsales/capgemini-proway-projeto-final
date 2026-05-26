@@ -224,7 +224,7 @@ private fun FormularioBody(
         OutlinedTextField(
             value         = uiState.limite,
             onValueChange = { onEvent(CadastrarAlterarEvent.LimiteAlterado(it)) },
-            label         = { Text("Limite (R$)") },
+            label         = { Text("Limite máximo (R$)") },
             isError       = uiState.erroLimite != null,
             supportingText = uiState.erroLimite?.let { { Text(it) } },
             keyboardOptions = KeyboardOptions(
@@ -276,4 +276,3 @@ private fun CadastrarComErrosPreview() {
         )
     }
 }
-
