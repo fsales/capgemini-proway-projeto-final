@@ -124,6 +124,8 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
+    // ArchUnit - regras de arquitetura (JUnit4 integration)
+    testImplementation(libs.archunit.junit4)
 
     // Testes instrumentados (Android)
     androidTestImplementation(libs.androidx.junit)
