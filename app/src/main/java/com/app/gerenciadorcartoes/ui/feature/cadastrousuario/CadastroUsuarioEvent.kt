@@ -7,6 +7,7 @@ sealed interface CadastroUsuarioEvent {
     data class EnderecoAlterado(val valor: String)       : CadastroUsuarioEvent
     data class NumberAlterado(val valor: String)         : CadastroUsuarioEvent
     data class BairroAlterado(val valor: String)         : CadastroUsuarioEvent
+    data class CidadeAlterada(val valor: String)         : CadastroUsuarioEvent
     data class EstadoAlterado(val valor: String)         : CadastroUsuarioEvent
     data class EmailAlterado(val valor: String)          : CadastroUsuarioEvent
     data class SenhaAlterada(val valor: String)          : CadastroUsuarioEvent

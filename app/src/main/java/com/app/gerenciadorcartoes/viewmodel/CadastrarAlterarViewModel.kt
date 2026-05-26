@@ -113,14 +113,15 @@ class CadastrarAlterarViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(salvando = true) }
             runCatching {
+                val s = _uiState.value
                 val cartao = Cartao(
-                    id = id,
-                    nomeTitular = _uiState.value.nomeTitular.trim(),
-                    finalNumero = _uiState.value.finalNumero.trim(),
-                    bandeira    = _uiState.value.bandeira.trim(),
-                    validade    = _uiState.value.validade.trim(),
-                    limite      = _uiState.value.limite.toDoubleOrNull() ?: 0.0,
-                    template    = _uiState.value.template,
+                    id          = id,
+                    nomeTitular = s.nomeTitular.trim(),
+                    finalNumero = s.finalNumero.trim(),
+                    bandeira    = s.bandeira.trim(),
+                    validade    = s.validade.trim(),
+                    limite      = s.limite.toDoubleOrNull() ?: 0.0,
+                    template    = s.template,
                 )
                 if (id == 0L){
                     cartaoRepository.salvar(cartao)
@@ -164,10 +165,10 @@ class CadastrarAlterarViewModel @Inject constructor(
 
     private suspend fun enviarCartaoParaApi(cartao: Cartao) {
         runCatching {
-            val email = sessionManager.getUsuarioLogado().firstOrNull() ?: return
+            val userId = sessionManager.getSessionUserId().firstOrNull() ?: return
             apiService.addCard(
                 AddCardRequest(
-                    idUsuario   = email,
+                    idUsuario   = userId,
                     id = cartao.id.toString(),
                     nomeTitular = cartao.nomeTitular,
                     finalNumero = cartao.finalNumero,

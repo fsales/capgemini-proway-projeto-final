@@ -1,13 +1,10 @@
 package com.app.gerenciadorcartoes.ui.feature.login
 
 sealed interface LoginEvent {
-    /** Usuário digitou no campo usuário */
-    data class Usuario(val valor: String) : LoginEvent
-    /** Usuário digitou no campo senha */
-    data class Senha(val valor: String)   : LoginEvent
-    /** Botão "Entrar" acionado */
-    data object Entrar                             : LoginEvent
-    /** Botão "Cadastrar" acionado — navega para cadastro */
-    data object NavegaParaCadastro                 : LoginEvent
+    data class  Usuario(val valor: String)                    : LoginEvent
+    data class  Senha(val valor: String)                      : LoginEvent
+    data object Entrar                                        : LoginEvent
+    data object NavegaParaCadastro                            : LoginEvent
+    data class  EntrarComProvedorExterno(val idToken: String) : LoginEvent
+    data object NavegaParaRecuperarSenha                      : LoginEvent
 }
-

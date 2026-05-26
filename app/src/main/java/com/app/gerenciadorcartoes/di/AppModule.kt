@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.room.Room
 import com.app.gerenciadorcartoes.data.local.dao.CadastroUsuarioDao
 import com.app.gerenciadorcartoes.data.local.dao.CartaoDao
+import com.app.gerenciadorcartoes.data.local.database.ALL_MIGRATIONS
 import com.app.gerenciadorcartoes.data.local.database.AppDatabase
 import com.app.gerenciadorcartoes.data.local.session.SessionManager
 import com.app.gerenciadorcartoes.data.local.session.SessionManagerImpl
@@ -17,6 +18,8 @@ import com.app.gerenciadorcartoes.repository.CartaoDetalheRepository
 import com.app.gerenciadorcartoes.repository.CartaoDetalheRepositoryImpl
 import com.app.gerenciadorcartoes.repository.CartaoRepository
 import com.app.gerenciadorcartoes.repository.CartaoRepositoryImpl
+import com.app.gerenciadorcartoes.repository.SessaoRepository
+import com.app.gerenciadorcartoes.repository.SessaoRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -48,6 +51,9 @@ abstract class AppModule {
     @Binds @Singleton
     abstract fun bindSessionManager(impl: SessionManagerImpl): SessionManager
 
+    @Binds @Singleton
+    abstract fun bindSessaoRepository(impl: SessaoRepositoryImpl): SessaoRepository
+
     companion object {
 
         @Provides @Singleton
@@ -56,13 +62,9 @@ abstract class AppModule {
                 context,
                 AppDatabase::class.java,
                 "gerenciador-cartoes-db",
-            ).addMigrations(
-                AppDatabase.MIGRATION_1_2,
-                AppDatabase.MIGRATION_2_3,
-                AppDatabase.MIGRATION_3_4,
-                AppDatabase.MIGRATION_4_5,
-                AppDatabase.MIGRATION_5_6,
-            ).build()
+            )
+            .addMigrations(*ALL_MIGRATIONS)
+            .build()
 
         @Provides @Singleton
         fun provideCartaoDao(database: AppDatabase): CartaoDao = database.cartaoDao()

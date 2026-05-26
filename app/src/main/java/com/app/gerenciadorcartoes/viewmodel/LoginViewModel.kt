@@ -2,8 +2,8 @@ package com.app.gerenciadorcartoes.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.app.gerenciadorcartoes.data.local.session.SessionManager
-import com.app.gerenciadorcartoes.repository.CadastroUsuarioRepository
+import com.app.gerenciadorcartoes.model.ResultadoAutenticacaoExterna
+import com.app.gerenciadorcartoes.repository.SessaoRepository
 import com.app.gerenciadorcartoes.ui.feature.login.LoginEvent
 import com.app.gerenciadorcartoes.ui.feature.login.LoginUiEvent
 import com.app.gerenciadorcartoes.ui.feature.login.state.LoginUiState
@@ -19,8 +19,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val sessionManager            : SessionManager,
-    private val cadastroUsuarioRepository : CadastroUsuarioRepository,
+    private val sessaoRepository : SessaoRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
@@ -41,6 +40,13 @@ class LoginViewModel @Inject constructor(
 
             LoginEvent.NavegaParaCadastro ->
                 viewModelScope.launch { _uiEvent.send(LoginUiEvent.NavegaParaCadastro) }
+
+            is LoginEvent.EntrarComProvedorExterno -> entrarComProvedorExterno(event.idToken)
+
+            LoginEvent.NavegaParaRecuperarSenha ->
+                viewModelScope.launch {
+                    _uiEvent.send(LoginUiEvent.NavegaParaRecuperarSenha(_uiState.value.usuario))
+                }
         }
     }
 
@@ -49,36 +55,51 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(carregando = true) }
             runCatching {
-                val credenciaisValidas = cadastroUsuarioRepository.verificarCredenciais(
-                    email = _uiState.value.usuario,
-                    senha = _uiState.value.senha,
-                )
-                if (!credenciaisValidas) throw Exception("Usuário ou senha incorretos")
-                sessionManager.saveSession(_uiState.value.usuario)
+                sessaoRepository.entrar(_uiState.value.usuario, _uiState.value.senha)
                 _uiState.update { it.copy(carregando = false) }
                 _uiEvent.send(LoginUiEvent.NavegaParaLista)
             }.onFailure { erro ->
                 _uiState.update { it.copy(carregando = false) }
+                _uiEvent.send(LoginUiEvent.MostrarErro(erro.message ?: "Usuário ou senha incorretos"))
+            }
+        }
+    }
+
+    private fun entrarComProvedorExterno(idToken: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(carregando = true) }
+            runCatching {
+                val resultado = sessaoRepository.autenticarComToken(idToken)
+                _uiState.update { it.copy(carregando = false) }
+                when (resultado) {
+                    ResultadoAutenticacaoExterna.Autenticado ->
+                        _uiEvent.send(LoginUiEvent.NavegaParaLista)
+                    is ResultadoAutenticacaoExterna.PrecisaCadastro ->
+                        _uiEvent.send(
+                            LoginUiEvent.NavegaParaCadastroExterno(
+                                userId = resultado.userId,
+                                email  = resultado.email,
+                                nome   = resultado.nome,
+                            )
+                        )
+                }
+            }.onFailure { erro ->
+                _uiState.update { it.copy(carregando = false) }
                 _uiEvent.send(
-                    LoginUiEvent.MostrarErro(erro.message ?: "Usuário ou senha incorretos")
+                    LoginUiEvent.MostrarErro(
+                        erro.message?.takeIf { it.isNotBlank() }
+                            ?: "Erro ao autenticar com Google. Tente novamente."
+                    )
                 )
             }
         }
     }
 
-    /** Valida todos os campos de uma vez — nunca aborta no primeiro erro. */
     private fun validar(): Boolean {
         var valido = true
         val s = _uiState.value
-
-        if (s.usuario.isBlank()) {
-            _uiState.update { it.copy(erroUsuario = "Informe o usuário") }
-            valido = false
-        }
-        if (s.senha.isBlank()) {
-            _uiState.update { it.copy(erroSenha = "Informe a senha") }
-            valido = false
-        }
+        if (s.usuario.isBlank()) { _uiState.update { it.copy(erroUsuario = "Informe o usuário") }; valido = false }
+        if (s.senha.isBlank())   { _uiState.update { it.copy(erroSenha   = "Informe a senha") };   valido = false }
         return valido
     }
 }

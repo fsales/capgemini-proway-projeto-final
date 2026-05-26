@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import com.app.gerenciadorcartoes.ui.theme.GerenciadorCartoesTheme
@@ -73,6 +74,60 @@ fun AppFormField(
                 if (showValidationIcon) {
                     AppFormFieldValidationIcon(
                         hasValue = value.isNotBlank(),
+                        isError  = errorMessage != null,
+                    )
+                }
+                trailingIcon?.invoke()
+            }
+        },
+        isError          = errorMessage != null,
+        supportingText   = errorMessage?.let { msg -> { Text(msg) } },
+        visualTransformation = visualTransformation,
+        keyboardOptions  = keyboardOptions,
+        keyboardActions  = keyboardActions,
+        readOnly         = readOnly,
+        singleLine       = true,
+        modifier         = fieldModifier,
+    )
+}
+
+/**
+ * Overload com [TextFieldValue] para campos que precisam de controle preciso do cursor
+ * (ex: campos com [VisualTransformation] como máscara de CPF/CEP).
+ * Todos os outros parâmetros são idênticos ao overload com [String].
+ */
+@Composable
+fun AppFormField(
+    value                : TextFieldValue,
+    onValueChange        : (TextFieldValue) -> Unit,
+    label                : String,
+    modifier             : Modifier                     = Modifier,
+    leadingIcon          : @Composable (() -> Unit)?    = null,
+    trailingIcon         : @Composable (() -> Unit)?    = null,
+    errorMessage         : String?                      = null,
+    hintText             : String?                      = null,
+    visualTransformation : VisualTransformation         = VisualTransformation.None,
+    keyboardOptions      : KeyboardOptions              = KeyboardOptions.Default,
+    keyboardActions      : KeyboardActions              = KeyboardActions.Default,
+    readOnly             : Boolean                      = false,
+    focusRequester       : FocusRequester?              = null,
+    showValidationIcon   : Boolean                      = true,
+) {
+    val fieldModifier = modifier
+        .fillMaxWidth()
+        .let { if (focusRequester != null) it.focusRequester(focusRequester) else it }
+
+    OutlinedTextField(
+        value            = value,
+        onValueChange    = onValueChange,
+        label            = { Text(label) },
+        placeholder      = hintText?.let { hint -> { Text(hint, color = MaterialTheme.colorScheme.outline) } },
+        leadingIcon      = leadingIcon,
+        trailingIcon     = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (showValidationIcon) {
+                    AppFormFieldValidationIcon(
+                        hasValue = value.text.isNotBlank(),
                         isError  = errorMessage != null,
                     )
                 }

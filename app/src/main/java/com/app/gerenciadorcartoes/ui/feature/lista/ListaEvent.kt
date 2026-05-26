@@ -11,4 +11,6 @@ sealed interface ListaEvent {
     data class  ExcluirCartao(val id: Long) : ListaEvent
     /** Usuário confirmou sair da conta */
     data object Deslogar : ListaEvent
+    /** Usuário quer consultar/editar o próprio perfil cadastrado */
+    data object NavegaParaPerfil : ListaEvent
 }

@@ -11,6 +11,11 @@ interface CadastroUsuarioRepository {
     suspend fun salvar(usuario: CadastroUsuario): Long
 
     /**
+     * Atualiza todos os campos de um perfil já existente (identificado pelo `id`).
+     */
+    suspend fun atualizar(usuario: CadastroUsuario)
+
+    /**
      * Retorna o usuário cujo e-mail corresponde ao informado, ou `null` se não existir.
      * Use para verificar duplicidade antes de salvar.
      */
@@ -19,12 +24,15 @@ interface CadastroUsuarioRepository {
     /** Retorna o usuário com o [id] informado, ou `null` se não existir. */
     suspend fun buscarPorId(id: Long): CadastroUsuario?
 
-    /**
-     * Verifica se [email] e [senha] correspondem a um registro cadastrado.
-     *
-     * A comparação de senha é feita em tempo constante contra o hash armazenado.
-     * @return `true` se as credenciais são válidas; `false` caso contrário.
-     */
-    suspend fun verificarCredenciais(email: String, senha: String): Boolean
-}
+    /** Retorna o usuário com o [userId] informado, ou `null` se não existir. */
+    suspend fun buscarPorUserId(userId: String): CadastroUsuario?
 
+    /**
+     * Substitui o userId de um perfil existente pelo [novoUserId].
+     *
+     * Necessário quando a conta Firebase é deletada e recriada via Google:
+     * o UID gerado pelo Firebase muda, mas o perfil no Room (com o mesmo e-mail)
+     * deve ser aproveitado sem exigir re-cadastro do usuário.
+     */
+    suspend fun atualizarUserId(id: Long, novoUserId: String)
+}
