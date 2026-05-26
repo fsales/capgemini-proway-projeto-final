@@ -151,7 +151,7 @@ private fun BlockCardSection(
      onBlockCard : () -> Unit,){
      val spacing              = LocalSpacing.current
      val isBloqueado          = detalhe.cartao.bloqueado
-     val corBotao             = if (isBloqueado) Color(0xFFC62828) else Color(0xFF2E7D32)
+     val corBotao             = if (isBloqueado) Color(0xFF2E7D32)  else Color(0xFFC62828)
      val textoBotao           = if (isBloqueado) "Desbloquear" else "Bloquear"
 
      Column(

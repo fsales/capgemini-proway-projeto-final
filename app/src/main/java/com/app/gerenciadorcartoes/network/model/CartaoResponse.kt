@@ -1,15 +1,16 @@
 package com.app.gerenciadorcartoes.network.model
 
-import com.google.gson.annotations.SerializedName
-
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+@Serializable
 data class CartaoResponse(
-    @SerializedName("id") val id: String = "",
-    @SerializedName("nomeTitular") val nomeTitular: String = "",
-    @SerializedName("finalNumero") val finalNumero: String = "",
-    @SerializedName("bandeira") val bandeira: String = "",
-    @SerializedName("validade") val validade: String = "",
-    @SerializedName("limite") val limite: String = "",
-    @SerializedName("template") val template: String = "",
-    @SerializedName("bloqueado") val bloqueado: String = "",
+    @SerialName("id") val id: String = "",
+    @SerialName("nomeTitular") val nomeTitular: String = "",
+    @SerialName("finalNumero") val finalNumero: String = "",
+    @SerialName("bandeira") val bandeira: String = "",
+    @SerialName("validade") val validade: String = "",
+    @SerialName("limite") val limite: String = "",
+    @SerialName("template") val template: String = "",
+    @SerialName("bloqueado") val bloqueado: String = "",
 )
 

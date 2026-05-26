@@ -4,8 +4,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.app.gerenciadorcartoes.data.local.session.SessionManager
+import com.app.gerenciadorcartoes.network.model.BlockCardRequest
 import com.app.gerenciadorcartoes.network.service.ApiService
 import com.app.gerenciadorcartoes.repository.CartaoDetalheRepository
+import com.app.gerenciadorcartoes.repository.CartaoRepository
 import com.app.gerenciadorcartoes.ui.feature.detalhe.DetalheEvent
 import com.app.gerenciadorcartoes.ui.feature.detalhe.DetalheUiEvent
 import com.app.gerenciadorcartoes.ui.feature.detalhe.state.DetalheUiState
@@ -16,6 +19,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -25,6 +29,8 @@ import javax.inject.Inject
 class DetalheViewModel @Inject constructor(
     savedStateHandle              : SavedStateHandle,
     private val detalheRepository : CartaoDetalheRepository,
+    private val cartaoRepository : CartaoRepository,
+    private val sessionManager    : SessionManager,
     private val apiService        : ApiService,
 ) : ViewModel() {
 
@@ -80,10 +86,12 @@ class DetalheViewModel @Inject constructor(
                 val novoStatusBloqueio = !cartao.bloqueado
 
                 // Chamar API para bloquear ou desbloquear
+
+                val userId = sessionManager.getSessionUserId().firstOrNull() ?: throw Exception("Usuário não autenticado")
                 if (novoStatusBloqueio) {
-                    apiService.blockCard(cartao.id.toInt())
+                    apiService.blockCard(BlockCardRequest(userId,cartao.id.toString()))
                 } else {
-                    apiService.unblockCard(cartao.id.toInt())
+                    apiService.unblockCard(BlockCardRequest(userId, cartao.id.toString()))
                 }
 
                 // Atualizar no banco de dados local
