@@ -11,6 +11,7 @@ import com.app.gerenciadorcartoes.ui.feature.cadastraralterar.CadastrarAlterarUi
 import com.app.gerenciadorcartoes.ui.feature.cadastraralterar.state.CadastrarAlterarUiState
 import com.app.gerenciadorcartoes.ui.navigation.CadastrarAlterarRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,7 +30,7 @@ class CadastrarAlterarViewModel @Inject constructor(
     private val route: CadastrarAlterarRoute = savedStateHandle.toRoute()
     private val id: Long = route.id
 
-    private val _uiState = MutableStateFlow(CadastrarAlterarUiState(carregando = id != 0L))
+    private val _uiState = MutableStateFlow(CadastrarAlterarUiState(carregando = id != 0L, modoEdicao = id != 0L))
     val uiState: StateFlow<CadastrarAlterarUiState> = _uiState.asStateFlow()
 
     private val _uiEvent = Channel<CadastrarAlterarUiEvent>(Channel.BUFFERED)
@@ -91,6 +92,7 @@ class CadastrarAlterarViewModel @Inject constructor(
                     _uiEvent.send(CadastrarAlterarUiEvent.NavigateBack)
                 }
             }.onFailure { erro ->
+                if (erro is CancellationException) throw erro
                 _uiState.update { it.copy(carregando = false) }
                 _uiEvent.send(
                     CadastrarAlterarUiEvent.MostrarErro(
@@ -107,19 +109,21 @@ class CadastrarAlterarViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(salvando = true) }
             runCatching {
+                val s = _uiState.value
                 val cartao = Cartao(
-                    id = id,
-                    nomeTitular = _uiState.value.nomeTitular.trim(),
-                    finalNumero = _uiState.value.finalNumero.trim(),
-                    bandeira    = _uiState.value.bandeira.trim(),
-                    validade    = _uiState.value.validade.trim(),
-                    limite      = _uiState.value.limite.toDoubleOrNull() ?: 0.0,
-                    template    = _uiState.value.template,
+                    id          = id,
+                    nomeTitular = s.nomeTitular.trim(),
+                    finalNumero = s.finalNumero.trim(),
+                    bandeira    = s.bandeira.trim(),
+                    validade    = s.validade.trim(),
+                    limite      = s.limite.toDoubleOrNull() ?: 0.0,
+                    template    = s.template,
                 )
                 if (id == 0L) cartaoRepository.salvar(cartao)
-                else cartaoRepository.atualizar(cartao)
+                else          cartaoRepository.atualizar(cartao)
                 _uiEvent.send(CadastrarAlterarUiEvent.NavigateBack)
             }.onFailure { erro ->
+                if (erro is CancellationException) throw erro
                 _uiState.update { it.copy(salvando = false) }
                 _uiEvent.send(
                     CadastrarAlterarUiEvent.MostrarErro(

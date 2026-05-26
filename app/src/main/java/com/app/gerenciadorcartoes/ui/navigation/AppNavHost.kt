@@ -11,6 +11,7 @@ import com.app.gerenciadorcartoes.ui.feature.cadastrousuario.CadastroUsuarioScre
 import com.app.gerenciadorcartoes.ui.feature.detalhe.DetalheScreen
 import com.app.gerenciadorcartoes.ui.feature.lista.ListaScreen
 import com.app.gerenciadorcartoes.ui.feature.login.LoginScreen
+import com.app.gerenciadorcartoes.ui.feature.recuperarsenha.RecuperarSenhaScreen
 import com.app.gerenciadorcartoes.ui.feature.splash.SplashScreen
 
 @Composable
@@ -25,7 +26,7 @@ fun AppNavHost(startDestination: Any = SplashRoute) {
         composable<SplashRoute> {
             SplashScreen(
                 navigateToLista = {
-                    navController.navigate(ListaRoute) {
+                    navController.navigate(ListaRoute()) {
                         popUpTo<SplashRoute> { inclusive = true }
                     }
                 },
@@ -34,18 +35,41 @@ fun AppNavHost(startDestination: Any = SplashRoute) {
                         popUpTo<SplashRoute> { inclusive = true }
                     }
                 },
+                navigateToCadastroIncompleto = { userId, email, nome ->
+                    navController.navigate(
+                        CadastroUsuarioRoute(
+                            userId       = userId,
+                            emailExterno = email,
+                            nomeExterno  = nome,
+                        )
+                    ) {
+                        popUpTo<SplashRoute> { inclusive = true }
+                    }
+                },
             )
         }
 
         composable<LoginRoute> {
             LoginScreen(
-                onNavigateToLista      = {
-                    navController.navigate(ListaRoute) {
+                navigateToLista           = {
+                    navController.navigate(ListaRoute()) {
                         popUpTo<LoginRoute> { inclusive = true }
                     }
                 },
-                onNavigateParaCadastro = {
-                    navController.navigate(CadastroUsuarioRoute)
+                navigateToCadastro        = {
+                    navController.navigate(CadastroUsuarioRoute())
+                },
+                navigateToCadastroExterno = { userId, email, nome ->
+                    navController.navigate(
+                        CadastroUsuarioRoute(
+                            userId       = userId,
+                            emailExterno = email,
+                            nomeExterno  = nome,
+                        )
+                    )
+                },
+                navigateToRecuperarSenha  = { email ->
+                    navController.navigate(RecuperarSenhaRoute(emailInicial = email))
                 },
             )
         }
@@ -63,8 +87,13 @@ fun AppNavHost(startDestination: Any = SplashRoute) {
                 },
                 onDeslogar = {
                     navController.navigate(LoginRoute) {
-                        popUpTo<ListaRoute> { inclusive = true }   // limpa toda a back stack
+                        popUpTo<ListaRoute> { inclusive = true }
                     }
+                },
+                onNavigateToPerfil = { userId ->
+                    navController.navigate(
+                        CadastroUsuarioRoute(userId = userId, modoEdicao = true)
+                    )
                 },
             )
         }
@@ -103,8 +132,26 @@ fun AppNavHost(startDestination: Any = SplashRoute) {
             )
         }
 
-        composable<CadastroUsuarioRoute> {
+        composable<CadastroUsuarioRoute> { backStackEntry ->
+            val route = backStackEntry.toRoute<CadastroUsuarioRoute>()
             CadastroUsuarioScreen(
+                navigateBack    = { navController.navigateUp() },
+                navigateToLista = { _ ->
+                    if (route.modoEdicao) {
+                        navController.navigate(ListaRoute(exibirConfirmacao = true)) {
+                            popUpTo<ListaRoute> { inclusive = true }
+                        }
+                    } else {
+                        navController.navigate(ListaRoute(exibirConfirmacao = true)) {
+                            popUpTo<LoginRoute> { inclusive = true }
+                        }
+                    }
+                },
+            )
+        }
+
+        composable<RecuperarSenhaRoute> {
+            RecuperarSenhaScreen(
                 navigateBack = { navController.popBackStack() },
             )
         }

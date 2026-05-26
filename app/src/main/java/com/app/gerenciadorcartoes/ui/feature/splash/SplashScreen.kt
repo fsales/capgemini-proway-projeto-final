@@ -38,6 +38,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.app.gerenciadorcartoes.R
 import com.app.gerenciadorcartoes.ui.feature.splash.state.SplashUiState
 import com.app.gerenciadorcartoes.ui.theme.GerenciadorCartoesTheme
+import com.app.gerenciadorcartoes.ui.theme.LocalSpacing
 import com.app.gerenciadorcartoes.viewmodel.SplashViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -47,17 +48,20 @@ private val SplashBg = Color(0xFF001432)
 // ── Nível 1: Screen ───────────────────────────────────────────────────────────
 @Composable
 fun SplashScreen(
-    navigateToLista: () -> Unit,
-    navigateToLogin: () -> Unit,
-    viewModel: SplashViewModel = hiltViewModel(),
+    navigateToLista              : () -> Unit,
+    navigateToLogin              : () -> Unit,
+    navigateToCadastroIncompleto : (userId: String, email: String, nome: String) -> Unit,
+    viewModel                    : SplashViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(viewModel) {
         viewModel.uiEvent.collect { event ->
             when (event) {
-                SplashUiEvent.NavigateToLista -> navigateToLista()
-                SplashUiEvent.NavigateToLogin -> navigateToLogin()
+                SplashUiEvent.NavigateToLista  -> navigateToLista()
+                SplashUiEvent.NavigateToLogin  -> navigateToLogin()
+                is SplashUiEvent.NavigateToCadastroIncompleto ->
+                    navigateToCadastroIncompleto(event.userId, event.email, event.nome)
             }
         }
     }
@@ -70,6 +74,7 @@ fun SplashScreen(
 fun SplashContent(
     uiState: SplashUiState = SplashUiState(),
 ) {
+    val spacing = LocalSpacing.current
     // ── Fase 1: ícone sobe com spring (mesmo tema da animação AVD do system splash)
     val iconOffsetY = remember { Animatable(80f) }
 
@@ -132,7 +137,7 @@ fun SplashContent(
                 )
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(spacing.extraLarge))
 
             // Título desliza para cima + aparece
             Text(
@@ -144,7 +149,7 @@ fun SplashContent(
                     .graphicsLayer { translationY = titleOffsetY.value * density; alpha = titleAlpha.value },
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(spacing.small))
 
             // Tagline aparece por último
             Text(

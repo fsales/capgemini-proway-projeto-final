@@ -6,28 +6,34 @@ import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "CadastroUsuario",
-    indices   = [Index(value = ["email"], unique = true)],
+    indices   = [
+        Index(value = ["email"],  unique = true),
+        Index(value = ["userId"], unique = true),
+    ],
 )
 data class CadastroUsuarioEntity(
 
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0L,
 
-    val nome: String = "",
+    val userId   : String = "",   // id opaco do provedor de autenticação
 
-    val cpf: String = "",
+    val nome     : String = "",
 
-    val cep: String = "",
+    val cpf      : String = "",
 
-    val endereco: String = "",
+    val cep      : String = "",
 
-    val number: String = "",
+    val endereco : String = "",
 
-    val bairro: String = "",
+    val number   : String = "",
 
-    val estado: String = "",
+    val bairro   : String = "",
 
-    val email: String = "",
+    val cidade   : String = "",
 
-    val senha: String = "",
+    val estado   : String = "",
+
+    val email    : String = "",
+    // campo `senha` removido — Firebase gerencia credenciais
 )

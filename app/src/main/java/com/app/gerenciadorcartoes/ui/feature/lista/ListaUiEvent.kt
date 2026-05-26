@@ -15,5 +15,7 @@ sealed interface ListaUiEvent {
     data class  MostrarMensagem(val mensagem: String) : ListaUiEvent
     /** Desloga e volta para o Login */
     data object NavegaParaLogin                        : ListaUiEvent
+    /** Navega para tela de perfil do usuário logado */
+    data class  NavegaParaPerfil(val userId: String)  : ListaUiEvent
 }
 

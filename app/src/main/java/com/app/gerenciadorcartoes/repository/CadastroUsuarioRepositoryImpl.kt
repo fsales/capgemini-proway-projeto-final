@@ -1,7 +1,6 @@
 package com.app.gerenciadorcartoes.repository
 
 import com.app.gerenciadorcartoes.data.local.dao.CadastroUsuarioDao
-import com.app.gerenciadorcartoes.data.local.security.SenhaHasher
 import com.app.gerenciadorcartoes.model.CadastroUsuario
 import com.app.gerenciadorcartoes.repository.mapper.toDomain
 import com.app.gerenciadorcartoes.repository.mapper.toEntity
@@ -11,11 +10,11 @@ class CadastroUsuarioRepositoryImpl @Inject constructor(
     private val cadastroUsuarioDao: CadastroUsuarioDao,
 ) : CadastroUsuarioRepository {
 
-    /** Persiste o usuário com a senha **hasheada** — nunca armazena texto plano. */
     override suspend fun salvar(usuario: CadastroUsuario): Long =
-        cadastroUsuarioDao.inserir(
-            usuario.copy(senha = SenhaHasher.hash(usuario.senha)).toEntity()
-        )
+        cadastroUsuarioDao.inserir(usuario.toEntity())
+
+    override suspend fun atualizar(usuario: CadastroUsuario) =
+        cadastroUsuarioDao.atualizar(usuario.toEntity())
 
     override suspend fun buscarPorEmail(email: String): CadastroUsuario? =
         cadastroUsuarioDao.buscarPorEmail(email)?.toDomain()
@@ -23,8 +22,9 @@ class CadastroUsuarioRepositoryImpl @Inject constructor(
     override suspend fun buscarPorId(id: Long): CadastroUsuario? =
         cadastroUsuarioDao.buscarPorId(id)?.toDomain()
 
-    override suspend fun verificarCredenciais(email: String, senha: String): Boolean {
-        val entity = cadastroUsuarioDao.buscarPorEmail(email) ?: return false
-        return SenhaHasher.verificar(senha, entity.senha)
-    }
+    override suspend fun buscarPorUserId(userId: String): CadastroUsuario? =
+        cadastroUsuarioDao.buscarPorUserId(userId)?.toDomain()
+
+    override suspend fun atualizarUserId(id: Long, novoUserId: String) =
+        cadastroUsuarioDao.atualizarUserId(id, novoUserId)
 }

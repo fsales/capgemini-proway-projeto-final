@@ -36,6 +36,7 @@
     <string name="cadastro_usuario_endereco">Endereço</string>
     <string name="cadastro_usuario_numero">Número</string>
     <string name="cadastro_usuario_bairro">Bairro</string>
+    <string name="cadastro_usuario_cidade">Cidade</string>
     <string name="cadastro_usuario_estado">Estado (UF)</string>
     <string name="cadastro_usuario_estado_hint">Ex: SP</string>
     <string name="cadastro_usuario_email">E-mail</string>
@@ -43,6 +44,7 @@
     <string name="cadastro_usuario_senha_hint">Mínimo 6 caracteres</string>
     <string name="cadastro_usuario_confirmar_senha">Confirmar senha</string>
     <string name="cadastro_usuario_btn_cadastrar">Cadastrar</string>
+    <string name="cadastro_usuario_btn_salvar">Salvar alterações</string>
     <string name="cadastro_usuario_btn_anterior">Anterior</string>
     <string name="cadastro_usuario_btn_proximo">Próximo</string>
     <string name="cadastro_usuario_progresso">Etapa %1$d de %2$d</string>
@@ -73,8 +75,10 @@
 
     <!-- Lista Screen — TopAppBar -->
     <string name="lista_menu_mais_opcoes">Mais opções</string>
+    <string name="lista_menu_meu_perfil">Meu perfil</string>
     <string name="lista_titulo">Meus Cartões</string>
     <string name="lista_subtitulo">Gerencie seus cartões</string>
+    <string name="lista_saudacao">Olá, %s 👋</string>
 
     <!-- Lista Screen — FAB -->
     <string name="lista_fab_novo_cartao">Novo cartão</string>
@@ -94,4 +98,20 @@
     <string name="lista_dialog_excluir_titulo">Excluir cartão</string>
     <string name="lista_dialog_excluir_mensagem">Deseja remover o cartão de %s?</string>
     <string name="lista_dialog_excluir_confirmar">Excluir</string>
+
+    <!-- RecuperarSenha Screen -->
+    <string name="recuperar_senha_titulo">Recuperar Senha</string>
+    <string name="recuperar_senha_subtitulo">Informe o e-mail cadastrado e enviaremos um link para redefinir sua senha.</string>
+    <string name="recuperar_senha_campo_email">E-mail cadastrado</string>
+    <string name="recuperar_senha_btn_enviar">Enviar e-mail de recuperação</string>
+
+    <!-- Google Sign-In -->
+    <string name="google_sign_in_continuar">Continuar com Google</string>
+
+
+    <!-- CadastroUsuario — fluxo Google (isFluxoExterno) -->
+    <string name="cadastro_usuario_externo_titulo">Complete seu perfil</string>
+    <string name="cadastro_usuario_externo_subtitulo">Você está quase lá! Adicione seus dados para finalizar o cadastro.</string>
+    <string name="cadastro_usuario_email_google">E-mail vinculado à sua conta Google</string>
+    <string name="cadastro_usuario_nome_google">Nome sincronizado com sua conta Google — você pode editar</string>
 </resources>

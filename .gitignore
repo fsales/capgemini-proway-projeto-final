@@ -11,3 +11,7 @@ local.properties
 
 /.agents/
 /app/google-services.json
+
+# NÃO ignorar o debug.keystore compartilhado
+!/app/keystore/debug.keystore
+

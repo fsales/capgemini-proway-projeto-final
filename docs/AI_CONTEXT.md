@@ -6,26 +6,6 @@
 
 ---
 
-## Histórico de Alterações
-
-- <!-- Insira uma linha no início a cada atualização: "- YYYY-MM-DD — descrição" -->
-- 2026-05-20 — Splash ajustada: logo reduzida em `ic_splash_logo_static` para melhor proporção visual no lançamento
-- 2026-05-19 — Tela `Detalhe` simplificada para leitura: removidas ações de Editar/Excluir do AppBar e limpeza de eventos/UI events relacionados no fluxo da feature
-- 2026-05-19 — Botão de 3 pontinhos na Lista atualizado para menu de ações em bottom sheet (Editar e Excluir), evitando popup deslocado sobre/abaixo do card
-- 2026-05-19 — Ação de excluir na Lista refinada: ícone de lixeira direto sobre o card substituído por menu discreto (⋮) com opção “Excluir cartão” em dropdown
-- 2026-05-19 — Botão + do topo refinado com microdetalhes premium (sombra suave, borda translúcida circular e ícone dimensionado por token de design)
-- 2026-05-19 — Estado vazio da Lista refinado com linguagem humana e hierarquia visual (`title` + `subtitle` no `EmptyState`), botão + do topo reforçado com cor primária e fundo em gradiente sutil na tela sem cartões
-- 2026-05-19 — ListaScreen alterada para padrão premium sem FAB sobreposto: ação de adicionar movida para o topo (ícone + em `AppTopAppBar.actions`) e texto do estado vazio atualizado
-- 2026-05-19 — Adicionado campo `template` ao modelo de domínio `Cartao` e a `CartaoEntity`; migração Room v1→v2; criado `CartaoTemplateCard` e `CartaoTemplateMini` em `ui/components/`; ListaScreen e CadastrarAlterarScreen atualizados com seletor de template visual (Bradesco, Itaú, Nubank, Inter, C6 Bank, Padrão)
-- 2026-05-19 — Downgrade do Android Gradle Plugin para 9.0.0 para compatibilidade com Android Studio; seção de build atualizada
-- 2026-05-16 — Adicionada feature Login: LoginUiState, LoginEvent, LoginUiEvent, LoginScreen, LoginViewModel, LoginRoute; AppNavHost atualizado com LoginRoute como startDestination
-- 2026-05-15 — Revisão completa: corrigidos tokens IconSize (extraSmall/small/extraLarge), adicionado smallMedium ao Spacing, corrigida Matriz de Estratégia (Repository em vez de DAO, tipos Cartao), corrigida ordem de parâmetros do AppScaffold, documentados CadastrarAlterarUiState.salvando e isEdicao
-- 2026-05-15 — Tradução completa para pt-BR; todos os arquivos da pasta docs/ atualizados
-- 2026-05-15 — Adicionados Guia de Manutenção e Histórico de Alterações; criado .github/copilot-instructions.md para aplicação contínua das regras de atualização
-- 2026-05-15 — Geração inicial a partir de análise completa do código-fonte
-
----
-
 ## Informações Rápidas
 
 | Campo | Valor |
@@ -55,7 +35,9 @@ app/src/main/java/com/app/gerenciadorcartoes/
 ├── MainActivity.kt                   @AndroidEntryPoint · enableEdgeToEdge()
 │
 ├── model/
-│   └── Cartao.kt                     Modelo de domínio puro — zero importações Android/Room
+│   ├── Cartao.kt                     Modelo de domínio puro — zero importações Android/Room
+│   ├── ResultadoAutenticacaoExterna.kt Resultado da autenticação via provedor externo — `Autenticado` | `PrecisaCadastro`
+│   └── UsuarioAuth.kt                Modelo de domínio de autenticação — zero importações de framework ou provedor
 │
 ├── data/local/
 │   ├── converter/                    (vazio — reservado para @TypeConverters)
@@ -76,12 +58,22 @@ app/src/main/java/com/app/gerenciadorcartoes/
 │   ├── CartaoDetalheRepositoryImpl.kt
 │   ├── CartaoRepository.kt           Interface — apenas tipos de domínio
 │   ├── CartaoRepositoryImpl.kt       @Singleton — delega para CartaoDao + mapper
+│   ├── SessaoRepository.kt           Interface — orquestra AuthRepository + SessionManager; ViewModels dependem APENAS dela
+│   ├── SessaoRepositoryImpl.kt       ÚNICA classe que coordena simultaneamente AuthRepository + SessionManager + CadastroUsuarioRepository
 │   └── mapper/
 │       ├── CadastroUsuarioMapper.kt  funções de extensão toDomain() / toEntity()
 │       └── CartaoMapper.kt           funções de extensão toDomain() / toEntity()
 │
-├── network/
-│   └── service/ApiService.kt         Placeholder Retrofit — sem endpoints ativos
+├── network/                          ← clientes de APIs externas (HTTP, Auth, etc.) — provedor-agnóstico
+│   ├── auth/
+│   │   └── AuthDataSource.kt         Interface — expõe apenas UsuarioAuth / primitivos; zero dependência de provedor
+│   ├── firebase/
+│   │   └── FirebaseAuthDataSource.kt ÚNICA classe que importa o SDK do provedor de auth atual
+│   ├── model/
+│   │   └── ViaCepResponse.kt         DTO de resposta HTTP — confinado a network/; não vaza ao domínio
+│   └── service/
+│       ├── ApiService.kt             Placeholder de cliente HTTP — sem endpoints ativos
+│       └── BuscaCep.kt               Interface de cliente HTTP — ViaCEP
 │
 ├── di/
 │   ├── AppModule.kt                  abstract class — @Binds + @Provides no companion
@@ -89,7 +81,7 @@ app/src/main/java/com/app/gerenciadorcartoes/
 │
 └── ui/
     ├── theme/                        Color · Type · Shape · Spacing · IconSize · Theme
-    ├── components/                   AppScaffold · AppTopAppBar · AppLoading · EmptyState
+    ├── components/                   AppScaffold · AppTopAppBar · AppLoading · EmptyState · GoogleSignInButton
     ├── navigation/                   Routes.kt · AppNavHost.kt
     ├── feature/
     │   ├── login/                    LoginEvent · LoginUiEvent · LoginScreen · state/LoginUiState
@@ -97,14 +89,17 @@ app/src/main/java/com/app/gerenciadorcartoes/
     │   ├── detalhe/                  DetalheEvent · DetalheUiEvent · DetalheScreen · state/DetalheUiState
     │   ├── cadastraralterar/         CadastrarAlterarEvent · CadastrarAlterarUiEvent
     │   │                             CadastrarAlterarScreen · state/CadastrarAlterarUiState
-    │   └── cadastrousuario/          CadastroUsuarioEvent · CadastroUsuarioUiEvent
-    │                                 CadastroUsuarioScreen · state/CadastroUsuarioUiState
+    │   ├── cadastrousuario/          CadastroUsuarioEvent · CadastroUsuarioUiEvent
+    │   │                             CadastroUsuarioScreen · state/CadastroUsuarioUiState
+    │   └── recuperarsenha/           RecuperarSenhaEvent · RecuperarSenhaUiEvent
+    │                                 RecuperarSenhaScreen · state/RecuperarSenhaUiState
     └── viewmodel/
         ├── LoginViewModel.kt
         ├── ListaViewModel.kt
         ├── DetalheViewModel.kt
         ├── CadastrarAlterarViewModel.kt
         ├── CadastroUsuarioViewModel.kt
+        ├── RecuperarSenhaViewModel.kt
         └── SplashViewModel.kt
 ```
 
@@ -136,10 +131,15 @@ Todos os campos têm valores padrão → `Cartao()` é sempre um estado inicial 
 
 | Regra | Detalhe |
 |---|---|
-| `model/Cartao.kt` tem zero importações de framework | Sem `@Entity`, sem `@SerialName`, sem classes Android |
-| A interface `CartaoRepository` usa apenas `Cartao` / primitivos | Sem `CartaoEntity`, sem tipos Room/Retrofit |
+| `model/Cartao.kt` e `model/UsuarioAuth.kt` têm zero importações de framework | Sem `@Entity`, sem `@SerialName`, sem classes Android ou de provedores externos |
+| A interface `CartaoRepository` usa apenas `Cartao` / primitivos | Sem `CartaoEntity`, sem types Room ou DTOs de rede |
 | `CartaoRepositoryImpl` é a **única** classe que importa `CartaoEntity` ou `CartaoDao` | Os mappers são chamados aqui e em nenhum outro lugar |
+| `FirebaseAuthDataSource` é a **única** classe que importa o SDK do provedor de auth | Toda lógica do provedor fica em `network/<provedor>/`; o restante do app depende de `AuthDataSource` (interface em `network/auth/`) |
+| A interface `AuthDataSource` usa apenas `UsuarioAuth` / primitivos | Sem tipos do provedor (`FirebaseUser`, `FirebaseAuth`, etc.) |
+| `ViaCepResponse` não vaza para fora do pacote `network/` | DTOs de rede nunca chegam ao domínio nem aos ViewModels |
 | ViewModels só importam `CartaoRepository` (interface) | Nunca importar `Dao` ou `Entity` diretamente |
+| ViewModels de autenticação/sessão só importam `SessaoRepository` | Nunca importar `AuthRepository`, `SessionManager`, `AuthDataSource` ou `FirebaseAuthDataSource` diretamente em ViewModels |
+| `SessaoRepositoryImpl` é a **única** classe que coordena `AuthRepository` + `SessionManager` juntos | Nenhum outro arquivo faz as duas injeções simultaneamente |
 | A camada de UI nunca muta o estado diretamente | Sempre despacha `XEvent` via `onEvent()` |
 | `XScreen` é dono do ViewModel; `XContent` é puro | Previews sempre chamam `XContent`, nunca `XScreen` |
 | Eventos pontuais de navegação / Snackbar passam pelo `Channel<XUiEvent>` | Nunca usar `StateFlow` para efeitos pontuais |
@@ -156,7 +156,7 @@ Todos os campos têm valores padrão → `Cartao()` é sempre um estado inicial 
 | Banco de dados Room | `AppDatabase` | `AppDatabase` |
 | Interface Repository | `<Entidade>Repository` | `CartaoRepository` |
 | Implementação do Repository | `<Entidade>RepositoryImpl` | `CartaoRepositoryImpl` |
-| Serviço Retrofit | `ApiService` | `ApiService` |
+| Cliente HTTP externo | `Service` | `ApiService` |
 | ViewModel | `<Feature>ViewModel` | `ListaViewModel` |
 | Estado da UI | `<Feature>UiState` | `ListaUiState` |
 | Evento do usuário (UI → VM) | `<Feature>Event` | `ListaEvent` |
@@ -311,7 +311,8 @@ data class XUiState(
 
 **Casos especiais observados em `CadastrarAlterarUiState`:**
 - `salvando: Boolean = false` — flag exclusiva para o progresso da operação de salvar (distinto de `carregando`, que representa o carregamento inicial dos dados).
-- `isEdicao: Boolean` — propriedade computada (`get() = nomeTitular.isNotBlank()`) que indica se o formulário está em modo edição.
+- `modoEdicao: Boolean = false` — campo explícito inicializado no `ViewModel` com `id != 0L`; indica se o formulário está em modo edição.
+- `isEdicao: Boolean` — propriedade computada (`get() = modoEdicao`), exposta para a UI.
 - Não possui campo `erro: String?` global; usa erros por campo (`erroNome`, `erroNumero`, etc.).
 
 ---
@@ -365,11 +366,12 @@ composable<XRoute> { XScreen(navigateBack = { navController.popBackStack() }) }
 |---|---|---|
 | `SplashRoute` | Verificação de sessão na abertura do app | ✅ sim |
 | `LoginRoute` | Autenticação do usuário | não |
-| `ListaRoute` | Lista de todos os cartões | não |
+| `ListaRoute(exibirConfirmacao: Boolean = false)` | Lista de todos os cartões; `exibirConfirmacao = true` exibe snackbar de sucesso | não |
 | `DetalheRoute(id: Long)` | Detalhe somente leitura | não |
 | `AjustarLimiteRoute(id: Long)` | Ajuste de limite de um cartão | não |
 | `CadastrarAlterarRoute(id: Long = 0L)` | Criar (`id=0`) ou editar (`id>0`) | não |
-| `CadastroUsuarioRoute` | Cadastro de novo usuário | não |
+| `CadastroUsuarioRoute(userId, emailExterno, nomeExterno)` | Cadastro (email+senha) ou completar perfil Google (`userId != ""`) | não |
+| `RecuperarSenhaRoute(emailInicial: String = "")` | Recuperação de senha — `emailInicial` pré-preenche o campo | não |
 
 ---
 
@@ -383,6 +385,44 @@ interface CartaoRepository {
     suspend fun salvar(cartao: Cartao) : Long    // returns generated id
     suspend fun atualizar(cartao: Cartao)
     suspend fun excluirPorId(id: Long)
+}
+```
+
+---
+
+## Contrato do SessaoRepository
+
+```kotlin
+interface SessaoRepository {
+    // Login
+    suspend fun entrar(email: String, senha: String)
+    suspend fun autenticarComToken(idToken: String): ResultadoAutenticacaoExterna
+
+    // Cadastro
+    suspend fun criarContaFirebase(email: String, senha: String): String  // → userId
+    suspend fun ativarSessao(userId: String)
+    suspend fun desfazerCriacaoConta()   // rollback Firebase se Room falhar
+
+    // Logout
+    suspend fun encerrarSessao()
+
+    // Estado
+    suspend fun verificarSessaoInicial(): Boolean  // true = autenticado e em sincronia
+    suspend fun verificarPerfilGoogleIncompleto(): ResultadoAutenticacaoExterna?
+    // null = nenhuma ação; PrecisaCadastro = Firebase ativo mas perfil Room ausente (Splash lida com isso)
+    fun observarDesconexaoExterna(): Flow<Unit>    // emite quando Firebase desconecta externamente
+
+    // Perfil
+    suspend fun buscarNomeUsuario(): String?       // null = sessão inativa ou perfil não encontrado
+
+    // Misc
+    suspend fun enviarRecuperacaoSenha(email: String)
+}
+
+// model/ResultadoAutenticacaoExterna.kt
+sealed interface ResultadoAutenticacaoExterna {
+    data object Autenticado : ResultadoAutenticacaoExterna
+    data class PrecisaCadastro(val userId: String, val email: String, val nome: String) : ResultadoAutenticacaoExterna
 }
 ```
 
@@ -468,6 +508,14 @@ AppLoading()   // no params
 
 // EmptyState — full-screen icon + message
 EmptyState(message: String)
+
+// GoogleSignInButton — botão Google com branding oficial (fundo branco fixo, borda cinza, ícone G colorido)
+// ⚠️ NÃO usa MaterialTheme para cores — exigência das Google Brand Guidelines
+GoogleSignInButton(
+    onClick  : () -> Unit,
+    modifier : Modifier = Modifier,
+    enabled  : Boolean  = true,
+)
 ```
 
 ---
@@ -587,9 +635,7 @@ Plugin Android:
 
 ---
 
-## Guia de Manutenção
-
-> Para assistentes de IA: consulte esta seção ao terminar uma tarefa para decidir o que atualizar.
+## Guia de Manutenção> Para assistentes de IA: consulte esta seção ao terminar uma tarefa para decidir o que atualizar.
 
 ### Qual seção atualizar para cada tipo de alteração
 
@@ -613,13 +659,7 @@ Plugin Android:
 
 1. Identificar o(s) tipo(s) de alteração na tabela acima.
 2. Editar cada seção listada — manter o conteúdo factual e fundamentado no código real.
-3. Inserir uma linha no início de `## Histórico de Alterações` com a data de hoje.
-4. Atualizar os docs companion listados na terceira coluna.
-5. **Não** adicionar conteúdo aspiracional ou futuro — apenas o que existe no código-fonte.
+3. Atualizar os docs companion listados na terceira coluna.
+4. **Não** adicionar conteúdo aspiracional ou futuro — apenas o que existe no código-fonte.
 
-### Como deve ser uma entrada no `## Histórico de Alterações`
-
-```
-- 2026-05-15 — Adicionado observarPorId() reativo ao CartaoDao; Matriz de Estratégia de Leitura atualizada
-- 2026-05-15 — Nova funcionalidade: tela CadastrarAlterar; Árvore de Fontes e Rotas Existentes atualizadas
-```
+---

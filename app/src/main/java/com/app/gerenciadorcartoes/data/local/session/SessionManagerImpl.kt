@@ -16,14 +16,14 @@ class SessionManagerImpl @Inject constructor(
     private val dataStore: DataStore<Preferences>,
 ) : SessionManager {
 
-    override suspend fun saveSession(usuario: String) {
-        val usuarioNormalizado = usuario.trim()
-        val usuarioCifrado     = DataStoreEncryptor.encrypt(usuarioNormalizado)   // AES-256-GCM
-        val loginTime          = System.currentTimeMillis()
+    override suspend fun saveSession(userId: String) {
+        val userIdNormalizado = userId.trim()
+        val userIdCifrado     = DataStoreEncryptor.encrypt(userIdNormalizado)   // AES-256-GCM
+        val loginTime         = System.currentTimeMillis()
 
         dataStore.edit { preferences ->
             preferences[IS_LOGGED_IN]    = true
-            preferences[USUARIO_LOGADO]  = usuarioCifrado   // armazenado cifrado
+            preferences[SESSION_USER_ID] = userIdCifrado   // UID cifrado
             preferences[LAST_LOGIN_TIME] = loginTime
         }
     }
@@ -31,7 +31,7 @@ class SessionManagerImpl @Inject constructor(
     override suspend fun logout() {
         dataStore.edit { preferences ->
             preferences.remove(IS_LOGGED_IN)
-            preferences.remove(USUARIO_LOGADO)
+            preferences.remove(SESSION_USER_ID)
             preferences.remove(LAST_LOGIN_TIME)
         }
     }
@@ -42,20 +42,20 @@ class SessionManagerImpl @Inject constructor(
             .catch { emit(false) }
 
     // Decifra antes de emitir — null se chave ausente ou dado adulterado (sessão expirada)
-    override fun getUsuarioLogado(): Flow<String?> =
+    override fun getSessionUserId(): Flow<String?> =
         dataStore.data
             .map { preferences ->
-                preferences[USUARIO_LOGADO]?.let { DataStoreEncryptor.decrypt(it) }
+                preferences[SESSION_USER_ID]?.let { DataStoreEncryptor.decrypt(it) }
             }
             .catch { emit(null) }
 
     companion object {
         private const val KEY_IS_LOGGED_IN    = "session_is_logged_in"
-        private const val KEY_USUARIO_LOGADO  = "session_usuario_logado"
+        private const val KEY_SESSION_USER_ID = "session_user_id"         // era session_usuario_logado
         private const val KEY_LAST_LOGIN_TIME = "session_last_login_time"
 
         private val IS_LOGGED_IN    = booleanPreferencesKey(KEY_IS_LOGGED_IN)
-        private val USUARIO_LOGADO  = stringPreferencesKey(KEY_USUARIO_LOGADO)
+        private val SESSION_USER_ID = stringPreferencesKey(KEY_SESSION_USER_ID)
         private val LAST_LOGIN_TIME = longPreferencesKey(KEY_LAST_LOGIN_TIME)
     }
 }
