@@ -43,3 +43,21 @@ jobs:
           </resources>
           XML
           ./gradlew :app:testDebugUnitTest --tests "com.app.gerenciadorcartoes.architecture.*" -x kspDebugUnitTestKotlin -x processDebugGoogleServices --no-daemon --info
+      - name: Zip ArchUnit report
+        run: |
+          set -e
+          # ensure output exists
+          if [ -d "app/build/reports/tests/testDebugUnitTest" ] || [ -d "app/build/test-results/testDebugUnitTest" ]; then
+            zip -r archunit-report.zip app/build/reports/tests/testDebugUnitTest app/build/test-results/testDebugUnitTest || true
+          else
+            echo "No report directories found — creating empty placeholder zip"
+            mkdir -p reports/empty
+            zip -r archunit-report.zip reports/empty
+          fi
+
+      - name: Upload ArchUnit test report
+        uses: actions/upload-artifact@v4
+        with:
+          name: archunit-test-report
+          path: archunit-report.zip
+          retention-days: 7
