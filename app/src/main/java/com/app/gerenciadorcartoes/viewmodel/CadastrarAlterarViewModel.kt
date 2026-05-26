@@ -82,7 +82,10 @@ class CadastrarAlterarViewModel @Inject constructor(
                             finalNumero = cartao.finalNumero,
                             bandeira    = cartao.bandeira,
                             validade    = cartao.validade,
-                            limite      = cartao.limite.toString(),
+                            limite      = cartao.limiteMaximo
+                                .takeIf { limite -> limite > 0.0 }
+                                ?.toString()
+                                ?: cartao.limite.toString(),
                             template    = cartao.template,
                             carregando  = false,
                         )
@@ -109,14 +112,24 @@ class CadastrarAlterarViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(salvando = true) }
             runCatching {
-                val s = _uiState.value
+                val s            = _uiState.value
+                val limiteMaximo = s.limite.toDoubleOrNull() ?: 0.0
+                val limiteAtual  = if (id == 0L) {
+                    limiteMaximo
+                } else {
+                    cartaoRepository.buscarPorId(id)
+                        ?.limite
+                        ?.coerceAtMost(limiteMaximo)
+                        ?: limiteMaximo
+                }
                 val cartao = Cartao(
                     id          = id,
                     nomeTitular = s.nomeTitular.trim(),
                     finalNumero = s.finalNumero.trim(),
                     bandeira    = s.bandeira.trim(),
                     validade    = s.validade.trim(),
-                    limite      = s.limite.toDoubleOrNull() ?: 0.0,
+                    limite      = limiteAtual,
+                    limiteMaximo= limiteMaximo,
                     template    = s.template,
                 )
                 if (id == 0L) cartaoRepository.salvar(cartao)
@@ -150,10 +163,10 @@ class CadastrarAlterarViewModel @Inject constructor(
         if (!Regex("""^\d{2}/\d{2}$""").matches(s.validade)) {
             _uiState.update { it.copy(erroValidade = "Formato MM/AA") }; valid = false
         }
-        if (s.limite.isBlank() || s.limite.toDoubleOrNull() == null) {
+        val limite = s.limite.toDoubleOrNull()
+        if (s.limite.isBlank() || limite == null || limite <= 0.0) {
             _uiState.update { it.copy(erroLimite = "Limite inválido") }; valid = false
         }
         return valid
     }
 }
-

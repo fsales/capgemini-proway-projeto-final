@@ -15,6 +15,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 //  v6  Recriação de `CadastroUsuario`: removido `senha`, adicionado `userId`
 //         + UNIQUE INDEX em `userId` (Firebase passa a gerenciar credenciais)
 //  v7  Adicionado campo `cidade` em `CadastroUsuario` (preenchido via ViaCEP)
+//  v8  Adicionado `limiteMaximo` em `cartoes` para preservar o limite cadastrado
 //
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -159,6 +160,21 @@ val MIGRATION_6_7 = object : Migration(6, 7) {
     }
 }
 
+/**
+ * v7 → v8: adiciona `limiteMaximo` em `cartoes`.
+ * Para cartões existentes, o limite atual passa a ser o teto cadastrado.
+ */
+val MIGRATION_7_8 = object : Migration(7, 8) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "ALTER TABLE cartoes ADD COLUMN limiteMaximo REAL NOT NULL DEFAULT 0.0"
+        )
+        db.execSQL(
+            "UPDATE cartoes SET limiteMaximo = limite WHERE limiteMaximo = 0.0"
+        )
+    }
+}
+
 /** Lista completa de migrações — passe para `.addMigrations(*ALL_MIGRATIONS)`. */
 val ALL_MIGRATIONS = arrayOf(
     MIGRATION_1_2,
@@ -167,4 +183,5 @@ val ALL_MIGRATIONS = arrayOf(
     MIGRATION_4_5,
     MIGRATION_5_6,
     MIGRATION_6_7,
+    MIGRATION_7_8,
 )
