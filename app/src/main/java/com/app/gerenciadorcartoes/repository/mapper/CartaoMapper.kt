@@ -12,6 +12,7 @@ fun CartaoEntity.toDomain(): Cartao = Cartao(
     limite      = limite,
     limiteMaximo= limiteMaximo,
     template    = template,
+    bloqueado   = bloqueado,
 )
 
 fun Cartao.toEntity(): CartaoEntity = CartaoEntity(
@@ -23,4 +24,5 @@ fun Cartao.toEntity(): CartaoEntity = CartaoEntity(
     limite      = limite,
     limiteMaximo= limiteMaximo.takeIf { it > 0.0 } ?: limite,
     template    = template,
+    bloqueado   = bloqueado,
 )

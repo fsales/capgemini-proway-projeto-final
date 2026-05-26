@@ -14,4 +14,5 @@ data class CartaoEntity(
     val limite      : Double,
     val limiteMaximo: Double,
     val template    : String = "default",
+    val bloqueado   : Boolean = false,
 )

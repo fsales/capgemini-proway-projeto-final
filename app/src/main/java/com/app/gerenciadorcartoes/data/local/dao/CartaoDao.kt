@@ -31,6 +31,9 @@ interface CartaoDao {
     @Query("UPDATE cartoes SET limite = :limite WHERE id = :id")
     suspend fun atualizarLimite(id: Long, limite: Double)
 
+    @Query("UPDATE cartoes SET bloqueado = :bloqueado WHERE id = :id")
+    suspend fun atualizarBloqueio(id: Long, bloqueado: Boolean)
+
     @Query("DELETE FROM cartoes WHERE id = :id")
     suspend fun excluirPorId(id: Long)
 }

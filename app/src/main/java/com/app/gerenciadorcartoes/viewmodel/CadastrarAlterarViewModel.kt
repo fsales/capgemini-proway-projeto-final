@@ -113,7 +113,7 @@ class CadastrarAlterarViewModel @Inject constructor(
             _uiState.update { it.copy(salvando = true) }
             runCatching {
                 val s            = _uiState.value
-                val limiteMaximo = s.limite.toDoubleOrNull() ?: 0.0
+                val limiteMaximo = parseLimite(s.limite) ?: 0.0
                 val limiteAtual  = if (id == 0L) {
                     limiteMaximo
                 } else {
@@ -132,8 +132,11 @@ class CadastrarAlterarViewModel @Inject constructor(
                     limiteMaximo= limiteMaximo,
                     template    = s.template,
                 )
-                if (id == 0L) cartaoRepository.salvar(cartao)
-                else          cartaoRepository.atualizar(cartao)
+                if (id == 0L) {
+                    cartaoRepository.salvar(cartao)
+                } else {
+                    cartaoRepository.atualizar(cartao)
+                }
                 _uiEvent.send(CadastrarAlterarUiEvent.NavigateBack)
             }.onFailure { erro ->
                 if (erro is CancellationException) throw erro
@@ -163,10 +166,38 @@ class CadastrarAlterarViewModel @Inject constructor(
         if (!Regex("""^\d{2}/\d{2}$""").matches(s.validade)) {
             _uiState.update { it.copy(erroValidade = "Formato MM/AA") }; valid = false
         }
-        val limite = s.limite.toDoubleOrNull()
+        val limite = parseLimite(s.limite)
         if (s.limite.isBlank() || limite == null || limite <= 0.0) {
             _uiState.update { it.copy(erroLimite = "Limite inválido") }; valid = false
         }
         return valid
+    }
+
+    private fun parseLimite(valor: String): Double? {
+        val numero = valor
+            .replace("R$", "")
+            .replace("\\s".toRegex(), "")
+            .filter { it.isDigit() || it == ',' || it == '.' }
+
+        if (numero.isBlank()) return null
+
+        val separadores = numero.count { it == ',' || it == '.' }
+        val separadorDecimalIndex = maxOf(numero.lastIndexOf(','), numero.lastIndexOf('.'))
+        if (separadorDecimalIndex == -1) return numero.toDoubleOrNull()
+
+        val parteInteira = numero.substring(0, separadorDecimalIndex).filter(Char::isDigit)
+        val parteDecimal = numero.substring(separadorDecimalIndex + 1).filter(Char::isDigit)
+
+        val separadorUnicoDeMilhar = separadores == 1 &&
+            parteDecimal.length == 3 &&
+            parteInteira.length <= 3
+
+        val normalizado = when {
+            separadorUnicoDeMilhar -> parteInteira + parteDecimal
+            parteDecimal.isBlank() -> parteInteira
+            else                   -> "$parteInteira.$parteDecimal"
+        }
+
+        return normalizado.toDoubleOrNull()
     }
 }

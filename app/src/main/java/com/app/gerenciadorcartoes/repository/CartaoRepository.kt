@@ -12,4 +12,5 @@ interface CartaoRepository {
     suspend fun atualizar(cartao: Cartao)
     suspend fun atualizarLimite(id: Long, limite: Double)
     suspend fun excluirPorId(id: Long)
+    suspend fun atualizarBloqueio(id: Long, novoStatusBloqueio: Boolean)
 }

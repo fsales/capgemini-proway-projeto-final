@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SnackbarHostState
@@ -70,6 +71,7 @@ fun DetalheScreen(
                 is DetalheUiEvent.NavigateToAjustarLimite -> onNavigateToAjustarLimite(event.id)
                 is DetalheUiEvent.NavigateToFatura        -> onNavigateToFatura(event.id)
                 is DetalheUiEvent.MostrarErro             -> snackbarHostState.showSnackbar(event.mensagem)
+                is DetalheUiEvent.MostrarMensagem         -> snackbarHostState.showSnackbar(event.mensagem)
             }
         }
     }
@@ -129,8 +131,12 @@ private fun DetalheBody(
             .padding(spacing.medium),
         verticalArrangement = Arrangement.spacedBy(spacing.extraLarge),
     ) {
-        CartaoSection(detalhe = detalhe)
-        LimiteSection(
+         CartaoSection(detalhe = detalhe)
+         BlockCardSection(
+             detalhe = detalhe,
+             onBlockCard = { onEvent(DetalheEvent.BloquearCartao) }
+         )
+         LimiteSection(
             detalhe          = detalhe,
             onAjustarLimite = { onEvent(DetalheEvent.AjustarLimite) },
             onVerFaturas    = { onEvent(DetalheEvent.VerFaturas) },
@@ -142,6 +148,41 @@ private fun DetalheBody(
 private fun CartaoSection(detalhe: CartaoDetalhe) {
     CartaoTemplateCard(cartao = detalhe.cartao)
 }
+
+@Composable
+private fun BlockCardSection(
+     detalhe          : CartaoDetalhe,
+     onBlockCard : () -> Unit,){
+     val spacing              = LocalSpacing.current
+     val isBloqueado          = detalhe.cartao.bloqueado
+     val corBotao             = if (isBloqueado) Color(0xFF2E7D32)  else Color(0xFFC62828)
+     val textoBotao           = if (isBloqueado) "Desbloquear" else "Bloquear"
+
+     Column(
+         modifier            = Modifier.fillMaxWidth(),
+         verticalArrangement = Arrangement.spacedBy(spacing.medium),
+     ) {
+         Row(
+             modifier              = Modifier.fillMaxWidth(),
+             horizontalArrangement = Arrangement.SpaceBetween,
+             verticalAlignment     = Alignment.CenterVertically,
+         ) {
+             Text(
+                 text  = "Bloqueio",
+                 style = MaterialTheme.typography.titleLarge,
+             )
+             Button(
+                 onClick = onBlockCard,
+                 colors = ButtonDefaults.buttonColors(
+                     containerColor = corBotao
+                 )
+             ) {
+                 Text(text = textoBotao)
+             }
+         }
+
+     }
+ }
 
 @Composable
 private fun LimiteSection(
