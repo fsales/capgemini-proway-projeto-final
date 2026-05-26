@@ -57,7 +57,9 @@ app/src/main/java/com/app/gerenciadorcartoes/
 ├── MainActivity.kt                   @AndroidEntryPoint · enableEdgeToEdge()
 │
 ├── model/
-│   └── Cartao.kt                     Modelo de domínio puro — zero importações Android/Room
+│   ├── Cartao.kt                     Modelo de domínio puro — zero importações Android/Room
+│   ├── ResultadoAutenticacaoExterna.kt Resultado da autenticação via provedor externo — `Autenticado` | `PrecisaCadastro`
+│   └── UsuarioAuth.kt                Modelo de domínio de autenticação — zero importações de framework ou provedor
 │
 ├── data/local/
 │   ├── converter/                    (vazio — reservado para @TypeConverters)
@@ -78,12 +80,22 @@ app/src/main/java/com/app/gerenciadorcartoes/
 │   ├── CartaoDetalheRepositoryImpl.kt
 │   ├── CartaoRepository.kt           Interface — apenas tipos de domínio
 │   ├── CartaoRepositoryImpl.kt       @Singleton — delega para CartaoDao + mapper
+│   ├── SessaoRepository.kt           Interface — orquestra AuthRepository + SessionManager; ViewModels dependem APENAS dela
+│   ├── SessaoRepositoryImpl.kt       ÚNICA classe que coordena simultaneamente AuthRepository + SessionManager + CadastroUsuarioRepository
 │   └── mapper/
 │       ├── CadastroUsuarioMapper.kt  funções de extensão toDomain() / toEntity()
 │       └── CartaoMapper.kt           funções de extensão toDomain() / toEntity()
 │
-├── network/
-│   └── service/ApiService.kt         Placeholder Retrofit — sem endpoints ativos
+├── network/                          ← clientes de APIs externas (HTTP, Auth, etc.) — provedor-agnóstico
+│   ├── auth/
+│   │   └── AuthDataSource.kt         Interface — expõe apenas UsuarioAuth / primitivos; zero dependência de provedor
+│   ├── firebase/
+│   │   └── FirebaseAuthDataSource.kt ÚNICA classe que importa o SDK do provedor de auth atual
+│   ├── model/
+│   │   └── ViaCepResponse.kt         DTO de resposta HTTP — confinado a network/; não vaza ao domínio
+│   └── service/
+│       ├── ApiService.kt             Placeholder de cliente HTTP — sem endpoints ativos
+│       └── BuscaCep.kt               Interface de cliente HTTP — ViaCEP
 │
 ├── di/
 │   ├── AppModule.kt                  abstract class — @Binds + @Provides no companion
@@ -91,7 +103,7 @@ app/src/main/java/com/app/gerenciadorcartoes/
 │
 └── ui/
     ├── theme/                        Color · Type · Shape · Spacing · IconSize · Theme
-    ├── components/                   AppScaffold · AppTopAppBar · AppLoading · EmptyState
+    ├── components/                   AppScaffold · AppTopAppBar · AppLoading · EmptyState · GoogleSignInButton
     ├── navigation/                   Routes.kt · AppNavHost.kt
     ├── feature/
     │   ├── login/                    LoginEvent · LoginUiEvent · LoginScreen · state/LoginUiState
@@ -100,8 +112,10 @@ app/src/main/java/com/app/gerenciadorcartoes/
     |   |── fatura/                   FaturaEvent · FaturaUiEvent · FaturaScreen · state/FaturaUiState
     │   ├── cadastraralterar/         CadastrarAlterarEvent · CadastrarAlterarUiEvent
     │   │                             CadastrarAlterarScreen · state/CadastrarAlterarUiState
-    │   └── cadastrousuario/          CadastroUsuarioEvent · CadastroUsuarioUiEvent
-    │                                 CadastroUsuarioScreen · state/CadastroUsuarioUiState
+    │   ├── cadastrousuario/          CadastroUsuarioEvent · CadastroUsuarioUiEvent
+    │   │                             CadastroUsuarioScreen · state/CadastroUsuarioUiState
+    │   └── recuperarsenha/           RecuperarSenhaEvent · RecuperarSenhaUiEvent
+    │                                 RecuperarSenhaScreen · state/RecuperarSenhaUiState
     └── viewmodel/
         ├── LoginViewModel.kt
         ├── ListaViewModel.kt
@@ -109,6 +123,7 @@ app/src/main/java/com/app/gerenciadorcartoes/
         |── FaturaViewModel.kt
         ├── CadastrarAlterarViewModel.kt
         ├── CadastroUsuarioViewModel.kt
+        ├── RecuperarSenhaViewModel.kt
         └── SplashViewModel.kt
 ```
 
@@ -140,10 +155,15 @@ Todos os campos têm valores padrão → `Cartao()` é sempre um estado inicial 
 
 | Regra | Detalhe |
 |---|---|
-| `model/Cartao.kt` tem zero importações de framework | Sem `@Entity`, sem `@SerialName`, sem classes Android |
-| A interface `CartaoRepository` usa apenas `Cartao` / primitivos | Sem `CartaoEntity`, sem tipos Room/Retrofit |
+| `model/Cartao.kt` e `model/UsuarioAuth.kt` têm zero importações de framework | Sem `@Entity`, sem `@SerialName`, sem classes Android ou de provedores externos |
+| A interface `CartaoRepository` usa apenas `Cartao` / primitivos | Sem `CartaoEntity`, sem types Room ou DTOs de rede |
 | `CartaoRepositoryImpl` é a **única** classe que importa `CartaoEntity` ou `CartaoDao` | Os mappers são chamados aqui e em nenhum outro lugar |
+| `FirebaseAuthDataSource` é a **única** classe que importa o SDK do provedor de auth | Toda lógica do provedor fica em `network/<provedor>/`; o restante do app depende de `AuthDataSource` (interface em `network/auth/`) |
+| A interface `AuthDataSource` usa apenas `UsuarioAuth` / primitivos | Sem tipos do provedor (`FirebaseUser`, `FirebaseAuth`, etc.) |
+| `ViaCepResponse` não vaza para fora do pacote `network/` | DTOs de rede nunca chegam ao domínio nem aos ViewModels |
 | ViewModels só importam `CartaoRepository` (interface) | Nunca importar `Dao` ou `Entity` diretamente |
+| ViewModels de autenticação/sessão só importam `SessaoRepository` | Nunca importar `AuthRepository`, `SessionManager`, `AuthDataSource` ou `FirebaseAuthDataSource` diretamente em ViewModels |
+| `SessaoRepositoryImpl` é a **única** classe que coordena `AuthRepository` + `SessionManager` juntos | Nenhum outro arquivo faz as duas injeções simultaneamente |
 | A camada de UI nunca muta o estado diretamente | Sempre despacha `XEvent` via `onEvent()` |
 | `XScreen` é dono do ViewModel; `XContent` é puro | Previews sempre chamam `XContent`, nunca `XScreen` |
 | Eventos pontuais de navegação / Snackbar passam pelo `Channel<XUiEvent>` | Nunca usar `StateFlow` para efeitos pontuais |
@@ -160,7 +180,7 @@ Todos os campos têm valores padrão → `Cartao()` é sempre um estado inicial 
 | Banco de dados Room | `AppDatabase` | `AppDatabase` |
 | Interface Repository | `<Entidade>Repository` | `CartaoRepository` |
 | Implementação do Repository | `<Entidade>RepositoryImpl` | `CartaoRepositoryImpl` |
-| Serviço Retrofit | `ApiService` | `ApiService` |
+| Cliente HTTP externo | `Service` | `ApiService` |
 | ViewModel | `<Feature>ViewModel` | `ListaViewModel` |
 | Estado da UI | `<Feature>UiState` | `ListaUiState` |
 | Evento do usuário (UI → VM) | `<Feature>Event` | `ListaEvent` |
@@ -315,7 +335,8 @@ data class XUiState(
 
 **Casos especiais observados em `CadastrarAlterarUiState`:**
 - `salvando: Boolean = false` — flag exclusiva para o progresso da operação de salvar (distinto de `carregando`, que representa o carregamento inicial dos dados).
-- `isEdicao: Boolean` — propriedade computada (`get() = nomeTitular.isNotBlank()`) que indica se o formulário está em modo edição.
+- `modoEdicao: Boolean = false` — campo explícito inicializado no `ViewModel` com `id != 0L`; indica se o formulário está em modo edição.
+- `isEdicao: Boolean` — propriedade computada (`get() = modoEdicao`), exposta para a UI.
 - Não possui campo `erro: String?` global; usa erros por campo (`erroNome`, `erroNumero`, etc.).
 
 ---
@@ -369,12 +390,13 @@ composable<XRoute> { XScreen(navigateBack = { navController.popBackStack() }) }
 |---|---|---|
 | `SplashRoute` | Verificação de sessão na abertura do app | ✅ sim |
 | `LoginRoute` | Autenticação do usuário | não |
-| `ListaRoute` | Lista de todos os cartões | não |
+| `ListaRoute(exibirConfirmacao: Boolean = false)` | Lista de todos os cartões; `exibirConfirmacao = true` exibe snackbar de sucesso | não |
 | `DetalheRoute(id: Long)` | Detalhe somente leitura | não |
-| `FaturaRoute(id: Long)` | Faturas/mock de lançamentos por mês para o cartão selecionado
+| `FaturaRoute(id: Long)` | Faturas/mock de lançamentos por mês para o cartão selecionado | não |
 | `AjustarLimiteRoute(id: Long)` | Ajuste de limite de um cartão | não |
 | `CadastrarAlterarRoute(id: Long = 0L)` | Criar (`id=0`) ou editar (`id>0`) | não |
-| `CadastroUsuarioRoute` | Cadastro de novo usuário | não |
+| `CadastroUsuarioRoute(userId, emailExterno, nomeExterno)` | Cadastro (email+senha) ou completar perfil Google (`userId != ""`) | não |
+| `RecuperarSenhaRoute(emailInicial: String = "")` | Recuperação de senha — `emailInicial` pré-preenche o campo | não |
 
 ---
 
@@ -388,6 +410,44 @@ interface CartaoRepository {
     suspend fun salvar(cartao: Cartao) : Long    // returns generated id
     suspend fun atualizar(cartao: Cartao)
     suspend fun excluirPorId(id: Long)
+}
+```
+
+---
+
+## Contrato do SessaoRepository
+
+```kotlin
+interface SessaoRepository {
+    // Login
+    suspend fun entrar(email: String, senha: String)
+    suspend fun autenticarComToken(idToken: String): ResultadoAutenticacaoExterna
+
+    // Cadastro
+    suspend fun criarContaFirebase(email: String, senha: String): String  // → userId
+    suspend fun ativarSessao(userId: String)
+    suspend fun desfazerCriacaoConta()   // rollback Firebase se Room falhar
+
+    // Logout
+    suspend fun encerrarSessao()
+
+    // Estado
+    suspend fun verificarSessaoInicial(): Boolean  // true = autenticado e em sincronia
+    suspend fun verificarPerfilGoogleIncompleto(): ResultadoAutenticacaoExterna?
+    // null = nenhuma ação; PrecisaCadastro = Firebase ativo mas perfil Room ausente (Splash lida com isso)
+    fun observarDesconexaoExterna(): Flow<Unit>    // emite quando Firebase desconecta externamente
+
+    // Perfil
+    suspend fun buscarNomeUsuario(): String?       // null = sessão inativa ou perfil não encontrado
+
+    // Misc
+    suspend fun enviarRecuperacaoSenha(email: String)
+}
+
+// model/ResultadoAutenticacaoExterna.kt
+sealed interface ResultadoAutenticacaoExterna {
+    data object Autenticado : ResultadoAutenticacaoExterna
+    data class PrecisaCadastro(val userId: String, val email: String, val nome: String) : ResultadoAutenticacaoExterna
 }
 ```
 
@@ -473,6 +533,14 @@ AppLoading()   // no params
 
 // EmptyState — full-screen icon + message
 EmptyState(message: String)
+
+// GoogleSignInButton — botão Google com branding oficial (fundo branco fixo, borda cinza, ícone G colorido)
+// ⚠️ NÃO usa MaterialTheme para cores — exigência das Google Brand Guidelines
+GoogleSignInButton(
+    onClick  : () -> Unit,
+    modifier : Modifier = Modifier,
+    enabled  : Boolean  = true,
+)
 ```
 
 ---
@@ -628,3 +696,5 @@ Plugin Android:
 - 2026-05-15 — Adicionado observarPorId() reativo ao CartaoDao; Matriz de Estratégia de Leitura atualizada
 - 2026-05-15 — Nova funcionalidade: tela CadastrarAlterar; Árvore de Fontes e Rotas Existentes atualizadas
 ```
+
+---

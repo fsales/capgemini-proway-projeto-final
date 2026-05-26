@@ -60,7 +60,6 @@ import java.util.Locale
 
 private val PtBrLocale: Locale = Locale.forLanguageTag("pt-BR")
 private const val LimiteMinimoSlider = 1.0
-private const val LimiteMaximoSlider = 10_000.0
 
 // =============================================================================
 // Screen — ponto de entrada; coleta ViewModel e roteia UiEvent.
@@ -87,7 +86,6 @@ fun AjustarLimiteScreen(
     AjustarLimiteContent(
         uiState           = uiState,
         snackbarHostState = snackbarHostState,
-        onNavigateBack    = navigateBack,
         onEvent           = viewModel::onEvent,
     )
 }
@@ -99,7 +97,6 @@ fun AjustarLimiteScreen(
 fun AjustarLimiteContent(
     uiState           : AjustarLimiteUiState = AjustarLimiteUiState(),
     snackbarHostState : SnackbarHostState    = remember { SnackbarHostState() },
-    onNavigateBack    : () -> Unit = {},
     onEvent           : (AjustarLimiteEvent) -> Unit = {},
 ) {
     val currencyFormatter = rememberCurrencyFormatter()
@@ -109,7 +106,7 @@ fun AjustarLimiteContent(
         topBar = {
             AppTopAppBar(
                 title          = "Ajustar limite",
-                onNavigateBack = onNavigateBack,
+                onNavigateBack = { onEvent(AjustarLimiteEvent.Voltar) },
             )
         },
     ) { paddingValues ->
@@ -119,7 +116,6 @@ fun AjustarLimiteContent(
                 uiState           = uiState,
                 paddingValues     = paddingValues,
                 currencyFormatter = currencyFormatter,
-                onNavigateBack    = onNavigateBack,
                 onEvent           = onEvent,
             )
         }
@@ -143,7 +139,6 @@ private fun AjustarLimiteBody(
     uiState           : AjustarLimiteUiState,
     paddingValues     : PaddingValues,
     currencyFormatter : NumberFormat,
-    onNavigateBack    : () -> Unit,
     onEvent           : (AjustarLimiteEvent) -> Unit,
 ) {
     val spacing = LocalSpacing.current
@@ -192,7 +187,7 @@ private fun AjustarLimiteBody(
             horizontalArrangement = Arrangement.spacedBy(spacing.medium),
         ) {
             OutlinedButton(
-                onClick  = onNavigateBack,
+                onClick  = { onEvent(AjustarLimiteEvent.Voltar) },
                 modifier = Modifier.weight(1f),
                 enabled  = !uiState.salvando,
             ) {
@@ -252,8 +247,9 @@ private fun LimiteSliderCard(
 
     if (validacaoManual != null) {
         ValidacaoManualDialog(
-            validacao = validacaoManual!!,
-            onDismiss = { validacaoManual = null },
+            validacao    = validacaoManual!!,
+            limiteMaximo = currencyFormatter.format(limiteMaximo),
+            onDismiss    = { validacaoManual = null },
         )
     }
 
@@ -296,7 +292,7 @@ private fun LimiteSliderCard(
                                 textoManual = sliderValue.formatarEntradaMonetaria()
                                 validacaoManual = ValidacaoManual.ValorMinimo
                             }
-                            valorDigitado != null && valorDigitado > LimiteMaximoSlider -> {
+                            valorDigitado != null && valorDigitado > limiteMaximo -> {
                                 textoManual = sliderValue.formatarEntradaMonetaria()
                                 validacaoManual = ValidacaoManual.ValorMaximo
                             }
@@ -370,11 +366,12 @@ private fun LimiteSliderCard(
 
 @Composable
 private fun ValidacaoManualDialog(
-    validacao : ValidacaoManual,
-    onDismiss : () -> Unit,
+    validacao    : ValidacaoManual,
+    limiteMaximo : String,
+    onDismiss    : () -> Unit,
 ) {
     val mensagem = when (validacao) {
-        ValidacaoManual.ValorMaximo -> "O limite máximo permitido é R$ 10.000,00."
+        ValidacaoManual.ValorMaximo -> "O limite máximo permitido é $limiteMaximo."
         ValidacaoManual.ValorMinimo -> "O limite precisa ser maior que zero."
     }
 
@@ -492,7 +489,13 @@ private fun rememberCurrencyFormatter(): NumberFormat =
     remember { NumberFormat.getCurrencyInstance(PtBrLocale) }
 
 private fun limiteMaximoSlider(uiState: AjustarLimiteUiState): Double =
-    LimiteMaximoSlider
+    maxOf(
+        LimiteMinimoSlider,
+        uiState.limiteMaximo
+            .takeIf { it > 0.0 }
+            ?: uiState.limiteAtual.takeIf { it > 0.0 }
+            ?: LimiteMinimoSlider,
+    )
 
 private fun Double.arredondarParaPasso(): Double =
     maxOf(LimiteMinimoSlider, kotlin.math.round(this / 50.0) * 50.0)
@@ -561,6 +564,7 @@ private fun AjustarLimitePreview() {
         AjustarLimiteContent(
             uiState = AjustarLimiteUiState(
                 limiteAtual       = 5_000.0,
+                limiteMaximo      = 8_000.0,
                 novoLimite        = 7_500.0,
                 cartaoFinalNumero = "1234",
             ),
@@ -575,6 +579,7 @@ private fun AjustarLimiteErroPreview() {
         AjustarLimiteContent(
             uiState = AjustarLimiteUiState(
                 limiteAtual       = 5_000.0,
+                limiteMaximo      = 5_000.0,
                 novoLimite        = 100.0,
                 cartaoFinalNumero = "1234",
                 erroLimite        = "O limite deve ser maior que zero.",

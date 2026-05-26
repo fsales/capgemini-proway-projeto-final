@@ -1,13 +1,17 @@
 package com.app.gerenciadorcartoes.viewmodel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.app.gerenciadorcartoes.data.local.session.SessionManager
+import androidx.navigation.toRoute
 import com.app.gerenciadorcartoes.repository.CartaoRepository
+import com.app.gerenciadorcartoes.repository.SessaoRepository
 import com.app.gerenciadorcartoes.ui.feature.lista.ListaEvent
 import com.app.gerenciadorcartoes.ui.feature.lista.ListaUiEvent
 import com.app.gerenciadorcartoes.ui.feature.lista.state.ListaUiState
+import com.app.gerenciadorcartoes.ui.navigation.ListaRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,9 +23,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ListaViewModel @Inject constructor(
-    private val cartaoRepository: CartaoRepository,
-    private val sessionManager: SessionManager,
+    savedStateHandle             : SavedStateHandle,
+    private val cartaoRepository : CartaoRepository,
+    private val sessaoRepository : SessaoRepository,
 ) : ViewModel() {
+
+    private val route = savedStateHandle.toRoute<ListaRoute>()
 
     private val _uiState = MutableStateFlow(ListaUiState(carregando = true))
 
@@ -32,6 +39,13 @@ class ListaViewModel @Inject constructor(
 
     init {
         observarCartoes()
+        observarDesconexao()
+        carregarUsuario()
+        if (route.exibirConfirmacao) {
+            viewModelScope.launch {
+                _uiEvent.send(ListaUiEvent.MostrarMensagem("Cadastro realizado com sucesso!"))
+            }
+        }
     }
 
     fun onEvent(event: ListaEvent) {
@@ -48,6 +62,35 @@ class ListaViewModel @Inject constructor(
             is ListaEvent.ExcluirCartao -> excluir(event.id)
 
             ListaEvent.Deslogar -> deslogar()
+
+            ListaEvent.NavegaParaPerfil -> navegarParaPerfil()
+        }
+    }
+
+    private fun carregarUsuario() {
+        viewModelScope.launch {
+            runCatching {
+                val userId = sessaoRepository.buscarUserId()
+                val nome   = sessaoRepository.buscarNomeUsuario()
+                _uiState.update { it.copy(nomeUsuario = nome, userId = userId) }
+            }.onFailure { erro ->
+                if (erro is CancellationException) throw erro
+                _uiEvent.send(ListaUiEvent.MostrarErro(erro.message ?: "Erro ao carregar usuário"))
+            }
+        }
+    }
+
+    private fun navegarParaPerfil() {
+        viewModelScope.launch {
+            runCatching {
+                val userId = _uiState.value.userId
+                    ?: sessaoRepository.buscarUserId()
+                    ?: error("Sessão não encontrada")
+                _uiEvent.send(ListaUiEvent.NavegaParaPerfil(userId))
+            }.onFailure { erro ->
+                if (erro is CancellationException) throw erro
+                _uiEvent.send(ListaUiEvent.MostrarErro(erro.message ?: "Erro ao abrir perfil"))
+            }
         }
     }
 
@@ -58,8 +101,22 @@ class ListaViewModel @Inject constructor(
                     _uiState.update { it.copy(cartoes = cartoes, carregando = false) }
                 }
             }.onFailure { erro ->
+                if (erro is CancellationException) throw erro
                 _uiState.update { it.copy(carregando = false, erro = erro.message) }
                 _uiEvent.send(ListaUiEvent.MostrarErro(erro.message ?: "Erro ao carregar cartões"))
+            }
+        }
+    }
+
+    private fun observarDesconexao() {
+        viewModelScope.launch {
+            runCatching {
+                sessaoRepository.observarDesconexaoExterna().collect {
+                    _uiEvent.send(ListaUiEvent.NavegaParaLogin)
+                }
+            }.onFailure { erro ->
+                if (erro is CancellationException) throw erro
+                _uiEvent.send(ListaUiEvent.MostrarErro(erro.message ?: "Erro ao monitorar sessão"))
             }
         }
     }
@@ -70,6 +127,7 @@ class ListaViewModel @Inject constructor(
                 cartaoRepository.excluirPorId(id)
                 _uiEvent.send(ListaUiEvent.MostrarMensagem("Cartão removido com sucesso"))
             }.onFailure { erro ->
+                if (erro is CancellationException) throw erro
                 _uiEvent.send(ListaUiEvent.MostrarErro(erro.message ?: "Erro ao remover cartão"))
             }
         }
@@ -78,9 +136,10 @@ class ListaViewModel @Inject constructor(
     private fun deslogar() {
         viewModelScope.launch {
             runCatching {
-                sessionManager.logout()
+                sessaoRepository.encerrarSessao()
                 _uiEvent.send(ListaUiEvent.NavegaParaLogin)
             }.onFailure { erro ->
+                if (erro is CancellationException) throw erro
                 _uiEvent.send(ListaUiEvent.MostrarErro(erro.message ?: "Erro ao encerrar sessão"))
             }
         }

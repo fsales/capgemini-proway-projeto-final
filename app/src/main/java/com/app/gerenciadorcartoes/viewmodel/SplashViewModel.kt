@@ -1,16 +1,18 @@
 package com.app.gerenciadorcartoes.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.app.gerenciadorcartoes.data.local.session.SessionManager
+import com.app.gerenciadorcartoes.model.ResultadoAutenticacaoExterna
+import com.app.gerenciadorcartoes.repository.SessaoRepository
 import com.app.gerenciadorcartoes.ui.feature.splash.SplashUiEvent
 import com.app.gerenciadorcartoes.ui.feature.splash.state.SplashUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
@@ -19,7 +21,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SplashViewModel @Inject constructor(
-    private val sessionManager: SessionManager,
+    private val sessaoRepository : SessaoRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SplashUiState())
@@ -31,22 +33,41 @@ class SplashViewModel @Inject constructor(
     init {
         verificarSessao()
     }
-
     private fun verificarSessao() {
         viewModelScope.launch {
             runCatching {
-                delay(2_200L)
-                val logado = sessionManager.isLoggedIn().first()
+                delay(DURACAO_SPLASH_MS)
+                val autenticado = sessaoRepository.verificarSessaoInicial()
                 _uiState.update { it.copy(carregando = false) }
-                if (logado) {
+                if (autenticado) {
                     _uiEvent.send(SplashUiEvent.NavigateToLista)
-                } else {
-                    _uiEvent.send(SplashUiEvent.NavigateToLogin)
+                    return@runCatching
                 }
-            }.onFailure {
+                when (val perfil = sessaoRepository.verificarPerfilGoogleIncompleto()) {
+                    ResultadoAutenticacaoExterna.Autenticado ->
+                        _uiEvent.send(SplashUiEvent.NavigateToLista)
+
+                    is ResultadoAutenticacaoExterna.PrecisaCadastro ->
+                        _uiEvent.send(
+                            SplashUiEvent.NavigateToCadastroIncompleto(
+                                userId = perfil.userId,
+                                email  = perfil.email,
+                                nome   = perfil.nome,
+                            )
+                        )
+
+                    null -> _uiEvent.send(SplashUiEvent.NavigateToLogin)
+                }
+            }.onFailure { erro ->
+                if (erro is CancellationException) throw erro
+                Log.e("SplashViewModel", "Erro ao verificar sessão — redirecionando para Login", erro)
                 _uiState.update { it.copy(carregando = false) }
                 _uiEvent.send(SplashUiEvent.NavigateToLogin)
             }
         }
+    }
+
+    private companion object {
+        const val DURACAO_SPLASH_MS = 2_200L
     }
 }

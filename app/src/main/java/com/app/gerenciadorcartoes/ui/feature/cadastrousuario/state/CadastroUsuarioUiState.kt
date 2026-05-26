@@ -9,6 +9,16 @@ data class CadastroUsuarioUiState(
      * Deve ser limpo despachando [com.app.gerenciadorcartoes.ui.feature.cadastrousuario.CadastroUsuarioEvent.FocoRealizado].
      */
     val focarPrimeiroCampoComErro : Boolean = false,
+    /**
+     * `true` quando o usuário veio de um provedor externo (Google etc.).
+     * Oculta a aba de Segurança — a conta no provedor já existe.
+     */
+    val isFluxoExterno            : Boolean = false,
+    /**
+     * `true` quando o usuário acessou a tela para editar o próprio perfil já cadastrado.
+     * Oculta a aba de Segurança e e-mail fica somente-leitura.
+     */
+    val isModoEdicao              : Boolean = false,
 
     val nome           : String  = "",
     val erroNome       : String? = null,
@@ -22,6 +32,8 @@ data class CadastroUsuarioUiState(
     val erroNumber     : String? = null,
     val bairro         : String  = "",
     val erroBairro     : String? = null,
+    val cidade         : String  = "",
+    val erroCidade     : String? = null,
     val estado         : String  = "",
     val erroEstado     : String? = null,
     val email          : String  = "",
@@ -40,7 +52,7 @@ data class CadastroUsuarioUiState(
     /** Etapa 1 — Endereço possui algum campo com erro. */
     val temErroNaEtapa1: Boolean
         get() = erroCep != null || erroEndereco != null || erroNumber != null ||
-                erroBairro != null || erroEstado != null
+                erroBairro != null || erroCidade != null || erroEstado != null
 
     /** Etapa 2 — Segurança possui algum campo com erro. */
     val temErroNaEtapa2: Boolean

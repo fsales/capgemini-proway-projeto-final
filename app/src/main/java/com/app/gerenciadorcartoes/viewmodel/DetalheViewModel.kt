@@ -5,12 +5,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.app.gerenciadorcartoes.repository.CartaoDetalheRepository
-import com.app.gerenciadorcartoes.repository.CartaoRepository
 import com.app.gerenciadorcartoes.ui.feature.detalhe.DetalheEvent
 import com.app.gerenciadorcartoes.ui.feature.detalhe.DetalheUiEvent
 import com.app.gerenciadorcartoes.ui.feature.detalhe.state.DetalheUiState
 import com.app.gerenciadorcartoes.ui.navigation.DetalheRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,7 +23,6 @@ import javax.inject.Inject
 @HiltViewModel
 class DetalheViewModel @Inject constructor(
     savedStateHandle              : SavedStateHandle,
-    private val cartaoRepository  : CartaoRepository,
     private val detalheRepository : CartaoDetalheRepository,
 ) : ViewModel() {
 
@@ -67,6 +66,7 @@ class DetalheViewModel @Inject constructor(
                     }
                 }
             }.onFailure { erro ->
+                if (erro is CancellationException) throw erro
                 _uiState.update { it.copy(carregando = false, erro = erro.message) }
                 _uiEvent.send(DetalheUiEvent.MostrarErro(erro.message ?: "Erro ao carregar cartão"))
             }

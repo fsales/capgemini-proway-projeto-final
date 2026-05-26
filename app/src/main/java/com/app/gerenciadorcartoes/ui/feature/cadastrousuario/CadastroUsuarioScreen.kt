@@ -2,7 +2,12 @@ package com.app.gerenciadorcartoes.ui.feature.cadastrousuario
 
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -45,14 +50,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -74,8 +87,9 @@ import com.app.gerenciadorcartoes.viewmodel.CadastroUsuarioViewModel
 
 @Composable
 fun CadastroUsuarioScreen(
-    navigateBack: () -> Unit,
-    viewModel: CadastroUsuarioViewModel = hiltViewModel(),
+    navigateBack    : () -> Unit,
+    navigateToLista : (mensagem: String) -> Unit,
+    viewModel       : CadastroUsuarioViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -83,9 +97,10 @@ fun CadastroUsuarioScreen(
     LaunchedEffect(viewModel) {
         viewModel.uiEvent.collect { event ->
             when (event) {
-                CadastroUsuarioUiEvent.NavigateBack       -> navigateBack()
-                is CadastroUsuarioUiEvent.MostrarErro     -> snackbarHostState.showSnackbar(event.mensagem)
-                is CadastroUsuarioUiEvent.MostrarMensagem -> snackbarHostState.showSnackbar(event.mensagem)
+                CadastroUsuarioUiEvent.NavigateBack        -> navigateBack()
+                is CadastroUsuarioUiEvent.NavigateToLista  -> navigateToLista(event.mensagem)
+                is CadastroUsuarioUiEvent.MostrarErro      -> snackbarHostState.showSnackbar(event.mensagem)
+                is CadastroUsuarioUiEvent.MostrarMensagem  -> snackbarHostState.showSnackbar(event.mensagem)
             }
         }
     }
@@ -108,9 +123,13 @@ fun CadastroUsuarioContent(
     val spacing      = LocalSpacing.current
     val iconSize     = LocalIconSize.current
     val focusManager = LocalFocusManager.current
-    val steps        = CadastroUsuarioTab.entries
+    val steps = when {
+        uiState.isFluxoExterno || uiState.isModoEdicao ->
+            CadastroUsuarioTab.entries.filter { it != CadastroUsuarioTab.Seguranca }
+        else ->
+            CadastroUsuarioTab.entries
+    }
 
-    // ── FocusRequesters — responsabilidade exclusiva da UI ──
     val nomeFocusRequester           = remember { FocusRequester() }
     val cpfFocusRequester            = remember { FocusRequester() }
     val emailFocusRequester          = remember { FocusRequester() }
@@ -118,16 +137,17 @@ fun CadastroUsuarioContent(
     val enderecoFocusRequester       = remember { FocusRequester() }
     val numberFocusRequester         = remember { FocusRequester() }
     val bairroFocusRequester         = remember { FocusRequester() }
+    val cidadeFocusRequester         = remember { FocusRequester() }
     val estadoFocusRequester         = remember { FocusRequester() }
     val senhaFocusRequester          = remember { FocusRequester() }
     val confirmarSenhaFocusRequester = remember { FocusRequester() }
 
-    // Estado puramente visual — não pertence ao ViewModel
     var senhaVisivel          by remember { mutableStateOf(false) }
     var confirmarSenhaVisivel by remember { mutableStateOf(false) }
     var estavaBuscandoCep     by remember { mutableStateOf(false) }
+    var cpfFieldValue by remember { mutableStateOf(TextFieldValue(uiState.cpf)) }
+    var cepFieldValue by remember { mutableStateOf(TextFieldValue(uiState.cep)) }
 
-    // ── Foca o primeiro campo ao mudar de etapa ──
     LaunchedEffect(uiState.etapaAtual) {
         when (steps[uiState.etapaAtual]) {
             CadastroUsuarioTab.DadosPessoais -> nomeFocusRequester.requestFocus()
@@ -136,7 +156,6 @@ fun CadastroUsuarioContent(
         }
     }
 
-    // ── Foca Número após busca de CEP bem-sucedida ──
     LaunchedEffect(uiState.buscandoCep) {
         if (estavaBuscandoCep && !uiState.buscandoCep && uiState.erroCep == null) {
             numberFocusRequester.requestFocus()
@@ -144,8 +163,6 @@ fun CadastroUsuarioContent(
         estavaBuscandoCep = uiState.buscandoCep
     }
 
-    // ── Foca o primeiro campo com erro (ViewModel sinaliza via flag) ──
-    // O LaunchedEffect re-dispara APÓS a recomposição com os erros já aplicados no estado.
     LaunchedEffect(uiState.focarPrimeiroCampoComErro) {
         if (!uiState.focarPrimeiroCampoComErro) return@LaunchedEffect
         focarPrimeiroCampoComErro(
@@ -159,11 +176,21 @@ fun CadastroUsuarioContent(
             enderecoFocusRequester   = enderecoFocusRequester,
             numberFocusRequester     = numberFocusRequester,
             bairroFocusRequester     = bairroFocusRequester,
+            cidadeFocusRequester     = cidadeFocusRequester,
             estadoFocusRequester     = estadoFocusRequester,
             senhaFocusRequester      = senhaFocusRequester,
             confirmarSenhaFocusRequester = confirmarSenhaFocusRequester,
         )
         onEvent(CadastroUsuarioEvent.FocoRealizado)
+    }
+
+    LaunchedEffect(uiState.cpf) {
+        if (cpfFieldValue.text != uiState.cpf)
+            cpfFieldValue = TextFieldValue(uiState.cpf, TextRange(uiState.cpf.length))
+    }
+    LaunchedEffect(uiState.cep) {
+        if (cepFieldValue.text != uiState.cep)
+            cepFieldValue = TextFieldValue(uiState.cep, TextRange(uiState.cep.length))
     }
 
     AppScaffold(
@@ -185,7 +212,12 @@ fun CadastroUsuarioContent(
         ) {
             val contentWidth = if (maxWidth >= 600.dp) 560.dp else maxWidth
 
-            if (uiState.carregando) {
+            AnimatedContent(
+                targetState    = uiState.carregando,
+                transitionSpec = { fadeIn() togetherWith fadeOut() },
+                label          = "CadastroCarregando",
+            ) { carregando ->
+            if (carregando) {
                 AppLoading()
             } else {
                 Column(
@@ -210,7 +242,6 @@ fun CadastroUsuarioContent(
                             .widthIn(max = contentWidth),
                         verticalArrangement = Arrangement.spacedBy(spacing.medium),
                     ) {
-                        // ── Cabeçalho da tela ──────────────────────────────────────────────────
                         Surface(
                             shape           = MaterialTheme.shapes.large,
                             tonalElevation  = spacing.small,
@@ -222,33 +253,55 @@ fun CadastroUsuarioContent(
                                 verticalArrangement     = Arrangement.spacedBy(spacing.small),
                                 horizontalAlignment     = Alignment.CenterHorizontally,
                             ) {
-                                Box(
-                                    modifier           = Modifier
-                                        .size(iconSize.extraLarge * 2)
-                                        .background(MaterialTheme.colorScheme.primary, CircleShape),
-                                    contentAlignment   = Alignment.Center,
-                                ) {
-                                    Icon(
-                                        imageVector        = Icons.Default.Person,
-                                        contentDescription = null,
-                                        tint               = MaterialTheme.colorScheme.onPrimary,
-                                        modifier           = Modifier.size(iconSize.large),
-                                    )
+                                Box(contentAlignment = Alignment.BottomEnd) {
+                                    Box(
+                                        modifier         = Modifier
+                                            .size(iconSize.extraLarge * 2)
+                                            .background(MaterialTheme.colorScheme.primary, CircleShape),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Icon(
+                                            imageVector        = Icons.Default.Person,
+                                            contentDescription = null,
+                                            tint               = MaterialTheme.colorScheme.onPrimary,
+                                            modifier           = Modifier.size(iconSize.large),
+                                        )
+                                    }
+                                    if (uiState.isFluxoExterno) {
+                                        Box(
+                                            modifier         = Modifier
+                                                .size(iconSize.large)
+                                                .background(Color.White, CircleShape)
+                                                .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape),
+                                            contentAlignment = Alignment.Center,
+                                        ) {
+                                            Image(
+                                                painter            = painterResource(R.drawable.ic_google_logo),
+                                                contentDescription = null,
+                                                modifier           = Modifier.size(iconSize.small),
+                                            )
+                                        }
+                                    }
                                 }
                                 Text(
-                                    text  = stringResource(R.string.cadastro_usuario_header_titulo),
+                                    text  = stringResource(
+                                        if (uiState.isFluxoExterno) R.string.cadastro_usuario_externo_titulo
+                                        else                        R.string.cadastro_usuario_header_titulo
+                                    ),
                                     style = MaterialTheme.typography.titleLarge,
                                     color = MaterialTheme.colorScheme.onSurface,
                                 )
                                 Text(
-                                    text  = stringResource(R.string.cadastro_usuario_header_subtitulo),
+                                    text  = stringResource(
+                                        if (uiState.isFluxoExterno) R.string.cadastro_usuario_externo_subtitulo
+                                        else                        R.string.cadastro_usuario_header_subtitulo
+                                    ),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                         }
 
-                        // ── Wizard: Stepper + conteúdo + botões ────────────────────────────────
                         Surface(
                             shape           = MaterialTheme.shapes.large,
                             tonalElevation  = spacing.small,
@@ -267,7 +320,6 @@ fun CadastroUsuarioContent(
                                         }
                                     },
                                     onStepClick = { index ->
-                                        // Só permite recuar para etapas já visitadas
                                         if (index < uiState.etapaAtual) {
                                             repeat(uiState.etapaAtual - index) {
                                                 onEvent(CadastroUsuarioEvent.VoltarEtapa)
@@ -282,7 +334,6 @@ fun CadastroUsuarioContent(
                                 ) { tab ->
                                     when (tab) {
 
-                                        // ── Etapa 0: Dados pessoais ────────────────────────────
                                         CadastroUsuarioTab.DadosPessoais -> AppSectionCard(
                                             title    = stringResource(R.string.cadastro_usuario_secao_dados_pessoais),
                                             subtitle = stringResource(R.string.cadastro_usuario_secao_dados_pessoais_subtitulo),
@@ -301,15 +352,34 @@ fun CadastroUsuarioContent(
                                                     imeAction      = ImeAction.Next,
                                                 ),
                                             )
+                                            if (uiState.isFluxoExterno && uiState.nome.isNotBlank()) {
+                                                Text(
+                                                    text     = stringResource(R.string.cadastro_usuario_nome_google),
+                                                    style    = MaterialTheme.typography.bodySmall,
+                                                    color    = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                )
+                                            }
                                             AppFormField(
-                                                value           = uiState.cpf,
-                                                onValueChange   = { onEvent(CadastroUsuarioEvent.CpfAlterado(it)) },
-                                                label           = stringResource(R.string.cadastro_usuario_cpf),
-                                                hintText        = stringResource(R.string.cadastro_usuario_cpf_hint),
-                                                errorMessage    = uiState.erroCpf,
-                                                focusRequester  = cpfFocusRequester,
-                                                keyboardActions = KeyboardActions(onNext = { emailFocusRequester.requestFocus() }),
-                                                keyboardOptions = KeyboardOptions(
+                                                value                = cpfFieldValue,
+                                                onValueChange        = { newValue ->
+                                                    val digits = newValue.text
+                                                        .filter { it.isDigit() }.take(11)
+                                                    val cursor = newValue.selection.start
+                                                        .coerceAtMost(digits.length)
+                                                    cpfFieldValue = TextFieldValue(
+                                                        text      = digits,
+                                                        selection = TextRange(cursor),
+                                                    )
+                                                    onEvent(CadastroUsuarioEvent.CpfAlterado(digits))
+                                                },
+                                                label                = stringResource(R.string.cadastro_usuario_cpf),
+                                                hintText             = stringResource(R.string.cadastro_usuario_cpf_hint),
+                                                errorMessage         = uiState.erroCpf,
+                                                focusRequester       = cpfFocusRequester,
+                                                visualTransformation = CpfVisualTransformation,
+                                                keyboardActions      = KeyboardActions(onNext = { emailFocusRequester.requestFocus() }),
+                                                keyboardOptions      = KeyboardOptions(
                                                     keyboardType = KeyboardType.Number,
                                                     imeAction    = ImeAction.Next,
                                                 ),
@@ -321,27 +391,56 @@ fun CadastroUsuarioContent(
                                                 errorMessage    = uiState.erroEmail,
                                                 focusRequester  = emailFocusRequester,
                                                 leadingIcon     = { Icon(Icons.Default.Email, null) },
+                                                readOnly        = uiState.isFluxoExterno || uiState.isModoEdicao,
+                                                showValidationIcon = !uiState.isFluxoExterno && !uiState.isModoEdicao,
+                                                trailingIcon    = if (uiState.isFluxoExterno || uiState.isModoEdicao) {
+                                                    {
+                                                        Icon(
+                                                            imageVector        = Icons.Default.Lock,
+                                                            contentDescription = null,
+                                                            tint               = MaterialTheme.colorScheme.outline,
+                                                        )
+                                                    }
+                                                } else null,
                                                 keyboardActions = KeyboardActions(onNext = { onEvent(CadastroUsuarioEvent.AvancarEtapa) }),
                                                 keyboardOptions = KeyboardOptions(
                                                     keyboardType = KeyboardType.Email,
                                                     imeAction    = ImeAction.Next,
                                                 ),
                                             )
+                                            if (uiState.isFluxoExterno) {
+                                                Text(
+                                                    text     = stringResource(R.string.cadastro_usuario_email_google),
+                                                    style    = MaterialTheme.typography.bodySmall,
+                                                    color    = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                )
+                                            }
                                         }
 
-                                        // ── Etapa 1: Endereço ──────────────────────────────────
                                         CadastroUsuarioTab.Endereco -> AppSectionCard(
                                             title    = stringResource(R.string.cadastro_usuario_secao_endereco),
                                             subtitle = stringResource(R.string.cadastro_usuario_cep_dica),
                                         ) {
                                             AppFormField(
-                                                value              = uiState.cep,
-                                                onValueChange      = { onEvent(CadastroUsuarioEvent.CepAlterado(it)) },
-                                                label              = stringResource(R.string.cadastro_usuario_cep),
-                                                hintText           = stringResource(R.string.cadastro_usuario_cep_hint),
-                                                errorMessage       = uiState.erroCep,
-                                                focusRequester     = cepFocusRequester,
-                                                showValidationIcon = !uiState.buscandoCep,
+                                                value                = cepFieldValue,
+                                                onValueChange        = { newValue ->
+                                                    val digits = newValue.text
+                                                        .filter { it.isDigit() }.take(8)
+                                                    val cursor = newValue.selection.start
+                                                        .coerceAtMost(digits.length)
+                                                    cepFieldValue = TextFieldValue(
+                                                        text      = digits,
+                                                        selection = TextRange(cursor),
+                                                    )
+                                                    onEvent(CadastroUsuarioEvent.CepAlterado(digits))
+                                                },
+                                                label                = stringResource(R.string.cadastro_usuario_cep),
+                                                hintText             = stringResource(R.string.cadastro_usuario_cep_hint),
+                                                errorMessage         = uiState.erroCep,
+                                                focusRequester       = cepFocusRequester,
+                                                visualTransformation = CepVisualTransformation,
+                                                showValidationIcon   = !uiState.buscandoCep,
                                                 trailingIcon       = {
                                                     if (uiState.buscandoCep) {
                                                         CircularProgressIndicator(
@@ -399,6 +498,20 @@ fun CadastroUsuarioContent(
                                                 errorMessage    = uiState.erroBairro,
                                                 focusRequester  = bairroFocusRequester,
                                                 readOnly        = uiState.buscandoCep,
+                                                keyboardActions = KeyboardActions(onNext = { cidadeFocusRequester.requestFocus() }),
+                                                keyboardOptions = KeyboardOptions(
+                                                    capitalization = KeyboardCapitalization.Words,
+                                                    keyboardType   = KeyboardType.Text,
+                                                    imeAction      = ImeAction.Next,
+                                                ),
+                                            )
+                                            AppFormField(
+                                                value           = uiState.cidade,
+                                                onValueChange   = { onEvent(CadastroUsuarioEvent.CidadeAlterada(it)) },
+                                                label           = stringResource(R.string.cadastro_usuario_cidade),
+                                                errorMessage    = uiState.erroCidade,
+                                                focusRequester  = cidadeFocusRequester,
+                                                readOnly        = uiState.buscandoCep,
                                                 keyboardActions = KeyboardActions(onNext = { estadoFocusRequester.requestFocus() }),
                                                 keyboardOptions = KeyboardOptions(
                                                     capitalization = KeyboardCapitalization.Words,
@@ -423,7 +536,6 @@ fun CadastroUsuarioContent(
                                             )
                                         }
 
-                                        // ── Etapa 2: Segurança ─────────────────────────────────
                                         CadastroUsuarioTab.Seguranca -> AppSectionCard(
                                             title    = stringResource(R.string.cadastro_usuario_secao_seguranca),
                                             subtitle = stringResource(R.string.cadastro_usuario_secao_seguranca_subtitulo),
@@ -522,8 +634,11 @@ fun CadastroUsuarioContent(
                                     ) {
                                         Text(
                                             stringResource(
-                                                if (isUltimoPasso) R.string.cadastro_usuario_btn_cadastrar
-                                                else R.string.cadastro_usuario_btn_proximo,
+                                                when {
+                                                    isUltimoPasso && uiState.isModoEdicao -> R.string.cadastro_usuario_btn_salvar
+                                                    isUltimoPasso                         -> R.string.cadastro_usuario_btn_cadastrar
+                                                    else                                  -> R.string.cadastro_usuario_btn_proximo
+                                                }
                                             )
                                         )
                                     }
@@ -545,16 +660,11 @@ fun CadastroUsuarioContent(
                     }
                 }
             }
+            } // fecha AnimatedContent
         }
     }
 }
 
-// ── Gerenciamento de foco (responsabilidade exclusiva da UI) ──────────────────
-
-/**
- * Foca o primeiro campo que contém erro ou está em branco na etapa atual.
- * Extraída como função top-level para manter `CadastroUsuarioContent` sem lógica além de render.
- */
 private fun focarPrimeiroCampoComErro(
     etapaAtual               : Int,
     uiState                  : CadastroUsuarioUiState,
@@ -566,6 +676,7 @@ private fun focarPrimeiroCampoComErro(
     enderecoFocusRequester   : FocusRequester,
     numberFocusRequester     : FocusRequester,
     bairroFocusRequester     : FocusRequester,
+    cidadeFocusRequester     : FocusRequester,
     estadoFocusRequester     : FocusRequester,
     senhaFocusRequester      : FocusRequester,
     confirmarSenhaFocusRequester: FocusRequester,
@@ -583,6 +694,7 @@ private fun focarPrimeiroCampoComErro(
             uiState.endereco.isBlank() || uiState.erroEndereco != null -> enderecoFocusRequester.requestFocus()
             uiState.number.isBlank()   || uiState.erroNumber   != null -> numberFocusRequester.requestFocus()
             uiState.bairro.isBlank()   || uiState.erroBairro   != null -> bairroFocusRequester.requestFocus()
+            uiState.cidade.isBlank()   || uiState.erroCidade   != null -> cidadeFocusRequester.requestFocus()
             uiState.estado.isBlank()   || uiState.erroEstado   != null -> estadoFocusRequester.requestFocus()
             else                                                        -> Unit
         }
@@ -618,8 +730,8 @@ private fun CadastroUsuarioPreenchidoPreview() {
         CadastroUsuarioContent(
             uiState = CadastroUsuarioUiState(
                 nome           = "João Silva",
-                cpf            = "123.456.789-00",
-                cep            = "01310-100",
+                cpf            = "12345678900",
+                cep            = "01310100",
                 endereco       = "Av. Paulista",
                 number         = "1000",
                 bairro         = "Bela Vista",
@@ -629,5 +741,68 @@ private fun CadastroUsuarioPreenchidoPreview() {
                 confirmarSenha = "senha123",
             ),
         )
+    }
+}
+
+private object CpfVisualTransformation : VisualTransformation {
+    override fun filter(text: AnnotatedString): TransformedText {
+        val digits = text.text.take(11)
+        val out = buildString {
+            digits.forEachIndexed { i, c ->
+                if (i == 3 || i == 6) append('.')
+                if (i == 9) append('-')
+                append(c)
+            }
+        }
+        val offsetMapping = object : OffsetMapping {
+            override fun originalToTransformed(offset: Int): Int {
+                val o = offset.coerceIn(0, digits.length)
+                return when {
+                    o <= 2 -> o
+                    o <= 5 -> o + 1
+                    o <= 8 -> o + 2
+                    else   -> o + 3
+                }.coerceAtMost(out.length)
+            }
+            override fun transformedToOriginal(offset: Int): Int {
+                val o = offset.coerceIn(0, out.length)
+                return when {
+                    o <= 3  -> o
+                    o <= 7  -> o - 1
+                    o <= 11 -> o - 2
+                    else    -> o - 3
+                }.coerceIn(0, digits.length)
+            }
+        }
+        return TransformedText(AnnotatedString(out), offsetMapping)
+    }
+}
+
+private object CepVisualTransformation : VisualTransformation {
+    override fun filter(text: AnnotatedString): TransformedText {
+        val digits = text.text.take(8)
+        val out = buildString {
+            digits.forEachIndexed { i, c ->
+                if (i == 5) append('-')
+                append(c)
+            }
+        }
+        val offsetMapping = object : OffsetMapping {
+            override fun originalToTransformed(offset: Int): Int {
+                val o = offset.coerceIn(0, digits.length)
+                return when {
+                    o <= 4 -> o
+                    else   -> o + 1
+                }.coerceAtMost(out.length)
+            }
+            override fun transformedToOriginal(offset: Int): Int {
+                val o = offset.coerceIn(0, out.length)
+                return when {
+                    o <= 5 -> o
+                    else   -> o - 1
+                }.coerceIn(0, digits.length)
+            }
+        }
+        return TransformedText(AnnotatedString(out), offsetMapping)
     }
 }
