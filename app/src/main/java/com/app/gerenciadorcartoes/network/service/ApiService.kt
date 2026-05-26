@@ -1,6 +1,7 @@
 package com.app.gerenciadorcartoes.network.service
 
 import com.app.gerenciadorcartoes.network.model.AddCardRequest
+import com.app.gerenciadorcartoes.network.model.BlockCardRequest
 import com.app.gerenciadorcartoes.network.model.CartaoResponse
 import retrofit2.Response
 import retrofit2.http.Body
@@ -14,7 +15,7 @@ interface ApiService {
 
     @POST("cards") suspend fun addCard(@Body request: AddCardRequest)
 
-    @POST("cards/{id}/block") suspend fun blockCard(@Path("id") id: Int)
+    @POST("cards/block") suspend fun blockCard(@Body request: BlockCardRequest)
 
-    @POST("cards/{id}/unblock") suspend fun unblockCard(@Path("id") id: Int)
+    @POST("cards/unblock") suspend fun unblockCard(@Body request: BlockCardRequest)
 }
