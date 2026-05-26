@@ -10,6 +10,7 @@ import com.app.gerenciadorcartoes.ui.feature.ajustarlimite.AjustarLimiteUiEvent
 import com.app.gerenciadorcartoes.ui.feature.ajustarlimite.state.AjustarLimiteUiState
 import com.app.gerenciadorcartoes.ui.navigation.AjustarLimiteRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -92,6 +93,7 @@ class AjustarLimiteViewModel @Inject constructor(
                     }
                 }
             }.onFailure { erro ->
+                if (erro is CancellationException) throw erro
                 _uiState.update { it.copy(carregando = false) }
                 _uiEvent.send(
                     AjustarLimiteUiEvent.MostrarMensagem(
@@ -157,6 +159,7 @@ class AjustarLimiteViewModel @Inject constructor(
                 }
                 _uiEvent.send(AjustarLimiteUiEvent.NavigateBack)
             }.onFailure { erro ->
+                if (erro is CancellationException) throw erro
                 _uiState.update {
                     it.copy(
                         salvando   = false,

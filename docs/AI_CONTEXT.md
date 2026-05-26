@@ -311,7 +311,8 @@ data class XUiState(
 
 **Casos especiais observados em `CadastrarAlterarUiState`:**
 - `salvando: Boolean = false` — flag exclusiva para o progresso da operação de salvar (distinto de `carregando`, que representa o carregamento inicial dos dados).
-- `isEdicao: Boolean` — propriedade computada (`get() = nomeTitular.isNotBlank()`) que indica se o formulário está em modo edição.
+- `modoEdicao: Boolean = false` — campo explícito inicializado no `ViewModel` com `id != 0L`; indica se o formulário está em modo edição.
+- `isEdicao: Boolean` — propriedade computada (`get() = modoEdicao`), exposta para a UI.
 - Não possui campo `erro: String?` global; usa erros por campo (`erroNome`, `erroNumero`, etc.).
 
 ---
@@ -365,7 +366,7 @@ composable<XRoute> { XScreen(navigateBack = { navController.popBackStack() }) }
 |---|---|---|
 | `SplashRoute` | Verificação de sessão na abertura do app | ✅ sim |
 | `LoginRoute` | Autenticação do usuário | não |
-| `ListaRoute` | Lista de todos os cartões | não |
+| `ListaRoute(exibirConfirmacao: Boolean = false)` | Lista de todos os cartões; `exibirConfirmacao = true` exibe snackbar de sucesso | não |
 | `DetalheRoute(id: Long)` | Detalhe somente leitura | não |
 | `AjustarLimiteRoute(id: Long)` | Ajuste de limite de um cartão | não |
 | `CadastrarAlterarRoute(id: Long = 0L)` | Criar (`id=0`) ou editar (`id>0`) | não |

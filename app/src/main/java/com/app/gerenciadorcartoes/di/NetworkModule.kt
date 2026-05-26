@@ -1,5 +1,6 @@
 package com.app.gerenciadorcartoes.di
 
+import com.app.gerenciadorcartoes.BuildConfig
 import com.app.gerenciadorcartoes.network.service.ApiService
 import com.app.gerenciadorcartoes.network.service.BuscaCep
 import com.app.gerenciadorcartoes.network.ssl.UnsafeSslConfig
@@ -12,7 +13,6 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Named
@@ -35,7 +35,8 @@ object NetworkModule {
         OkHttpClient.Builder()
             .addInterceptor(
                 HttpLoggingInterceptor().apply {
-                    level = HttpLoggingInterceptor.Level.BODY
+                    level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
+                            else                   HttpLoggingInterceptor.Level.NONE
                 },
             )
             // ⚠️ UnsafeSslConfig: aceita qualquer certificado SSL.
@@ -66,10 +67,10 @@ object NetworkModule {
     @Provides
     @Singleton
     @Named("viacep")
-    fun provideViaCepRetrofit(): Retrofit =
+    fun provideViaCepRetrofit(json: Json): Retrofit =
         Retrofit.Builder()
             .baseUrl("https://viacep.com.br/ws/")
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
 
     @Provides

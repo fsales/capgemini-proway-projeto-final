@@ -11,6 +11,7 @@ import com.app.gerenciadorcartoes.ui.feature.lista.ListaUiEvent
 import com.app.gerenciadorcartoes.ui.feature.lista.state.ListaUiState
 import com.app.gerenciadorcartoes.ui.navigation.ListaRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,9 +41,9 @@ class ListaViewModel @Inject constructor(
         observarCartoes()
         observarDesconexao()
         carregarUsuario()
-        if (route.mensagemCadastro.isNotBlank()) {
+        if (route.exibirConfirmacao) {
             viewModelScope.launch {
-                _uiEvent.send(ListaUiEvent.MostrarMensagem(route.mensagemCadastro))
+                _uiEvent.send(ListaUiEvent.MostrarMensagem("Cadastro realizado com sucesso!"))
             }
         }
     }
@@ -73,6 +74,7 @@ class ListaViewModel @Inject constructor(
                 val nome   = sessaoRepository.buscarNomeUsuario()
                 _uiState.update { it.copy(nomeUsuario = nome, userId = userId) }
             }.onFailure { erro ->
+                if (erro is CancellationException) throw erro
                 _uiEvent.send(ListaUiEvent.MostrarErro(erro.message ?: "Erro ao carregar usuário"))
             }
         }
@@ -86,6 +88,7 @@ class ListaViewModel @Inject constructor(
                     ?: error("Sessão não encontrada")
                 _uiEvent.send(ListaUiEvent.NavegaParaPerfil(userId))
             }.onFailure { erro ->
+                if (erro is CancellationException) throw erro
                 _uiEvent.send(ListaUiEvent.MostrarErro(erro.message ?: "Erro ao abrir perfil"))
             }
         }
@@ -98,6 +101,7 @@ class ListaViewModel @Inject constructor(
                     _uiState.update { it.copy(cartoes = cartoes, carregando = false) }
                 }
             }.onFailure { erro ->
+                if (erro is CancellationException) throw erro
                 _uiState.update { it.copy(carregando = false, erro = erro.message) }
                 _uiEvent.send(ListaUiEvent.MostrarErro(erro.message ?: "Erro ao carregar cartões"))
             }
@@ -111,6 +115,7 @@ class ListaViewModel @Inject constructor(
                     _uiEvent.send(ListaUiEvent.NavegaParaLogin)
                 }
             }.onFailure { erro ->
+                if (erro is CancellationException) throw erro
                 _uiEvent.send(ListaUiEvent.MostrarErro(erro.message ?: "Erro ao monitorar sessão"))
             }
         }
@@ -122,6 +127,7 @@ class ListaViewModel @Inject constructor(
                 cartaoRepository.excluirPorId(id)
                 _uiEvent.send(ListaUiEvent.MostrarMensagem("Cartão removido com sucesso"))
             }.onFailure { erro ->
+                if (erro is CancellationException) throw erro
                 _uiEvent.send(ListaUiEvent.MostrarErro(erro.message ?: "Erro ao remover cartão"))
             }
         }
@@ -133,6 +139,7 @@ class ListaViewModel @Inject constructor(
                 sessaoRepository.encerrarSessao()
                 _uiEvent.send(ListaUiEvent.NavegaParaLogin)
             }.onFailure { erro ->
+                if (erro is CancellationException) throw erro
                 _uiEvent.send(ListaUiEvent.MostrarErro(erro.message ?: "Erro ao encerrar sessão"))
             }
         }

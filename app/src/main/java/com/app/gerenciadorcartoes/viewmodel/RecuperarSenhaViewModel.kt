@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -65,6 +66,7 @@ class RecuperarSenhaViewModel @Inject constructor(
                 _uiState.update { it.copy(enviando = false) }
                 _uiEvent.send(RecuperarSenhaUiEvent.MostrarMensagem("Se este e-mail estiver cadastrado, você receberá as instruções em breve"))
             }.onFailure { erro ->
+                if (erro is CancellationException) throw erro
                 _uiState.update { it.copy(enviando = false) }
                 _uiEvent.send(RecuperarSenhaUiEvent.MostrarErro(erro.message ?: "Erro ao enviar e-mail"))
             }

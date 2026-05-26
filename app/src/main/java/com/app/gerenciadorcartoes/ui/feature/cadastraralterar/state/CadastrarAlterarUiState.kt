@@ -15,8 +15,9 @@ data class CadastrarAlterarUiState(
     val erroBandeira: String? = null,
     val erroValidade: String? = null,
     val erroLimite  : String? = null,
+    val modoEdicao  : Boolean = false,
 ) {
     /** true quando o formulário tem id > 0 (modo edição já carregado) */
-    val isEdicao: Boolean get() = nomeTitular.isNotBlank()
+    val isEdicao: Boolean get() = modoEdicao
 }
 

@@ -10,12 +10,10 @@ import com.app.gerenciadorcartoes.repository.CadastroUsuarioRepository
 import com.app.gerenciadorcartoes.repository.SessaoRepository
 import com.app.gerenciadorcartoes.ui.feature.cadastrousuario.CadastroUsuarioEvent
 import com.app.gerenciadorcartoes.ui.feature.cadastrousuario.CadastroUsuarioUiEvent
-import com.app.gerenciadorcartoes.ui.feature.cadastrousuario.emailEstruturalmenteValido
-import com.app.gerenciadorcartoes.ui.feature.cadastrousuario.formatNumero
-import com.app.gerenciadorcartoes.ui.feature.cadastrousuario.formatUf
 import com.app.gerenciadorcartoes.ui.feature.cadastrousuario.state.CadastroUsuarioUiState
 import com.app.gerenciadorcartoes.ui.navigation.CadastroUsuarioRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -201,10 +199,9 @@ class CadastroUsuarioViewModel @Inject constructor(
                     else               -> null
                 }
                 val erroEmail = when {
-                    s.email.isBlank()                    -> MSG_CAMPO_OBRIGATORIO
-                    !emailEstruturalmenteValido(s.email) -> MSG_EMAIL_INVALIDO
-                    !EMAIL_REGEX.matches(s.email)         -> MSG_EMAIL_INVALIDO
-                    else                                 -> null
+                    s.email.isBlank()             -> MSG_CAMPO_OBRIGATORIO
+                    !EMAIL_REGEX.matches(s.email) -> MSG_EMAIL_INVALIDO
+                    else                          -> null
                 }
                 val valido = erroNome == null && erroCpf == null && erroEmail == null
                 if (!valido) _uiState.update {
@@ -298,6 +295,7 @@ class CadastroUsuarioViewModel @Inject constructor(
             )
             _uiEvent.send(CadastroUsuarioUiEvent.NavigateToLista("Dados atualizados com sucesso!"))
         }.onFailure { erro ->
+            if (erro is CancellationException) throw erro
             _uiState.update { it.copy(carregando = false) }
             _uiEvent.send(CadastroUsuarioUiEvent.MostrarErro(erro.message ?: "Erro ao salvar"))
         }
@@ -311,6 +309,7 @@ class CadastroUsuarioViewModel @Inject constructor(
             sessaoRepository.ativarSessao(route.userId)
             _uiEvent.send(CadastroUsuarioUiEvent.NavigateToLista("Cadastro realizado com sucesso!"))
         }.onFailure { erro ->
+            if (erro is CancellationException) throw erro
             _uiState.update { it.copy(carregando = false) }
             _uiEvent.send(CadastroUsuarioUiEvent.MostrarErro(erro.message ?: "Erro ao cadastrar"))
         }
@@ -339,10 +338,11 @@ class CadastroUsuarioViewModel @Inject constructor(
             sessaoRepository.ativarSessao(createdUserId)
             _uiEvent.send(CadastroUsuarioUiEvent.NavigateToLista("Cadastro realizado com sucesso!"))
         }.onFailure { erro ->
-            if (userId != null) sessaoRepository.desfazerCriacaoConta()
-            _uiState.update { it.copy(carregando = false) }
-            _uiEvent.send(CadastroUsuarioUiEvent.MostrarErro(erro.message ?: "Erro ao cadastrar"))
-        }
+                if (userId != null) sessaoRepository.desfazerCriacaoConta()
+                if (erro is CancellationException) throw erro
+                _uiState.update { it.copy(carregando = false) }
+                _uiEvent.send(CadastroUsuarioUiEvent.MostrarErro(erro.message ?: "Erro ao cadastrar"))
+            }
     }
 
     private fun construirCadastroUsuario(s: CadastroUsuarioUiState, userId: String): CadastroUsuario =
@@ -382,6 +382,7 @@ class CadastroUsuarioViewModel @Inject constructor(
                     _uiState.update { it.copy(erroCep = "CEP não encontrado") }
                 }
             }.onFailure { erro ->
+                if (erro is CancellationException) throw erro
                 _uiState.update { it.copy(erroCep = erro.message ?: "Erro ao buscar CEP") }
             }
             _uiState.update { it.copy(buscandoCep = false) }
@@ -416,10 +417,18 @@ class CadastroUsuarioViewModel @Inject constructor(
                     )
                 }
             }.onFailure { erro ->
+                if (erro is CancellationException) throw erro
                 _uiState.update { it.copy(carregando = false) }
                 _uiEvent.send(CadastroUsuarioUiEvent.MostrarErro(erro.message ?: "Erro ao carregar perfil"))
             }
         }
     }
+
+    // ── Funções auxiliares (movidas de ui/ — usadas apenas neste ViewModel) ────
+    private fun formatNumero(text: String): String =
+        text.filter { it.isDigit() }.take(8)
+
+    private fun formatUf(text: String): String =
+        text.filter { it.isLetter() }.uppercase().take(2)
 }
 
