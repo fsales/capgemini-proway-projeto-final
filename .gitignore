@@ -10,3 +10,4 @@ build/
 local.properties
 
 /.agents/
+/app/google-services.json
