@@ -26,7 +26,7 @@
 
 ---
 
-## � Índice
+## Índice
 
 - [Sobre o App](#-sobre-o-app)
 - [Sobre o Projeto Acadêmico](#-sobre-o-projeto-acadêmico)
