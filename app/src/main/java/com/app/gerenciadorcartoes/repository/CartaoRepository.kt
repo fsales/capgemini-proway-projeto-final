@@ -13,4 +13,10 @@ interface CartaoRepository {
     suspend fun atualizarLimite(id: Long, limite: Double)
     suspend fun excluirPorId(id: Long)
     suspend fun atualizarBloqueio(id: Long, novoStatusBloqueio: Boolean)
+
+    // Envia uma representação do cartão para a API remota (se houver sessão ativa).
+    suspend fun enviarParaApi(cartao: Cartao)
+
+    // Solicita bloqueio/desbloqueio remoto e atualiza o banco local em sequência.
+    suspend fun bloquearRemotamente(id: Long, novoStatusBloqueio: Boolean)
 }
