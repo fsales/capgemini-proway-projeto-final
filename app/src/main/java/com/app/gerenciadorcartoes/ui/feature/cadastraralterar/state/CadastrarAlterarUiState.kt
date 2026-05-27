@@ -5,7 +5,7 @@ data class CadastrarAlterarUiState(
     val finalNumero : String  = "",
     val bandeira    : String  = "",
     val validade    : String  = "",
-    val limite      : String  = "",
+    val limite      : Double  = 0.0,
     val template    : String  = "default",
     val carregando  : Boolean = false,
     val salvando    : Boolean = false,
