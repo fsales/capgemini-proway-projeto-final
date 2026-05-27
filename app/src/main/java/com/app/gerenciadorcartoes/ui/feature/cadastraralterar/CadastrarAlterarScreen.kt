@@ -29,12 +29,13 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.app.gerenciadorcartoes.ui.common.transformation.ValidadeVisualTransformation
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.app.gerenciadorcartoes.extensions.toCurrencyDigits
 import com.app.gerenciadorcartoes.extensions.toCurrencyDouble
-import com.app.gerenciadorcartoes.extensions.toValidadeFormatada
 import com.app.gerenciadorcartoes.ui.components.AppLoading
 import com.app.gerenciadorcartoes.ui.components.AppScaffold
 import com.app.gerenciadorcartoes.ui.components.AppTopAppBar
@@ -212,7 +213,7 @@ private fun FormularioBody(
         // Validade
         OutlinedTextField(
             value         = uiState.validade,
-            onValueChange = { onEvent(CadastrarAlterarEvent.ValidadeAlterada(it.toValidadeFormatada())) },
+            onValueChange = { onEvent(CadastrarAlterarEvent.ValidadeAlterada(it.filter(Char::isDigit).take(4))) },
             label         = { Text("Validade (MM/AA)") },
             visualTransformation = ValidadeVisualTransformation,
             isError       = uiState.erroValidade != null,
@@ -227,15 +228,19 @@ private fun FormularioBody(
         )
 
         // Limite
+        val limiteTexto = uiState.limite.toCurrencyDigits()
         OutlinedTextField(
-            value         = uiState.limite.toCurrencyDigits(),
-            onValueChange = { onEvent(CadastrarAlterarEvent.LimiteAlterado(it.toCurrencyDouble())) },
+            value         = TextFieldValue(
+                text      = limiteTexto,
+                selection = if (limiteTexto == "0") TextRange(0) else TextRange(limiteTexto.length)
+            ),
+            onValueChange = { onEvent(CadastrarAlterarEvent.LimiteAlterado(it.text.toCurrencyDouble())) },
             label         = { Text("Limite máximo (R$)") },
             visualTransformation = CurrencyVisualTransformation,
             isError       = uiState.erroLimite != null,
             supportingText = uiState.erroLimite?.let { { Text(it) } },
             keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Decimal,
+                keyboardType = KeyboardType.Number,
                 imeAction    = ImeAction.Done,
             ),
             singleLine = true,

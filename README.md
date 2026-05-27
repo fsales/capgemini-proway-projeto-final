@@ -45,6 +45,7 @@
 - [Estrutura do Projeto](#️-estrutura-do-projeto)
   - [O papel de cada camada](#o-papel-de-cada-camada)
 - [Banco de Dados](#️-banco-de-dados)
+- [Sincronização Offline (WorkManager)](#-sincroniza%C3%A7%C3%A3o-offline-workmanager)
 - [Segurança de Dados](#-segurança-de-dados)
 - [Design System](#-design-system)
 - [APIs Externas](#-apis-externas)
@@ -755,6 +756,36 @@ erDiagram
 | `email` | `TEXT` UNIQUE | E-mail de login |
 
 ---
+
+## ⚙️ Sincronização Offline (WorkManager)
+
+O app segue um modelo *offline-first* para o cadastro de cartões. Resumo técnico do fluxo de sincronização:
+
+- **Salvar offline**: ao salvar um cartão (`CartaoRepositoryImpl.salvar`) o app gera um `clientId` (UUID) para idempotência e persiste o registro localmente com `syncPending = true`.
+- **Campos novos no schema**: `CartaoEntity` adiciona `clientId: String?` e `syncPending: Boolean` (0/1). As migrations do Room atualizam o esquema automaticamente.
+- **Worker de sincronização**: `SyncPendingCardsWorker` (Hilt-enabled) consulta `cartaoRepository.buscarPendentes()` e chama `cartaoRepository.sincronizarCartao(cartao)` sequencialmente. Em sucesso, o repositório marca `syncPending = false`.
+- **Hilt + WorkManager**: `GerenciadorCartoesApp` implementa `Configuration.Provider` e injeta `HiltWorkerFactory` (via `@HiltAndroidApp`) para permitir Workers com dependências injetadas.
+- **Comportamento de debug**: durante investigação foi usado `ExistingWorkPolicy.REPLACE` para forçar reexecução do Worker; o código final usa `ExistingWorkPolicy.KEEP` — ver `SyncCoordinator`.
+- **Logs**: logs de sincronização estão condicionados a `BuildConfig.DEBUG`. Para debug, observe Logcat nos tags: `SyncCoordinator`, `SyncPendingWorker`, `CartaoRepository`.
+
+Como testar rapidamente:
+
+1. Build e instale o APK:
+```bash
+./gradlew :app:assembleDebug
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+```
+2. Crie um cartão no app (sem rede se quiser testar offline). Verifique que `syncPending` está `1` no inspector do DB.
+3. Forçar execução do sync (ou esperar agendamento): observe Logcat com filtros:
+```bash
+adb logcat -s SyncPendingWorker SyncCoordinator CartaoRepository
+```
+4. Após sincronização bem-sucedida, `syncPending` deverá virar `0`.
+
+Notas de robustez:
+- Tratar erros HTTP 4xx como finais (não retry) e 5xx/timeouts como transitórios (retry). Considere mapear exceções da camada `ApiService` no repositório para decisão de retry.
+- Remova ou reduza logs verbosos antes do merge para produção se necessário.
+
 
 ## 📚 Documentação Técnica
 

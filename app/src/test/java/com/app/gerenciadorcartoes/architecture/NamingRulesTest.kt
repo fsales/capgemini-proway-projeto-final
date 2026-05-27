@@ -94,6 +94,7 @@ class NamingRulesTest {
     val moduleNoPackageCorreto: ArchRule = classes()
         .that().haveSimpleNameEndingWith("Module")
         .and().areNotMemberClasses()
+        .and().haveSimpleNameNotEndingWith("_HiltModule") // excluir módulos gerados automaticamente pelo Hilt (ex: para Workers)
         .and().resideInAPackage(ROOT_PACKAGE + "..")
         .should().resideInAPackage(PKG_DI)
         .`as`("Classes *Module devem residir em di/")

@@ -1,9 +1,20 @@
 package com.app.gerenciadorcartoes.data.local.entity
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "cartoes")
+@Entity(
+    tableName = "cartoes",
+    foreignKeys = [ForeignKey(
+        entity = UsuarioEntity::class,
+        parentColumns = ["id"],
+        childColumns = ["usuarioId"],
+        onDelete = ForeignKey.CASCADE
+    )],
+    indices = [Index(value = ["usuarioId"])]
+)
 data class CartaoEntity(
     @PrimaryKey(autoGenerate = true)
     val id          : Long   = 0L,
@@ -15,4 +26,10 @@ data class CartaoEntity(
     val limiteMaximo: Double,
     val template    : String = "default",
     val bloqueado   : Boolean = false,
+    // Identificador gerado pelo cliente (opcional) usado para idempotência
+    val clientId     : String? = null,
+    // Marca registros que ainda precisam ser sincronizados com a API
+    val syncPending  : Boolean = false,
+    // relacionamento (nullable para migração segura)
+    val usuarioId: Long? = null,
 )

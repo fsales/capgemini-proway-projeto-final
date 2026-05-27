@@ -6,7 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.room.Room
-import com.app.gerenciadorcartoes.data.local.dao.CadastroUsuarioDao
+import com.app.gerenciadorcartoes.data.local.dao.UsuarioDao
 import com.app.gerenciadorcartoes.data.local.dao.CartaoDao
 import com.app.gerenciadorcartoes.data.local.database.ALL_MIGRATIONS
 import com.app.gerenciadorcartoes.data.local.database.AppDatabase
@@ -76,7 +76,7 @@ abstract class AppModule {
         fun provideCartaoDao(database: AppDatabase): CartaoDao = database.cartaoDao()
 
         @Provides @Singleton
-        fun provideCadastroUsuarioDao(database: AppDatabase): CadastroUsuarioDao =
+        fun provideCadastroUsuarioDao(database: AppDatabase): UsuarioDao =
             database.cadastroUsuarioDao()
 
         @Provides @Singleton

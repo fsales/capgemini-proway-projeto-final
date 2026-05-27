@@ -1,4 +1,4 @@
-package com.app.gerenciadorcartoes.viewmodel
+﻿package com.app.gerenciadorcartoes.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.app.gerenciadorcartoes.model.Cartao
 import com.app.gerenciadorcartoes.repository.CartaoRepository
+import com.app.gerenciadorcartoes.repository.SessaoRepository
 import com.app.gerenciadorcartoes.ui.feature.cadastraralterar.CadastrarAlterarEvent
 import com.app.gerenciadorcartoes.ui.feature.cadastraralterar.CadastrarAlterarUiEvent
 import com.app.gerenciadorcartoes.ui.feature.cadastraralterar.state.CadastrarAlterarUiState
@@ -13,6 +14,7 @@ import com.app.gerenciadorcartoes.ui.navigation.CadastrarAlterarRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
+
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,6 +27,8 @@ import javax.inject.Inject
 class CadastrarAlterarViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val cartaoRepository: CartaoRepository,
+    private val sessaoRepository          : SessaoRepository,
+    private val syncCoordinator          : com.app.gerenciadorcartoes.sync.SyncCoordinator,
 ) : ViewModel() {
 
     private val route: CadastrarAlterarRoute = savedStateHandle.toRoute()
@@ -81,7 +85,7 @@ class CadastrarAlterarViewModel @Inject constructor(
                             nomeTitular = cartao.nomeTitular,
                             finalNumero = cartao.finalNumero,
                             bandeira    = cartao.bandeira,
-                            validade    = cartao.validade,
+                            validade    = cartao.validade.filter { it.isDigit() },
                             limite      = cartao.limiteMaximo
                                 .takeIf { limite -> limite > 0.0 }
                                 ?: cartao.limite,
@@ -98,7 +102,7 @@ class CadastrarAlterarViewModel @Inject constructor(
                 _uiState.update { it.copy(carregando = false) }
                 _uiEvent.send(
                     CadastrarAlterarUiEvent.MostrarErro(
-                        erro.message ?: "Erro ao carregar cartão"
+                            erro.message ?: "Erro ao carregar cartão"
                     )
                 )
             }
@@ -121,21 +125,24 @@ class CadastrarAlterarViewModel @Inject constructor(
                         ?.coerceAtMost(limiteMaximo)
                         ?: limiteMaximo
                 }
-                val cartao = Cartao(
+                val idUsuario = sessaoRepository.buscarIdUsuario();
+                val cartao = Cartao.fromUi(
                     id          = id,
-                    nomeTitular = s.nomeTitular.trim(),
-                    finalNumero = s.finalNumero.trim(),
-                    bandeira    = s.bandeira.trim(),
-                    validade    = s.validade.trim(),
+                    nomeTitular = s.nomeTitular,
+                    finalNumero = s.finalNumero,
+                    bandeira    = s.bandeira,
+                    validadeRaw = s.validade,
                     limite      = limiteAtual,
                     limiteMaximo= limiteMaximo,
                     template    = s.template,
+                    usuarioId = idUsuario
                 )
-                if (id == 0L) {
+                if (id == 0L){
                     cartaoRepository.salvar(cartao)
-                } else {
-                    cartaoRepository.atualizar(cartao)
+                    // Solicita a sincronização com a API remota via SyncCoordinator
+                    syncCoordinator.scheduleSync()
                 }
+                else cartaoRepository.atualizar(cartao)
                 _uiEvent.send(CadastrarAlterarUiEvent.NavigateBack)
             }.onFailure { erro ->
                 if (erro is CancellationException) throw erro
@@ -153,25 +160,41 @@ class CadastrarAlterarViewModel @Inject constructor(
         val s = _uiState.value
         var valid = true
 
-        if (s.nomeTitular.isBlank()) {
-            _uiState.update { it.copy(erroNome = "Nome é obrigatório") }; valid = false
+        fun setErro(update: CadastrarAlterarUiState.() -> CadastrarAlterarUiState) {
+            _uiState.update(update)
+            valid = false
         }
-        if (s.finalNumero.length != 4 || !s.finalNumero.all { it.isDigit() }) {
-            _uiState.update { it.copy(erroNumero = "Informe os 4 últimos dígitos") }; valid = false
+
+        with(s) {
+            if (nomeTitular.isBlank()) setErro { copy(erroNome = "Nome é obrigatório") }
+
+            if (finalNumero.length != 4 || !finalNumero.all { it.isDigit() }) {
+                setErro { copy(erroNumero = "Informe os 4 últimos dígitos") }
+            }
+
+            if (bandeira.isBlank()) setErro { copy(erroBandeira = "Bandeira é obrigatória") }
+
+            validade.let { v ->
+                val mes = v.take(2).toIntOrNull() ?: 0
+                val ano = v.takeLast(2).toIntOrNull() ?: 0
+                val anoAtual = java.time.LocalDate.now().year % 100
+
+                when {
+                    v.length != 4 -> setErro { copy(erroValidade = "Informe MM/AA") }
+                    mes !in 1..12 -> setErro { copy(erroValidade = "Mês inválido (01-12)") }
+                    ano < anoAtual -> setErro { copy(erroValidade = "Ano deve ser atual ou futuro") }
+                }
+            }
+
+            if (limite <= 0.0) setErro { copy(erroLimite = "Limite inválido") }
         }
-        if (s.bandeira.isBlank()) {
-            _uiState.update { it.copy(erroBandeira = "Bandeira é obrigatória") }; valid = false
-        }
-        if (!Regex("""^\d{2}/\d{2}$""").matches(s.validade)) {
-            _uiState.update { it.copy(erroValidade = "Formato MM/AA") }; valid = false
-        }
-        if (s.limite <= 0.0) {
-            _uiState.update { it.copy(erroLimite = "Limite inválido") }; valid = false
-        }
+
         return valid
     }
 
-    // Nota: o campo `limite` no UiState foi migrado para Double — parse de string
-    // ficou obsoleto na ViewModel. Se a UI enviar strings, a conversão deve
-    // ocorrer no componente de Input antes de enviar o evento.
+
+    // Chamadas remotas delegadas ao repositório; Erros de rede não propagam para o fluxo principal
 }
+
+
+

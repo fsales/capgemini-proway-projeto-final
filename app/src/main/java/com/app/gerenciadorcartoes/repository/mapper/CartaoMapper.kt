@@ -13,9 +13,10 @@ fun CartaoEntity.toDomain(): Cartao = Cartao(
     limiteMaximo= limiteMaximo,
     template    = template,
     bloqueado   = bloqueado,
+    clientId    = clientId,
 )
 
-fun Cartao.toEntity(): CartaoEntity = CartaoEntity(
+fun Cartao.toEntity(clientId: String? = this.clientId, syncPending: Boolean = false): CartaoEntity = CartaoEntity(
     id          = id,
     nomeTitular = nomeTitular,
     finalNumero = finalNumero,
@@ -25,4 +26,7 @@ fun Cartao.toEntity(): CartaoEntity = CartaoEntity(
     limiteMaximo= limiteMaximo.takeIf { it > 0.0 } ?: limite,
     template    = template,
     bloqueado   = bloqueado,
+    clientId    = clientId,
+    syncPending = syncPending,
+    usuarioId = usuarioId,
 )

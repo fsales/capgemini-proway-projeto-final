@@ -1,9 +1,9 @@
 package com.app.gerenciadorcartoes.repository.mapper
 
-import com.app.gerenciadorcartoes.data.local.entity.CadastroUsuarioEntity
+import com.app.gerenciadorcartoes.data.local.entity.UsuarioEntity
 import com.app.gerenciadorcartoes.model.CadastroUsuario
 
-fun CadastroUsuarioEntity.toDomain(): CadastroUsuario = CadastroUsuario(
+fun UsuarioEntity.toDomain(): CadastroUsuario = CadastroUsuario(
     id       = id,
     userId   = userId,
     nome     = nome,
@@ -17,7 +17,7 @@ fun CadastroUsuarioEntity.toDomain(): CadastroUsuario = CadastroUsuario(
     email    = email,
 )
 
-fun CadastroUsuario.toEntity(): CadastroUsuarioEntity = CadastroUsuarioEntity(
+fun CadastroUsuario.toEntity(): UsuarioEntity = UsuarioEntity(
     id       = id,
     userId   = userId,
     nome     = nome,

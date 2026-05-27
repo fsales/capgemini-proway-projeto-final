@@ -18,6 +18,9 @@ interface CartaoDao {
     @Query("SELECT * FROM cartoes WHERE id = :id")
     fun observarPorId(id: Long): Flow<CartaoEntity?>
 
+    @Query("SELECT * FROM cartoes WHERE usuarioId = :usuarioId ORDER BY nomeTitular ASC")
+    fun buscarCartaosPorUsuario(usuarioId: Long): Flow<List<CartaoEntity>>
+
     /** Leitura pontual — use apenas quando não precisar de reatividade. */
     @Query("SELECT * FROM cartoes WHERE id = :id")
     suspend fun buscarPorId(id: Long): CartaoEntity?
@@ -27,6 +30,12 @@ interface CartaoDao {
 
     @Update
     suspend fun atualizar(entity: CartaoEntity)
+
+    @Query("SELECT * FROM cartoes WHERE syncPending = 1")
+    suspend fun buscarPendentes(): List<CartaoEntity>
+
+    @Query("UPDATE cartoes SET syncPending = :pending WHERE id = :id")
+    suspend fun atualizarSyncPending(id: Long, pending: Boolean)
 
     @Query("UPDATE cartoes SET limite = :limite WHERE id = :id")
     suspend fun atualizarLimite(id: Long, limite: Double)

@@ -191,7 +191,106 @@ val MIGRATION_7_8 = object : Migration(7, 8) {
     }
 }
 
+/** Migration 8 -> 9: adiciona coluna cadastroUsuarioId (nullable) em `cartoes`. */
+val MIGRATION_8_9 = object : Migration(8, 9) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        // coluna nullable adicionada para compatibilidade com dados existentes
+        db.execSQL("ALTER TABLE cartoes ADD COLUMN cadastroUsuarioId INTEGER")
+    }
+}
+
+
+/** Migration 9 -> 10: adiciona coluna clientId (TEXT) e syncPending (INTEGER NOT NULL DEFAULT 0) em `cartoes`. */
+val MIGRATION_9_10 = object : Migration(9, 10) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE cartoes ADD COLUMN clientId TEXT")
+        db.execSQL("ALTER TABLE cartoes ADD COLUMN syncPending INTEGER NOT NULL DEFAULT 0")
+    }
+}
+
+
 /** Lista completa de migrações — passe para `.addMigrations(*ALL_MIGRATIONS)`. */
+
+/** Migration 10 -> 11: renomeia CadastroUsuario -> usuarios e renomeia a FK em `cartoes` de cadastroUsuarioId -> usuarioId
+ *  Também recria a tabela `cartoes` para adicionar a FOREIGN KEY que referencia `usuarios(id)` e atualiza índices.
+ */
+val MIGRATION_10_11 = object : Migration(10, 11) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        // 1) Renomeia a tabela CadastroUsuario para usuarios, se necessário
+        try {
+            // Se a tabela CadastroUsuario existe e usuarios não existe, renomeia
+            db.query("SELECT name FROM sqlite_master WHERE type='table' AND name='CadastroUsuario'").use { c ->
+                val existsCadastro = c.moveToFirst()
+                if (existsCadastro) {
+                    db.execSQL("ALTER TABLE CadastroUsuario RENAME TO usuarios")
+                }
+            }
+        } catch (_: Exception) {
+            // ignore - renomeação não crítica se já aplicada
+        }
+
+        // 2) Adiciona a nova coluna usuarioId em cartoes (nullable) para copiar os dados
+        if (!db.hasColumn("cartoes", "usuarioId")) {
+            db.execSQL("ALTER TABLE cartoes ADD COLUMN usuarioId INTEGER")
+        }
+
+        // 3) Copia valores de cadastroUsuarioId para usuarioId caso existam
+        try {
+            db.execSQL("UPDATE cartoes SET usuarioId = cadastroUsuarioId WHERE usuarioId IS NULL")
+        } catch (_: Exception) {
+            // ignore if cadastroUsuarioId doesn't exist
+        }
+
+        // 4) Remove índice antigo se existir
+        try { db.execSQL("DROP INDEX IF EXISTS index_cartoes_cadastroUsuarioId") } catch (_: Exception) {}
+
+        // 5) Recria a tabela `cartoes` incluindo a FOREIGN KEY para `usuarios(id)` e índice em usuarioId
+        db.execSQL("DROP TABLE IF EXISTS cartoes_new")
+
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS cartoes_new (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `nomeTitular` TEXT NOT NULL,
+                `finalNumero` TEXT NOT NULL,
+                `bandeira` TEXT NOT NULL,
+                `validade` TEXT NOT NULL,
+                `limite` REAL NOT NULL,
+                `limiteMaximo` REAL NOT NULL,
+                `template` TEXT NOT NULL,
+                `bloqueado` INTEGER NOT NULL,
+                `clientId` TEXT,
+                `syncPending` INTEGER NOT NULL,
+                `usuarioId` INTEGER,
+                FOREIGN KEY(`usuarioId`) REFERENCES `usuarios`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE
+            )
+            """.trimIndent()
+        )
+
+        db.execSQL(
+            """
+            INSERT INTO cartoes_new (
+                id, nomeTitular, finalNumero, bandeira, validade, limite, limiteMaximo, template, bloqueado, clientId, syncPending, usuarioId
+            )
+            SELECT
+                id, nomeTitular, finalNumero, bandeira, validade, limite, limiteMaximo, template, bloqueado, clientId, syncPending, usuarioId
+            FROM cartoes
+            """.trimIndent()
+        )
+
+        db.execSQL("DROP TABLE cartoes")
+        db.execSQL("ALTER TABLE cartoes_new RENAME TO cartoes")
+
+        // 6) Cria índice novo para usuarioId
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_cartoes_usuarioId ON cartoes (usuarioId)")
+
+        // 7) (Re)cria índices únicos para a tabela usuarios
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_usuarios_email ON usuarios(email)")
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_usuarios_userId ON usuarios(userId)")
+    }
+}
+
+// Atualiza a lista completa de migrações incluindo 10->11
 val ALL_MIGRATIONS = arrayOf(
     MIGRATION_1_2,
     MIGRATION_2_3,
@@ -200,6 +299,9 @@ val ALL_MIGRATIONS = arrayOf(
     MIGRATION_5_6,
     MIGRATION_6_7,
     MIGRATION_7_8,
+    MIGRATION_8_9,
+    MIGRATION_9_10,
+    MIGRATION_10_11,
 )
 
 private fun SupportSQLiteDatabase.hasColumn(tableName: String, columnName: String): Boolean {

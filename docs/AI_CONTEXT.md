@@ -9,6 +9,7 @@
 ## Histórico de Alterações
 
 - <!-- Insira uma linha no início a cada atualização: "- YYYY-MM-DD — descrição" -->
+- 2026-05-27 — Adicionada migration Room v10→v11: renomeada tabela `CadastroUsuario` → `usuarios`; migrado FK em `cartoes` de `cadastroUsuarioId` → `usuarioId`; recriada tabela `cartoes` para garantir FOREIGN KEY e índices; atualizados índices únicos em `usuarios`.
 - 2026-05-27 — Resolvidos conflitos de merge: unificado CartaoRepositoryImpl (enviarParaApi + bloquearRemotamente + sincronização em background), DetalheViewModel usa bloquearRemotamente, CadastrarAlterarViewModel migrado para usar Double `limite` e removido parseLimite, removidas implementações duplicadas de VisualTransformation em `CadastroUsuarioScreen`.
 - 2026-05-22 — Renomeada a feature de `Extrato` para `Fatura` em classes, pacotes, rota (`FaturaRoute`) e navegação a partir de `Detalhe`
 - 2026-05-22 — Adicionada feature `Extrato` com navegação a partir de `Detalhe` (`ExtratoRoute(id)`), mock de faturas agrupadas e ação renomeada para "Faturas"
@@ -453,6 +454,30 @@ sealed interface ResultadoAutenticacaoExterna {
 ```
 
 ---
+
+---
+
+## Fluxo de sincronização (offline-first)
+
+Resumo das mudanças implementadas recentemente relacionadas à sincronização offline e WorkManager.
+
+- **Offline-first ao salvar cartões**: `CartaoRepositoryImpl.salvar(cartao)` gera um `clientId` (UUID) para idempotência e insere imediatamente a entidade em Room com `syncPending = true`. Isso permite operação offline e reintento posterior.
+
+- **Campos novos no schema**: `CartaoEntity` agora inclui `clientId: String?` e `syncPending: Boolean` (1/0 no DB). Migrations foram adicionadas em `data/local/database/Migrations.kt`.
+
+- **Fluxo de sincronização**: `SyncPendingCardsWorker` (Hilt-enabled) consulta `cartaoRepository.buscarPendentes()` e chama `cartaoRepository.sincronizarCartao(cartao)` sequencialmente. Em sucesso, o repositório marca `syncPending=false`. Em falha, o Worker registra o erro e retorna `Result.retry()`.
+
+- **Contrato do repositório**: `CartaoRepositoryImpl.sincronizarCartao(cartao)` encapsula `enviarParaApi(cartao)` e marca o registro como sincronizado somente em sucesso. `enviarParaApi` agora lança `IllegalStateException` quando não há `userId` de sessão disponível — isso evita marcar indevidamente como sincronizado quando a sessão não estiver ativa.
+
+- **WorkManager / Hilt**: `GerenciadorCartoesApp` implementa `Configuration.Provider` e injeta `HiltWorkerFactory`, permitindo que Workers com dependências Hilt sejam instanciados corretamente. Use sempre `WorkManager.getInstance(context)` para inicialização sob demanda quando aplicável.
+
+- **Política de enfileiramento**: durante depuração usamos temporariamente `ExistingWorkPolicy.REPLACE` para forçar reexecução imediata; no código final a política foi revertida para `ExistingWorkPolicy.KEEP` para comportamento de produção.
+
+- **Logs e telemetria**: logs de sincronização em `CartaoRepositoryImpl` foram condicionados a `BuildConfig.DEBUG` para reduzir ruído em produção; `SyncPendingCardsWorker` possui logs de início/fim e contagem de pendentes.
+
+- **Boas práticas sugeridas**: tratar erros HTTP 4xx como definitivos (não retry) e 5xx/timeouts como transitórios (retry); considerar backoff exponencial via `WorkRequest`/`RetryPolicy` para evitar bursts.
+
+Atualize também `docs/ARCHITECTURE.md` e `docs/PROJECT_CONTEXT.md` nas seções de persistência e orquestração para refletir estas mudanças.
 
 ## Regras de Módulo Hilt
 

@@ -5,13 +5,13 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "CadastroUsuario",
+    tableName = "usuarios",
     indices   = [
         Index(value = ["email"],  unique = true),
         Index(value = ["userId"], unique = true),
     ],
 )
-data class CadastroUsuarioEntity(
+data class UsuarioEntity(
 
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0L,
@@ -35,5 +35,4 @@ data class CadastroUsuarioEntity(
     val estado   : String = "",
 
     val email    : String = "",
-    // campo `senha` removido — Firebase gerencia credenciais
 )
