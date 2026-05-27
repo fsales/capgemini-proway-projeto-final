@@ -18,8 +18,8 @@ interface CartaoDao {
     @Query("SELECT * FROM cartoes WHERE id = :id")
     fun observarPorId(id: Long): Flow<CartaoEntity?>
 
-    @Query("SELECT * FROM cartoes WHERE cadastroUsuarioId = :cadastroUsuarioId ORDER BY nomeTitular ASC")
-    fun buscarCartaosPorUsuario(cadastroUsuarioId: Long): Flow<List<CartaoEntity>>
+    @Query("SELECT * FROM cartoes WHERE usuarioId = :usuarioId ORDER BY nomeTitular ASC")
+    fun buscarCartaosPorUsuario(usuarioId: Long): Flow<List<CartaoEntity>>
 
     /** Leitura pontual — use apenas quando não precisar de reatividade. */
     @Query("SELECT * FROM cartoes WHERE id = :id")

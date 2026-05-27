@@ -1,0 +1,49 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 6,
+    "identityHash": "55555555555555555555555555555555",
+    "entities": [
+      {
+        "tableName": "cartoes",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nomeTitular` TEXT NOT NULL, `finalNumero` TEXT NOT NULL, `bandeira` TEXT NOT NULL, `validade` TEXT NOT NULL, `limite` REAL NOT NULL, `template` TEXT NOT NULL)",
+        "fields": [
+          { "fieldPath": "id", "columnName": "id", "affinity": "INTEGER", "notNull": true },
+          { "fieldPath": "nomeTitular", "columnName": "nomeTitular", "affinity": "TEXT", "notNull": true },
+          { "fieldPath": "finalNumero", "columnName": "finalNumero", "affinity": "TEXT", "notNull": true },
+          { "fieldPath": "bandeira", "columnName": "bandeira", "affinity": "TEXT", "notNull": true },
+          { "fieldPath": "validade", "columnName": "validade", "affinity": "TEXT", "notNull": true },
+          { "fieldPath": "limite", "columnName": "limite", "affinity": "REAL", "notNull": true },
+          { "fieldPath": "template", "columnName": "template", "affinity": "TEXT", "notNull": true }
+        ],
+        "primaryKey": { "autoGenerate": true, "columnNames": [ "id" ] }
+      },
+      {
+        "tableName": "CadastroUsuario",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `userId` TEXT NOT NULL, `nome` TEXT NOT NULL, `cpf` TEXT NOT NULL, `cep` TEXT NOT NULL, `endereco` TEXT NOT NULL, `number` TEXT NOT NULL, `bairro` TEXT NOT NULL, `estado` TEXT NOT NULL, `email` TEXT NOT NULL)",
+        "fields": [
+          { "fieldPath": "id", "columnName": "id", "affinity": "INTEGER", "notNull": true },
+          { "fieldPath": "userId", "columnName": "userId", "affinity": "TEXT", "notNull": true },
+          { "fieldPath": "nome", "columnName": "nome", "affinity": "TEXT", "notNull": true },
+          { "fieldPath": "cpf", "columnName": "cpf", "affinity": "TEXT", "notNull": true },
+          { "fieldPath": "cep", "columnName": "cep", "affinity": "TEXT", "notNull": true },
+          { "fieldPath": "endereco", "columnName": "endereco", "affinity": "TEXT", "notNull": true },
+          { "fieldPath": "number", "columnName": "number", "affinity": "TEXT", "notNull": true },
+          { "fieldPath": "bairro", "columnName": "bairro", "affinity": "TEXT", "notNull": true },
+          { "fieldPath": "estado", "columnName": "estado", "affinity": "TEXT", "notNull": true },
+          { "fieldPath": "email", "columnName": "email", "affinity": "TEXT", "notNull": true }
+        ],
+        "primaryKey": { "autoGenerate": true, "columnNames": [ "id" ] },
+        "indices": [
+          { "name": "index_CadastroUsuario_email", "unique": true, "columnNames": [ "email" ], "orders": [], "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_CadastroUsuario_email` ON `${TABLE_NAME}` (`email`)" },
+          { "name": "index_CadastroUsuario_userId", "unique": true, "columnNames": [ "userId" ], "orders": [], "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_CadastroUsuario_userId` ON `${TABLE_NAME}` (`userId`)" }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '55555555555555555555555555555555')"
+    ]
+  }
+}
+

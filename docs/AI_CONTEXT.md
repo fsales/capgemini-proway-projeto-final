@@ -9,6 +9,7 @@
 ## Histórico de Alterações
 
 - <!-- Insira uma linha no início a cada atualização: "- YYYY-MM-DD — descrição" -->
+- 2026-05-27 — Adicionada migration Room v10→v11: renomeada tabela `CadastroUsuario` → `usuarios`; migrado FK em `cartoes` de `cadastroUsuarioId` → `usuarioId`; recriada tabela `cartoes` para garantir FOREIGN KEY e índices; atualizados índices únicos em `usuarios`.
 - 2026-05-27 — Resolvidos conflitos de merge: unificado CartaoRepositoryImpl (enviarParaApi + bloquearRemotamente + sincronização em background), DetalheViewModel usa bloquearRemotamente, CadastrarAlterarViewModel migrado para usar Double `limite` e removido parseLimite, removidas implementações duplicadas de VisualTransformation em `CadastroUsuarioScreen`.
 - 2026-05-22 — Renomeada a feature de `Extrato` para `Fatura` em classes, pacotes, rota (`FaturaRoute`) e navegação a partir de `Detalhe`
 - 2026-05-22 — Adicionada feature `Extrato` com navegação a partir de `Detalhe` (`ExtratoRoute(id)`), mock de faturas agrupadas e ação renomeada para "Faturas"

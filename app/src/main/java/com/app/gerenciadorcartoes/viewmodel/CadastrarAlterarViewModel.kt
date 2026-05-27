@@ -102,7 +102,7 @@ class CadastrarAlterarViewModel @Inject constructor(
                 _uiState.update { it.copy(carregando = false) }
                 _uiEvent.send(
                     CadastrarAlterarUiEvent.MostrarErro(
-                        erro.message ?: "Erro ao carregar cart├úo"
+                            erro.message ?: "Erro ao carregar cartão"
                     )
                 )
             }
@@ -135,11 +135,11 @@ class CadastrarAlterarViewModel @Inject constructor(
                     limite      = limiteAtual,
                     limiteMaximo= limiteMaximo,
                     template    = s.template,
-                    cadastroUsuarioId = idUsuario
+                    usuarioId = idUsuario
                 )
                 if (id == 0L){
                     cartaoRepository.salvar(cartao)
-                    // Solicita a sincroniza├º├úo com a API remota via SyncCoordinator
+                    // Solicita a sincronização com a API remota via SyncCoordinator
                     syncCoordinator.scheduleSync()
                 }
                 else cartaoRepository.atualizar(cartao)
@@ -149,7 +149,7 @@ class CadastrarAlterarViewModel @Inject constructor(
                 _uiState.update { it.copy(salvando = false) }
                 _uiEvent.send(
                     CadastrarAlterarUiEvent.MostrarErro(
-                        erro.message ?: "Erro ao salvar cart├úo"
+                        erro.message ?: "Erro ao salvar cartão"
                     )
                 )
             }
@@ -166,13 +166,13 @@ class CadastrarAlterarViewModel @Inject constructor(
         }
 
         with(s) {
-            if (nomeTitular.isBlank()) setErro { copy(erroNome = "Nome ├® obrigat├│rio") }
+            if (nomeTitular.isBlank()) setErro { copy(erroNome = "Nome é obrigatório") }
 
             if (finalNumero.length != 4 || !finalNumero.all { it.isDigit() }) {
-                setErro { copy(erroNumero = "Informe os 4 ├║ltimos d├¡gitos") }
+                setErro { copy(erroNumero = "Informe os 4 últimos dígitos") }
             }
 
-            if (bandeira.isBlank()) setErro { copy(erroBandeira = "Bandeira ├® obrigat├│ria") }
+            if (bandeira.isBlank()) setErro { copy(erroBandeira = "Bandeira é obrigatória") }
 
             validade.let { v ->
                 val mes = v.take(2).toIntOrNull() ?: 0
@@ -181,19 +181,19 @@ class CadastrarAlterarViewModel @Inject constructor(
 
                 when {
                     v.length != 4 -> setErro { copy(erroValidade = "Informe MM/AA") }
-                    mes !in 1..12 -> setErro { copy(erroValidade = "M├¬s inv├ílido (01-12)") }
+                    mes !in 1..12 -> setErro { copy(erroValidade = "Mês inválido (01-12)") }
                     ano < anoAtual -> setErro { copy(erroValidade = "Ano deve ser atual ou futuro") }
                 }
             }
 
-            if (limite <= 0.0) setErro { copy(erroLimite = "Limite inv├ílido") }
+            if (limite <= 0.0) setErro { copy(erroLimite = "Limite inválido") }
         }
 
         return valid
     }
 
 
-    // Chamadas remotas delegadas ao reposit├│rio; Erros de rede n├úo propagam para o fluxo principal
+    // Chamadas remotas delegadas ao repositório; Erros de rede não propagam para o fluxo principal
 }
 
 

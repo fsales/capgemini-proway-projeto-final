@@ -28,5 +28,5 @@ fun Cartao.toEntity(clientId: String? = this.clientId, syncPending: Boolean = fa
     bloqueado   = bloqueado,
     clientId    = clientId,
     syncPending = syncPending,
-    cadastroUsuarioId = cadastroUsuarioId,
+    usuarioId = usuarioId,
 )

@@ -8,12 +8,12 @@ import androidx.room.PrimaryKey
 @Entity(
     tableName = "cartoes",
     foreignKeys = [ForeignKey(
-        entity = CadastroUsuarioEntity::class,
+        entity = UsuarioEntity::class,
         parentColumns = ["id"],
-        childColumns = ["cadastroUsuarioId"],
+        childColumns = ["usuarioId"],
         onDelete = ForeignKey.CASCADE
     )],
-    indices = [Index(value = ["cadastroUsuarioId"])]
+    indices = [Index(value = ["usuarioId"])]
 )
 data class CartaoEntity(
     @PrimaryKey(autoGenerate = true)
@@ -31,5 +31,5 @@ data class CartaoEntity(
     // Marca registros que ainda precisam ser sincronizados com a API
     val syncPending  : Boolean = false,
     // relacionamento (nullable para migração segura)
-    val cadastroUsuarioId: Long? = null,
+    val usuarioId: Long? = null,
 )

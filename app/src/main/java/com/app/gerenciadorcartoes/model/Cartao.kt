@@ -14,7 +14,7 @@ data class Cartao(
     val limiteMaximo: Double = 0.0,
     val template    : String = "default", // ex: "default", "bradesco", "itau", "nubank", "inter", "c6bank"
     val bloqueado   : Boolean  = false,
-    val cadastroUsuarioId: Long? = null,
+    val usuarioId: Long? = null,
     // Identificador gerado pelo cliente para idempotência/sincronização (opcional)
     val clientId     : String? = null,
 ) {
@@ -32,7 +32,7 @@ data class Cartao(
             limite: Double,
             limiteMaximo: Double,
             template: String,
-            cadastroUsuarioId: Long?
+            usuarioId: Long?
         ) = Cartao(
             id = id,
             nomeTitular = nomeTitular.trim(),
@@ -42,7 +42,7 @@ data class Cartao(
             limite = limite,
             limiteMaximo = limiteMaximo,
             template = template,
-            cadastroUsuarioId = cadastroUsuarioId
+            usuarioId = usuarioId
         )
     }
 }
