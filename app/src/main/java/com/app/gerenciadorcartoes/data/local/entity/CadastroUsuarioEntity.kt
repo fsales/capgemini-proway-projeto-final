@@ -35,5 +35,4 @@ data class CadastroUsuarioEntity(
     val estado   : String = "",
 
     val email    : String = "",
-    // campo `senha` removido — Firebase gerencia credenciais
 )

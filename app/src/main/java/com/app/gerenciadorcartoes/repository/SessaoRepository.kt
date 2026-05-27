@@ -41,6 +41,12 @@ interface SessaoRepository {
      */
     suspend fun buscarNomeUsuario(): String?
 
+    /***
+     *  Retorna o id do usuário da sessão ativa consultando o perfil em Room,
+     *  ou `null` se não houver sessão ativa ou o perfil não for encontrado.
+     */
+    suspend fun buscarIdUsuario(): Long?
+
     /**
      * Retorna o userId da sessão ativa (DataStore), ou `null` se não houver sessão.
      */

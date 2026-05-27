@@ -130,6 +130,13 @@ class SessaoRepositoryImpl @Inject constructor(
             ?.takeIf { it.isNotBlank() }
     }
 
+    override suspend fun buscarIdUsuario(): Long? {
+        val userId = sessionManager.getSessionUserId().first() ?: return null
+        return cadastroUsuarioRepository
+            .buscarPorUserId(userId)
+            ?.id
+    }
+
     override suspend fun buscarUserId(): String? =
         sessionManager.getSessionUserId().first()
 }

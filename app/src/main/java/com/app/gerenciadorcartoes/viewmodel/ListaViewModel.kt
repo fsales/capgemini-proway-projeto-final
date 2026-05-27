@@ -97,7 +97,8 @@ class ListaViewModel @Inject constructor(
     private fun observarCartoes() {
         viewModelScope.launch {
             runCatching {
-                cartaoRepository.observarTodos().collect { cartoes ->
+                val idUsuario = sessaoRepository.buscarIdUsuario()
+                cartaoRepository.buscarCartaosPorUsuario(idUsuario).collect { cartoes ->
                     _uiState.update { it.copy(cartoes = cartoes, carregando = false) }
                 }
             }.onFailure { erro ->

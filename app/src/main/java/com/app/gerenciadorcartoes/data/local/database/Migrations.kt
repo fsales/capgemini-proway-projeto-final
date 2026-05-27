@@ -175,6 +175,24 @@ val MIGRATION_7_8 = object : Migration(7, 8) {
     }
 }
 
+/** Migration 8 -> 9: adiciona coluna cadastroUsuarioId (nullable) em `cartoes`. */
+val MIGRATION_8_9 = object : Migration(8, 9) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        // coluna nullable adicionada para compatibilidade com dados existentes
+        database.execSQL("ALTER TABLE cartoes ADD COLUMN cadastroUsuarioId INTEGER")
+    }
+}
+
+
+/** Migration 9 -> 10: adiciona coluna clientId (TEXT) e syncPending (INTEGER NOT NULL DEFAULT 0) em `cartoes`. */
+val MIGRATION_9_10 = object : Migration(9, 10) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("ALTER TABLE cartoes ADD COLUMN clientId TEXT")
+        database.execSQL("ALTER TABLE cartoes ADD COLUMN syncPending INTEGER NOT NULL DEFAULT 0")
+    }
+}
+
+
 /** Lista completa de migrações — passe para `.addMigrations(*ALL_MIGRATIONS)`. */
 val ALL_MIGRATIONS = arrayOf(
     MIGRATION_1_2,
@@ -184,4 +202,6 @@ val ALL_MIGRATIONS = arrayOf(
     MIGRATION_5_6,
     MIGRATION_6_7,
     MIGRATION_7_8,
+    MIGRATION_8_9
+    ,MIGRATION_9_10
 )

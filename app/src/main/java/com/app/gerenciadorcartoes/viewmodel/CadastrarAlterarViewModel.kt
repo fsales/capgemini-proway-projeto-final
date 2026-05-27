@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.app.gerenciadorcartoes.model.Cartao
 import com.app.gerenciadorcartoes.repository.CartaoRepository
+import com.app.gerenciadorcartoes.repository.SessaoRepository
 import com.app.gerenciadorcartoes.ui.feature.cadastraralterar.CadastrarAlterarEvent
 import com.app.gerenciadorcartoes.ui.feature.cadastraralterar.CadastrarAlterarUiEvent
 import com.app.gerenciadorcartoes.ui.feature.cadastraralterar.state.CadastrarAlterarUiState
@@ -26,7 +27,8 @@ import javax.inject.Inject
 class CadastrarAlterarViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val cartaoRepository: CartaoRepository,
-    // Notificar: chamadas remotas delegadas ao CartaoRepository
+    private val sessaoRepository          : SessaoRepository,
+    private val syncCoordinator          : com.app.gerenciadorcartoes.sync.SyncCoordinator,
 ) : ViewModel() {
 
     private val route: CadastrarAlterarRoute = savedStateHandle.toRoute()
@@ -123,6 +125,7 @@ class CadastrarAlterarViewModel @Inject constructor(
                         ?.coerceAtMost(limiteMaximo)
                         ?: limiteMaximo
                 }
+                val idUsuario = sessaoRepository.buscarIdUsuario();
                 val cartao = Cartao(
                     id          = id,
                     nomeTitular = s.nomeTitular.trim(),
@@ -132,10 +135,12 @@ class CadastrarAlterarViewModel @Inject constructor(
                     limite      = limiteAtual,
                     limiteMaximo= limiteMaximo,
                     template    = s.template,
+                    cadastroUsuarioId = idUsuario
                 )
                 if (id == 0L){
                     cartaoRepository.salvar(cartao)
-                    cartaoRepository.enviarParaApi(cartao)
+                    // agendar sincronização via coordinator (mantendo repository livre de orquestração)
+                    syncCoordinator.scheduleSync()
                 }
                 else cartaoRepository.atualizar(cartao)
                 _uiEvent.send(CadastrarAlterarUiEvent.NavigateBack)
