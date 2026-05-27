@@ -85,7 +85,7 @@ class CadastrarAlterarViewModel @Inject constructor(
                             nomeTitular = cartao.nomeTitular,
                             finalNumero = cartao.finalNumero,
                             bandeira    = cartao.bandeira,
-                            validade    = cartao.validade,
+                            validade    = cartao.validade.filter { it.isDigit() },
                             limite      = cartao.limiteMaximo
                                 .takeIf { limite -> limite > 0.0 }
                                 ?: cartao.limite,
@@ -126,12 +126,12 @@ class CadastrarAlterarViewModel @Inject constructor(
                         ?: limiteMaximo
                 }
                 val idUsuario = sessaoRepository.buscarIdUsuario();
-                val cartao = Cartao(
+                val cartao = Cartao.fromUi(
                     id          = id,
-                    nomeTitular = s.nomeTitular.trim(),
-                    finalNumero = s.finalNumero.trim(),
-                    bandeira    = s.bandeira.trim(),
-                    validade    = s.validade.trim(),
+                    nomeTitular = s.nomeTitular,
+                    finalNumero = s.finalNumero,
+                    bandeira    = s.bandeira,
+                    validadeRaw = s.validade,
                     limite      = limiteAtual,
                     limiteMaximo= limiteMaximo,
                     template    = s.template,
@@ -139,7 +139,7 @@ class CadastrarAlterarViewModel @Inject constructor(
                 )
                 if (id == 0L){
                     cartaoRepository.salvar(cartao)
-                    // agendar sincronização via coordinator (mantendo repository livre de orquestração)
+                    // Solicita a sincronização com a API remota via SyncCoordinator
                     syncCoordinator.scheduleSync()
                 }
                 else cartaoRepository.atualizar(cartao)
@@ -160,22 +160,35 @@ class CadastrarAlterarViewModel @Inject constructor(
         val s = _uiState.value
         var valid = true
 
-        if (s.nomeTitular.isBlank()) {
-            _uiState.update { it.copy(erroNome = "Nome é obrigatório") }; valid = false
+        fun setErro(update: CadastrarAlterarUiState.() -> CadastrarAlterarUiState) {
+            _uiState.update(update)
+            valid = false
         }
-        if (s.finalNumero.length != 4 || !s.finalNumero.all { it.isDigit() }) {
-            _uiState.update { it.copy(erroNumero = "Informe os 4 últimos dígitos") }; valid = false
+
+        with(s) {
+            if (nomeTitular.isBlank()) setErro { copy(erroNome = "Nome é obrigatório") }
+
+            if (finalNumero.length != 4 || !finalNumero.all { it.isDigit() }) {
+                setErro { copy(erroNumero = "Informe os 4 últimos dígitos") }
+            }
+
+            if (bandeira.isBlank()) setErro { copy(erroBandeira = "Bandeira é obrigatória") }
+
+            validade.let { v ->
+                val mes = v.take(2).toIntOrNull() ?: 0
+                val ano = v.takeLast(2).toIntOrNull() ?: 0
+                val anoAtual = java.time.LocalDate.now().year % 100
+
+                when {
+                    v.length != 4 -> setErro { copy(erroValidade = "Informe MM/AA") }
+                    mes !in 1..12 -> setErro { copy(erroValidade = "Mês inválido (01-12)") }
+                    ano < anoAtual -> setErro { copy(erroValidade = "Ano deve ser atual ou futuro") }
+                }
+            }
+
+            if (limite <= 0.0) setErro { copy(erroLimite = "Limite inválido") }
         }
-        if (s.bandeira.isBlank()) {
-            _uiState.update { it.copy(erroBandeira = "Bandeira é obrigatória") }; valid = false
-        }
-        if (!Regex("""^\d{2}/\d{2}$""").matches(s.validade)) {
-            _uiState.update { it.copy(erroValidade = "Formato MM/AA") }; valid = false
-        }
-        val limite = s.limite
-        if (limite <= 0.0) {
-            _uiState.update { it.copy(erroLimite = "Limite inválido") }; valid = false
-        }
+
         return valid
     }
 

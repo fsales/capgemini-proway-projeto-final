@@ -1,5 +1,7 @@
 package com.app.gerenciadorcartoes.model
 
+import com.app.gerenciadorcartoes.extensions.toValidadeFormatada
+
 // Modelo de domínio do cartão de crédito/débito.
 // finalNumero: apenas os 4 últimos dígitos (exibição e armazenamento).
 data class Cartao(
@@ -15,6 +17,34 @@ data class Cartao(
     val cadastroUsuarioId: Long? = null,
     // Identificador gerado pelo cliente para idempotência/sincronização (opcional)
     val clientId     : String? = null,
-)
+) {
+    companion object {
+        /**
+         * Cria um Cartao a partir dos dados brutos da UI.
+         * Centraliza a lógica de formatação (ex: MM/AA) no domínio.
+         */
+        fun fromUi(
+            id: Long,
+            nomeTitular: String,
+            finalNumero: String,
+            bandeira: String,
+            validadeRaw: String, // ex: "1228"
+            limite: Double,
+            limiteMaximo: Double,
+            template: String,
+            cadastroUsuarioId: Long?
+        ) = Cartao(
+            id = id,
+            nomeTitular = nomeTitular.trim(),
+            finalNumero = finalNumero.trim(),
+            bandeira = bandeira.trim(),
+            validade = validadeRaw.toValidadeFormatada(),
+            limite = limite,
+            limiteMaximo = limiteMaximo,
+            template = template,
+            cadastroUsuarioId = cadastroUsuarioId
+        )
+    }
+}
 
 
