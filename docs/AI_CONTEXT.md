@@ -9,6 +9,7 @@
 ## Histórico de Alterações
 
 - <!-- Insira uma linha no início a cada atualização: "- YYYY-MM-DD — descrição" -->
+- 2026-05-27 — Resolvidos conflitos de merge: unificado CartaoRepositoryImpl (enviarParaApi + bloquearRemotamente + sincronização em background), DetalheViewModel usa bloquearRemotamente, CadastrarAlterarViewModel migrado para usar Double `limite` e removido parseLimite, removidas implementações duplicadas de VisualTransformation em `CadastroUsuarioScreen`.
 - 2026-05-22 — Renomeada a feature de `Extrato` para `Fatura` em classes, pacotes, rota (`FaturaRoute`) e navegação a partir de `Detalhe`
 - 2026-05-22 — Adicionada feature `Extrato` com navegação a partir de `Detalhe` (`ExtratoRoute(id)`), mock de faturas agrupadas e ação renomeada para "Faturas"
 - 2026-05-20 — Splash ajustada: logo reduzida em `ic_splash_logo_static` para melhor proporção visual no lançamento

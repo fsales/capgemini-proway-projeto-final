@@ -61,6 +61,32 @@ class CartaoRepositoryImpl @Inject constructor(
     override suspend fun excluirPorId(id: Long) =
         cartaoDao.excluirPorId(id)
 
+    override suspend fun enviarParaApi(cartao: Cartao) {
+        // Reaproveita a lógica de sincronização usada ao inserir um cartão
+        runCatching {
+            val userId = sessionManager.getSessionUserId().firstOrNull() ?: return
+            apiService.addCard(
+                AddCardRequest(
+                    idUsuario   = userId,
+                    id          = cartao.id.toString(),
+                    nomeTitular = cartao.nomeTitular,
+                    finalNumero = cartao.finalNumero,
+                    bandeira    = cartao.bandeira,
+                    validade    = cartao.validade,
+                    limite      = cartao.limite,
+                    template    = cartao.template,
+                    bloqueado   = cartao.bloqueado,
+                ),
+            )
+        }
+    }
+
+    override suspend fun bloquearRemotamente(id: Long, novoStatusBloqueio: Boolean) {
+        // Delega para a implementação existente que já realiza a chamada remota
+        // e atualiza o banco local em sequência.
+        atualizarBloqueio(id, novoStatusBloqueio)
+    }
+
     private suspend fun sincronizarNovoCartao(cartao: Cartao) {
         runCatching {
             val userId = sessionManager.getSessionUserId().firstOrNull() ?: return

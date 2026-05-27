@@ -84,8 +84,7 @@ class CadastrarAlterarViewModel @Inject constructor(
                             validade    = cartao.validade,
                             limite      = cartao.limiteMaximo
                                 .takeIf { limite -> limite > 0.0 }
-                                ?.toString()
-                                ?: cartao.limite.toString(),
+                                ?: cartao.limite,
                             template    = cartao.template,
                             carregando  = false,
                         )
@@ -113,7 +112,7 @@ class CadastrarAlterarViewModel @Inject constructor(
             _uiState.update { it.copy(salvando = true) }
             runCatching {
                 val s            = _uiState.value
-                val limiteMaximo = parseLimite(s.limite) ?: 0.0
+                val limiteMaximo = s.limite
                 val limiteAtual  = if (id == 0L) {
                     limiteMaximo
                 } else {
@@ -166,38 +165,13 @@ class CadastrarAlterarViewModel @Inject constructor(
         if (!Regex("""^\d{2}/\d{2}$""").matches(s.validade)) {
             _uiState.update { it.copy(erroValidade = "Formato MM/AA") }; valid = false
         }
-        val limite = parseLimite(s.limite)
-        if (s.limite.isBlank() || limite == null || limite <= 0.0) {
+        if (s.limite <= 0.0) {
             _uiState.update { it.copy(erroLimite = "Limite inválido") }; valid = false
         }
         return valid
     }
 
-    private fun parseLimite(valor: String): Double? {
-        val numero = valor
-            .replace("R$", "")
-            .replace("\\s".toRegex(), "")
-            .filter { it.isDigit() || it == ',' || it == '.' }
-
-        if (numero.isBlank()) return null
-
-        val separadores = numero.count { it == ',' || it == '.' }
-        val separadorDecimalIndex = maxOf(numero.lastIndexOf(','), numero.lastIndexOf('.'))
-        if (separadorDecimalIndex == -1) return numero.toDoubleOrNull()
-
-        val parteInteira = numero.substring(0, separadorDecimalIndex).filter(Char::isDigit)
-        val parteDecimal = numero.substring(separadorDecimalIndex + 1).filter(Char::isDigit)
-
-        val separadorUnicoDeMilhar = separadores == 1 &&
-            parteDecimal.length == 3 &&
-            parteInteira.length <= 3
-
-        val normalizado = when {
-            separadorUnicoDeMilhar -> parteInteira + parteDecimal
-            parteDecimal.isBlank() -> parteInteira
-            else                   -> "$parteInteira.$parteDecimal"
-        }
-
-        return normalizado.toDoubleOrNull()
-    }
+    // Nota: o campo `limite` no UiState foi migrado para Double — parse de string
+    // ficou obsoleto na ViewModel. Se a UI enviar strings, a conversão deve
+    // ocorrer no componente de Input antes de enviar o evento.
 }
