@@ -18,6 +18,8 @@ import com.app.gerenciadorcartoes.repository.CartaoDetalheRepository
 import com.app.gerenciadorcartoes.repository.CartaoDetalheRepositoryImpl
 import com.app.gerenciadorcartoes.repository.CartaoRepository
 import com.app.gerenciadorcartoes.repository.CartaoRepositoryImpl
+import com.app.gerenciadorcartoes.repository.FaturaRepository
+import com.app.gerenciadorcartoes.repository.FaturaRepositoryImpl
 import com.app.gerenciadorcartoes.repository.SessaoRepository
 import com.app.gerenciadorcartoes.repository.SessaoRepositoryImpl
 import dagger.Binds
@@ -26,6 +28,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import java.time.Clock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -47,6 +50,9 @@ abstract class AppModule {
     abstract fun bindCartaoDetalheRepository(
         impl: CartaoDetalheRepositoryImpl,
     ): CartaoDetalheRepository
+
+    @Binds @Singleton
+    abstract fun bindFaturaRepository(impl: FaturaRepositoryImpl): FaturaRepository
 
     @Binds @Singleton
     abstract fun bindSessionManager(impl: SessionManagerImpl): SessionManager
@@ -72,6 +78,9 @@ abstract class AppModule {
         @Provides @Singleton
         fun provideCadastroUsuarioDao(database: AppDatabase): CadastroUsuarioDao =
             database.cadastroUsuarioDao()
+
+        @Provides @Singleton
+        fun provideClock(): Clock = Clock.systemDefaultZone()
 
         @Provides @Singleton
         fun provideSessionDataStore(@ApplicationContext context: Context): DataStore<Preferences> =

@@ -9,19 +9,19 @@ import javax.inject.Inject
 
 class CartaoDetalheRepositoryImpl @Inject constructor(
     private val cartaoRepository: CartaoRepository,
+    private val faturaRepository: FaturaRepository,
 ) : CartaoDetalheRepository {
 
     override fun observarDetalhePorId(id: Long): Flow<CartaoDetalhe?> =
         cartaoRepository.observarPorId(id).map { cartao ->
             cartao?.let(::montarDetalheMockado)
-    }
+        }
 
-    // Ponto de troca futura: substituir este mock por dados reais de fatura/limite.
     private fun montarDetalheMockado(cartao: Cartao): CartaoDetalhe =
         CartaoDetalhe(
             cartao          = cartao,
             instituicao     = InstituicaoFinanceira(nome = instituicaoPorTemplate(cartao.template)),
-            limiteUtilizado = LIMITE_UTILIZADO_PADRAO,
+            limiteUtilizado = faturaRepository.totalAPartirDoMesAtual(cartao.id),
         )
 
     private fun instituicaoPorTemplate(template: String): String =
@@ -34,7 +34,4 @@ class CartaoDetalheRepositoryImpl @Inject constructor(
             else       -> "Cartão"
         }
 
-    private companion object {
-        const val LIMITE_UTILIZADO_PADRAO = 500.0
-    }
 }

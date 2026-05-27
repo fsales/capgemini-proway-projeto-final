@@ -4,7 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.app.gerenciadorcartoes.model.FaturaMes
 import com.app.gerenciadorcartoes.repository.CartaoRepository
+import com.app.gerenciadorcartoes.repository.FaturaRepository
 import com.app.gerenciadorcartoes.ui.feature.fatura.FaturaEvent
 import com.app.gerenciadorcartoes.ui.feature.fatura.FaturaUiEvent
 import com.app.gerenciadorcartoes.ui.feature.fatura.state.FaturaMesUiState
@@ -13,7 +15,6 @@ import com.app.gerenciadorcartoes.ui.feature.fatura.state.LancamentoUiState
 import com.app.gerenciadorcartoes.ui.navigation.FaturaRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
-import java.time.Month
 import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
@@ -30,6 +31,7 @@ import kotlinx.coroutines.launch
 class FaturaViewModel @Inject constructor(
     savedStateHandle         : SavedStateHandle,
     private val cartaoRepository: CartaoRepository,
+    private val faturaRepository: FaturaRepository,
 ) : ViewModel() {
 
     private val route : FaturaRoute = savedStateHandle.toRoute()
@@ -70,7 +72,7 @@ class FaturaViewModel @Inject constructor(
                             carregando = false,
                             erro       = null,
                             titulo     = titulo,
-                            faturas    = gerarFaturasMock(),
+                            faturas    = faturaRepository.listarFaturas(id).map { it.toUiState() },
                         )
                     }
                 }
@@ -81,37 +83,20 @@ class FaturaViewModel @Inject constructor(
         }
     }
 
-    private fun gerarFaturasMock(): List<FaturaMesUiState> {
-        val anoAtual = LocalDate.now().year
-        val inicio = YearMonth.of(anoAtual, Month.MAY)
-        val fim = YearMonth.of(2025, Month.NOVEMBER)
+    private fun FaturaMes.toUiState(): FaturaMesUiState =
+        FaturaMesUiState(
+            referencia  = competencia.formatarReferencia(),
+            lancamentos = lancamentos.map {
+                LancamentoUiState(
+                    descricao = it.descricao,
+                    data      = it.data.formatarData(),
+                    valor     = it.valor,
+                )
+            },
+        )
 
-        val meses = mutableListOf<YearMonth>()
-        var cursor = inicio
-        while (!cursor.isBefore(fim)) {
-            meses += cursor
-            cursor = cursor.minusMonths(1)
-        }
-
-        return meses.mapIndexed { indiceFatura, competencia ->
-            FaturaMesUiState(
-                referencia  = competencia.formatarReferencia(),
-                lancamentos = gerarLancamentos(competencia, indiceFatura),
-            )
-        }
-    }
-
-    private fun gerarLancamentos(competencia: YearMonth, indiceFatura: Int): List<LancamentoUiState> =
-        (1..5).map { indiceLancamento ->
-            val dia = (indiceLancamento * 5 + indiceFatura).coerceAtMost(28)
-            val valor = 25.0 + (indiceFatura * 11.75) + (indiceLancamento * 13.40)
-
-            LancamentoUiState(
-                descricao = DESCRICOES[(indiceFatura * 5 + indiceLancamento - 1) % DESCRICOES.size],
-                data      = "%02d/%02d/%d".format(dia, competencia.monthValue, competencia.year),
-                valor     = valor,
-            )
-        }
+    private fun LocalDate.formatarData(): String =
+        "%02d/%02d/%d".format(dayOfMonth, monthValue, year)
 
     private fun YearMonth.formatarReferencia(): String {
         val nomeMes = month.getDisplayName(TextStyle.FULL, PT_BR)
@@ -120,18 +105,5 @@ class FaturaViewModel @Inject constructor(
 
     private companion object {
         private val PT_BR = Locale.forLanguageTag("pt-BR")
-
-        private val DESCRICOES = listOf(
-            "Academia",
-            "Assinatura streaming",
-            "Cinema",
-            "Combustivel",
-            "Delivery",
-            "Farmacia",
-            "Loja online",
-            "Restaurante",
-            "Supermercado",
-            "Transporte",
-        )
     }
 }
