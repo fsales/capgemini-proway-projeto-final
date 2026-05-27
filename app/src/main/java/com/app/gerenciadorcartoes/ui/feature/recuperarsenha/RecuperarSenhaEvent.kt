@@ -5,4 +5,3 @@ sealed interface RecuperarSenhaEvent {
     data object Enviar                           : RecuperarSenhaEvent
     data object Voltar                           : RecuperarSenhaEvent
 }
-

@@ -27,4 +27,3 @@ abstract class AuthModule {
         fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
     }
 }
-

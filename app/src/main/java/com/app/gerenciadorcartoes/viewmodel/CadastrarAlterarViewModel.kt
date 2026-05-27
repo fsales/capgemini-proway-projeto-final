@@ -13,7 +13,6 @@ import com.app.gerenciadorcartoes.ui.navigation.CadastrarAlterarRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
-
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,7 +25,6 @@ import javax.inject.Inject
 class CadastrarAlterarViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val cartaoRepository: CartaoRepository,
-    // Notificar: chamadas remotas delegadas ao CartaoRepository
 ) : ViewModel() {
 
     private val route: CadastrarAlterarRoute = savedStateHandle.toRoute()
@@ -133,11 +131,11 @@ class CadastrarAlterarViewModel @Inject constructor(
                     limiteMaximo= limiteMaximo,
                     template    = s.template,
                 )
-                if (id == 0L){
+                if (id == 0L) {
                     cartaoRepository.salvar(cartao)
-                    cartaoRepository.enviarParaApi(cartao)
+                } else {
+                    cartaoRepository.atualizar(cartao)
                 }
-                else cartaoRepository.atualizar(cartao)
                 _uiEvent.send(CadastrarAlterarUiEvent.NavigateBack)
             }.onFailure { erro ->
                 if (erro is CancellationException) throw erro
@@ -167,14 +165,13 @@ class CadastrarAlterarViewModel @Inject constructor(
         if (!Regex("""^\d{2}/\d{2}$""").matches(s.validade)) {
             _uiState.update { it.copy(erroValidade = "Formato MM/AA") }; valid = false
         }
-        val limite = s.limite
-        if (limite <= 0.0) {
+        if (s.limite <= 0.0) {
             _uiState.update { it.copy(erroLimite = "Limite inválido") }; valid = false
         }
         return valid
     }
 
-
-    // Chamadas remotas delegadas ao repositório; Erros de rede não propagam para o fluxo principal
+    // Nota: o campo `limite` no UiState foi migrado para Double — parse de string
+    // ficou obsoleto na ViewModel. Se a UI enviar strings, a conversão deve
+    // ocorrer no componente de Input antes de enviar o evento.
 }
-

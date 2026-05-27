@@ -39,4 +39,3 @@ private val EMAIL_ESTRUTURAL_REGEX = Regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]{2,}$")
 
 internal fun emailEstruturalmenteValido(email: String): Boolean =
     email.isNotBlank() && EMAIL_ESTRUTURAL_REGEX.matches(email)
-

@@ -14,4 +14,3 @@ local.properties
 
 # NÃO ignorar o debug.keystore compartilhado
 !/app/keystore/debug.keystore
-

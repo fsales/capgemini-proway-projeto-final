@@ -49,7 +49,7 @@ class MvvmRulesTest {
             return true
         }
     }
-    
+
     private val viewModelNaoGerada = object : DescribedPredicate<JavaClass>("viewmodel não gerada") {
         override fun test(input: JavaClass): Boolean {
             val fqn = input.name ?: return false

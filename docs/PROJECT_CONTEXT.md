@@ -58,7 +58,8 @@ Todos os campos têm valores padrão para que `Cartao()` possa ser usado como es
 | Tela | Objeto de rota | Finalidade |
 |---|---|---|
 | Lista | `ListaRoute` (destino inicial) | Lista reativa de todos os cartões; exclusão a partir da lista |
-| Detalhe | `DetalheRoute(id: Long)` | Visualização somente leitura; navegar para editar ou excluir |
+| Detalhe | `DetalheRoute(id: Long)` | Visualização somente leitura; navegar para ajuste de limite e faturas |
+| Fatura | `FaturaRoute(id: Long)` | Lista mock de lançamentos agrupados por fatura mensal |
 | Cadastrar / Alterar | `CadastrarAlterarRoute(id: Long)` | Formulário unificado — inserção (`id=0`) ou atualização (`id>0`) |
 | Cadastro de Usuário | `CadastroUsuarioRoute` | Formulário responsivo com abas, CEP automático e validação inline |
 
@@ -68,10 +69,13 @@ Todos os campos têm valores padrão para que `Cartao()` possa ser usado como es
 ListaRoute  ←── destino inicial
   ├── FAB ──────────────────────────► CadastrarAlterarRoute(id=0)   [novo cartão]
   └── toque no cartão ──────────────► DetalheRoute(id)
-                                           ├── Botão Editar ──────────► CadastrarAlterarRoute(id)
-                                           └── Excluir / Voltar ───────► popBackStack() → ListaRoute
+                                           ├── Botão Ajustar limite ──► AjustarLimiteRoute(id)
+                                           ├── Botão Faturas ─────────► FaturaRoute(id)
+                                           └── Voltar ────────────────► popBackStack() → ListaRoute
 CadastrarAlterarRoute
   └── Salvar / Voltar ──────────────► popBackStack()
+FaturaRoute
+  └── Voltar ───────────────────────► popBackStack() → DetalheRoute
 ```
 
 ---
@@ -224,10 +228,12 @@ app/src/main/java/com/app/gerenciadorcartoes/
     ├── feature/
     │   ├── lista/                    ListaEvent, ListaUiEvent, ListaScreen, state/ListaUiState
     │   ├── detalhe/                  DetalheEvent, DetalheUiEvent, DetalheScreen, state/DetalheUiState
+    │   ├── fatura/                   FaturaEvent, FaturaUiEvent, FaturaScreen, state/FaturaUiState
     │   └── cadastraralterar/         CadastrarAlterarEvent, CadastrarAlterarUiEvent,
     │                                 CadastrarAlterarScreen, state/CadastrarAlterarUiState
     └── viewmodel/
         ├── ListaViewModel.kt
-        ├── DetalheViewModel.kt
+        ├── DetalheViewModel.kt   
+        ├── FaturaViewModel.kt
         └── CadastrarAlterarViewModel.kt
 ```

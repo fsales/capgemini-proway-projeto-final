@@ -6,6 +6,29 @@
 
 ---
 
+## Histórico de Alterações
+
+- <!-- Insira uma linha no início a cada atualização: "- YYYY-MM-DD — descrição" -->
+- 2026-05-27 — Resolvidos conflitos de merge: unificado CartaoRepositoryImpl (enviarParaApi + bloquearRemotamente + sincronização em background), DetalheViewModel usa bloquearRemotamente, CadastrarAlterarViewModel migrado para usar Double `limite` e removido parseLimite, removidas implementações duplicadas de VisualTransformation em `CadastroUsuarioScreen`.
+- 2026-05-22 — Renomeada a feature de `Extrato` para `Fatura` em classes, pacotes, rota (`FaturaRoute`) e navegação a partir de `Detalhe`
+- 2026-05-22 — Adicionada feature `Extrato` com navegação a partir de `Detalhe` (`ExtratoRoute(id)`), mock de faturas agrupadas e ação renomeada para "Faturas"
+- 2026-05-20 — Splash ajustada: logo reduzida em `ic_splash_logo_static` para melhor proporção visual no lançamento
+- 2026-05-19 — Tela `Detalhe` simplificada para leitura: removidas ações de Editar/Excluir do AppBar e limpeza de eventos/UI events relacionados no fluxo da feature
+- 2026-05-19 — Botão de 3 pontinhos na Lista atualizado para menu de ações em bottom sheet (Editar e Excluir), evitando popup deslocado sobre/abaixo do card
+- 2026-05-19 — Ação de excluir na Lista refinada: ícone de lixeira direto sobre o card substituído por menu discreto (⋮) com opção “Excluir cartão” em dropdown
+- 2026-05-19 — Botão + do topo refinado com microdetalhes premium (sombra suave, borda translúcida circular e ícone dimensionado por token de design)
+- 2026-05-19 — Estado vazio da Lista refinado com linguagem humana e hierarquia visual (`title` + `subtitle` no `EmptyState`), botão + do topo reforçado com cor primária e fundo em gradiente sutil na tela sem cartões
+- 2026-05-19 — ListaScreen alterada para padrão premium sem FAB sobreposto: ação de adicionar movida para o topo (ícone + em `AppTopAppBar.actions`) e texto do estado vazio atualizado
+- 2026-05-19 — Adicionado campo `template` ao modelo de domínio `Cartao` e a `CartaoEntity`; migração Room v1→v2; criado `CartaoTemplateCard` e `CartaoTemplateMini` em `ui/components/`; ListaScreen e CadastrarAlterarScreen atualizados com seletor de template visual (Bradesco, Itaú, Nubank, Inter, C6 Bank, Padrão)
+- 2026-05-19 — Downgrade do Android Gradle Plugin para 9.0.0 para compatibilidade com Android Studio; seção de build atualizada
+- 2026-05-16 — Adicionada feature Login: LoginUiState, LoginEvent, LoginUiEvent, LoginScreen, LoginViewModel, LoginRoute; AppNavHost atualizado com LoginRoute como startDestination
+- 2026-05-15 — Revisão completa: corrigidos tokens IconSize (extraSmall/small/extraLarge), adicionado smallMedium ao Spacing, corrigida Matriz de Estratégia (Repository em vez de DAO, tipos Cartao), corrigida ordem de parâmetros do AppScaffold, documentados CadastrarAlterarUiState.salvando e isEdicao
+- 2026-05-15 — Tradução completa para pt-BR; todos os arquivos da pasta docs/ atualizados
+- 2026-05-15 — Adicionados Guia de Manutenção e Histórico de Alterações; criado .github/copilot-instructions.md para aplicação contínua das regras de atualização
+- 2026-05-15 — Geração inicial a partir de análise completa do código-fonte
+
+---
+
 ## Informações Rápidas
 
 | Campo | Valor |
@@ -87,6 +110,7 @@ app/src/main/java/com/app/gerenciadorcartoes/
     │   ├── login/                    LoginEvent · LoginUiEvent · LoginScreen · state/LoginUiState
     │   ├── lista/                    ListaEvent · ListaUiEvent · ListaScreen · state/ListaUiState
     │   ├── detalhe/                  DetalheEvent · DetalheUiEvent · DetalheScreen · state/DetalheUiState
+    |   |── fatura/                   FaturaEvent · FaturaUiEvent · FaturaScreen · state/FaturaUiState
     │   ├── cadastraralterar/         CadastrarAlterarEvent · CadastrarAlterarUiEvent
     │   │                             CadastrarAlterarScreen · state/CadastrarAlterarUiState
     │   ├── cadastrousuario/          CadastroUsuarioEvent · CadastroUsuarioUiEvent
@@ -97,6 +121,7 @@ app/src/main/java/com/app/gerenciadorcartoes/
         ├── LoginViewModel.kt
         ├── ListaViewModel.kt
         ├── DetalheViewModel.kt
+        |── FaturaViewModel.kt
         ├── CadastrarAlterarViewModel.kt
         ├── CadastroUsuarioViewModel.kt
         ├── RecuperarSenhaViewModel.kt
@@ -368,6 +393,7 @@ composable<XRoute> { XScreen(navigateBack = { navController.popBackStack() }) }
 | `LoginRoute` | Autenticação do usuário | não |
 | `ListaRoute(exibirConfirmacao: Boolean = false)` | Lista de todos os cartões; `exibirConfirmacao = true` exibe snackbar de sucesso | não |
 | `DetalheRoute(id: Long)` | Detalhe somente leitura | não |
+| `FaturaRoute(id: Long)` | Faturas/mock de lançamentos por mês para o cartão selecionado | não |
 | `AjustarLimiteRoute(id: Long)` | Ajuste de limite de um cartão | não |
 | `CadastrarAlterarRoute(id: Long = 0L)` | Criar (`id=0`) ou editar (`id>0`) | não |
 | `CadastroUsuarioRoute(userId, emailExterno, nomeExterno)` | Cadastro (email+senha) ou completar perfil Google (`userId != ""`) | não |
@@ -635,7 +661,9 @@ Plugin Android:
 
 ---
 
-## Guia de Manutenção> Para assistentes de IA: consulte esta seção ao terminar uma tarefa para decidir o que atualizar.
+## Guia de Manutenção
+
+> Para assistentes de IA: consulte esta seção ao terminar uma tarefa para decidir o que atualizar.
 
 ### Qual seção atualizar para cada tipo de alteração
 
@@ -659,7 +687,15 @@ Plugin Android:
 
 1. Identificar o(s) tipo(s) de alteração na tabela acima.
 2. Editar cada seção listada — manter o conteúdo factual e fundamentado no código real.
-3. Atualizar os docs companion listados na terceira coluna.
-4. **Não** adicionar conteúdo aspiracional ou futuro — apenas o que existe no código-fonte.
+3. Inserir uma linha no início de `## Histórico de Alterações` com a data de hoje.
+4. Atualizar os docs companion listados na terceira coluna.
+5. **Não** adicionar conteúdo aspiracional ou futuro — apenas o que existe no código-fonte.
+
+### Como deve ser uma entrada no `## Histórico de Alterações`
+
+```
+- 2026-05-15 — Adicionado observarPorId() reativo ao CartaoDao; Matriz de Estratégia de Leitura atualizada
+- 2026-05-15 — Nova funcionalidade: tela CadastrarAlterar; Árvore de Fontes e Rotas Existentes atualizadas
+```
 
 ---

@@ -176,7 +176,7 @@ A camada de UI **apenas renderiza `UiState`** e **despacha `XEvent`**. Não cont
 | `ui/navigation/` | Declarações de rotas (`Routes.kt`) e configuração do `NavHost` (`AppNavHost.kt`) |
 | `ui/feature/<nome>/` | UI com escopo de feature — `XScreen`, `XContent`, `XEvent`, `XUiEvent`, `state/XUiState` |
 
-Features atuais incluem `login`, `lista`, `detalhe`, `cadastraralterar` e `cadastrousuario`.
+Features atuais incluem `login`, `lista`, `detalhe`, `fatura`, `cadastraralterar` e `cadastrousuario`.
 
 ---
 
@@ -256,7 +256,8 @@ Cada feature define duas sealed interfaces distintas:
 | Feature | Variantes de `XEvent` | Variantes de `XUiEvent` |
 |---|---|---|
 | Lista | `NavegaParaNovo`, `NavegaParaItem(id)`, `ExcluirCartao(id)` | `NavegaParaNovo`, `NavegaParaItem(id)`, `MostrarErro(msg)`, `MostrarMensagem(msg)` |
-| Detalhe | `Voltar`, `Editar`, `Excluir` | `NavigateBack`, `NavegaParaEditar(id)`, `MostrarErro(msg)` |
+| Detalhe | `Voltar`, `AjustarLimite`, `VerFaturas` | `NavigateBack`, `NavigateToAjustarLimite(id)`, `NavigateToFatura(id)`, `MostrarErro(msg)` |
+| Fatura | `Voltar` | `NavigateBack`, `MostrarErro(msg)` |
 | CadastrarAlterar | `Voltar`, `Salvar`, `NomeTitularAlterado(valor)`, `FinalNumeroAlterado(valor)`, `BandeiraAlterada(valor)`, `ValidadeAlterada(valor)`, `LimiteAlterado(valor)` | `NavigateBack`, `MostrarErro(msg)` |
 
 ---
@@ -267,6 +268,7 @@ Cada feature define duas sealed interfaces distintas:
 ```kotlin
 @Serializable object ListaRoute                          // sem parâmetros → object singleton
 @Serializable data class DetalheRoute(val id: Long)     // requer id → data class
+@Serializable data class FaturaRoute(val id: Long)      // faturas do cartão
 @Serializable data class CadastrarAlterarRoute(val id: Long = 0L)  // 0 = novo, >0 = editar
 ```
 
@@ -274,7 +276,8 @@ Cada feature define duas sealed interfaces distintas:
 ```kotlin
 NavHost(navController = navController, startDestination = ListaRoute) {
     composable<ListaRoute>            { ListaScreen(onNavigateToNovo = {...}, onNavigateToItem = {...}) }
-    composable<DetalheRoute>          { DetalheScreen(navigateBack = {...}, onNavigateToEditar = {...}) }
+    composable<DetalheRoute>          { DetalheScreen(navigateBack = {...}, onNavigateToAjustarLimite = {...}, onNavigateToFatura = {...}) }
+    composable<FaturaRoute>           { FaturaScreen(navigateBack = {...}) }
     composable<CadastrarAlterarRoute> { CadastrarAlterarScreen(navigateBack = {...}) }
 }
 ```

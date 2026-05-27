@@ -16,7 +16,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -26,7 +25,7 @@ import javax.inject.Inject
 class DetalheViewModel @Inject constructor(
     savedStateHandle              : SavedStateHandle,
     private val detalheRepository : CartaoDetalheRepository,
-    private val cartaoRepository : CartaoRepository,
+    private val cartaoRepository  : CartaoRepository,
 ) : ViewModel() {
 
     private val route : DetalheRoute = savedStateHandle.toRoute()
@@ -47,6 +46,9 @@ class DetalheViewModel @Inject constructor(
             DetalheEvent.Voltar -> viewModelScope.launch { _uiEvent.send(DetalheUiEvent.NavigateBack) }
             DetalheEvent.AjustarLimite -> viewModelScope.launch {
                 _uiEvent.send(DetalheUiEvent.NavigateToAjustarLimite(id))
+            }
+            DetalheEvent.VerFaturas -> viewModelScope.launch {
+                _uiEvent.send(DetalheUiEvent.NavigateToFatura(id))
             }
             DetalheEvent.BloquearCartao -> bloquearCartao()
         }
@@ -80,12 +82,8 @@ class DetalheViewModel @Inject constructor(
                 val cartao = _uiState.value.detalhe.cartao
                 val novoStatusBloqueio = !cartao.bloqueado
 
-                // Chamar API para bloquear ou desbloquear
+                cartaoRepository.atualizarBloqueio(cartao.id, novoStatusBloqueio)
 
-                // Executa chamada remota e atualiza o banco local via repositório
-                cartaoRepository.bloquearRemotamente(cartao.id, novoStatusBloqueio)
-
-                // Enviar mensagem de sucesso
                 val mensagem = if (novoStatusBloqueio) {
                     "Cartão bloqueado com sucesso"
                 } else {

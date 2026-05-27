@@ -429,4 +429,3 @@ class CadastroUsuarioViewModel @Inject constructor(
     private fun formatUf(text: String): String =
         text.filter { it.isLetter() }.uppercase().take(2)
 }
-

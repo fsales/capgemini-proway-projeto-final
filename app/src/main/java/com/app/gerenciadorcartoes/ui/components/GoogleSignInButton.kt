@@ -95,4 +95,3 @@ private fun GoogleSignInButtonDesabilitadoPreview() {
         GoogleSignInButton(onClick = {}, enabled = false, modifier = Modifier.fillMaxWidth())
     }
 }
-

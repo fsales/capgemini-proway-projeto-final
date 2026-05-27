@@ -13,4 +13,3 @@ data class CartaoResponse(
     @SerialName("template") val template: String = "",
     @SerialName("bloqueado") val bloqueado: String = "",
 )
-
