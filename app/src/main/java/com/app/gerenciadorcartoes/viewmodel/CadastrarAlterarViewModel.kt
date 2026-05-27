@@ -86,8 +86,7 @@ class CadastrarAlterarViewModel @Inject constructor(
                             validade    = cartao.validade,
                             limite      = cartao.limiteMaximo
                                 .takeIf { limite -> limite > 0.0 }
-                                ?.toString()
-                                ?: cartao.limite.toString(),
+                                ?: cartao.limite,
                             template    = cartao.template,
                             carregando  = false,
                         )
@@ -115,7 +114,7 @@ class CadastrarAlterarViewModel @Inject constructor(
             _uiState.update { it.copy(salvando = true) }
             runCatching {
                 val s            = _uiState.value
-                val limiteMaximo = s.limite.toDoubleOrNull() ?: 0.0
+                val limiteMaximo = s.limite
                 val limiteAtual  = if (id == 0L) {
                     limiteMaximo
                 } else {
@@ -168,8 +167,8 @@ class CadastrarAlterarViewModel @Inject constructor(
         if (!Regex("""^\d{2}/\d{2}$""").matches(s.validade)) {
             _uiState.update { it.copy(erroValidade = "Formato MM/AA") }; valid = false
         }
-        val limite = s.limite.toDoubleOrNull()
-        if (s.limite.isBlank() || limite == null || limite <= 0.0) {
+        val limite = s.limite
+        if (limite <= 0.0) {
             _uiState.update { it.copy(erroLimite = "Limite inválido") }; valid = false
         }
         return valid
