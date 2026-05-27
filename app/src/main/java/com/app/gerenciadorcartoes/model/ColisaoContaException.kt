@@ -13,4 +13,3 @@ class ColisaoContaException(
     val email   : String,
     val idToken : String,
 ) : Exception("Este e-mail já possui uma conta criada com senha.")
-

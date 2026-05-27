@@ -14,7 +14,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 //  v5  Adicionado UNIQUE INDEX em `email` de `CadastroUsuario`
 //  v6  Recriação de `CadastroUsuario`: removido `senha`, adicionado `userId`
 //         + UNIQUE INDEX em `userId` (Firebase passa a gerenciar credenciais)
-//  v7  Adicionado campo `cidade` em `CadastroUsuario` (preenchido via ViaCEP)
+//  v7  Adicionado campo `cidade` em `CadastroUsuario` e `bloqueado` em `cartoes`
 //  v8  Adicionado `limiteMaximo` em `cartoes` para preservar o limite cadastrado
 //
 // ─────────────────────────────────────────────────────────────────────────────
@@ -149,14 +149,22 @@ val MIGRATION_5_6 = object : Migration(5, 6) {
 }
 
 /**
- * v6 → v7: adiciona a coluna `cidade` (TEXT NOT NULL DEFAULT '').
- * Preenchida automaticamente pela API ViaCEP ao informar o CEP.
+ * v6 → v7: adiciona `cidade` em `CadastroUsuario` e `bloqueado` em `cartoes`.
  */
 val MIGRATION_6_7 = object : Migration(6, 7) {
     override fun migrate(db: SupportSQLiteDatabase) {
-        db.execSQL(
-            "ALTER TABLE CadastroUsuario ADD COLUMN cidade TEXT NOT NULL DEFAULT ''"
-        )
+        if (!db.hasColumn("CadastroUsuario", "cidade")) {
+            db.execSQL(
+                "ALTER TABLE CadastroUsuario ADD COLUMN cidade TEXT NOT NULL DEFAULT ''"
+            )
+        }
+        if (!db.hasColumn("cartoes", "bloqueado")) {
+            db.execSQL(
+                "ALTER TABLE cartoes ADD COLUMN bloqueado INTEGER NOT NULL DEFAULT 0"
+            )
+        }
+        db.recreateCadastroUsuarioTable()
+        db.recreateCartoesTable(includeLimiteMaximo = false)
     }
 }
 
@@ -166,12 +174,20 @@ val MIGRATION_6_7 = object : Migration(6, 7) {
  */
 val MIGRATION_7_8 = object : Migration(7, 8) {
     override fun migrate(db: SupportSQLiteDatabase) {
-        db.execSQL(
-            "ALTER TABLE cartoes ADD COLUMN limiteMaximo REAL NOT NULL DEFAULT 0.0"
-        )
+        if (!db.hasColumn("cartoes", "bloqueado")) {
+            db.execSQL(
+                "ALTER TABLE cartoes ADD COLUMN bloqueado INTEGER NOT NULL DEFAULT 0"
+            )
+        }
+        if (!db.hasColumn("cartoes", "limiteMaximo")) {
+            db.execSQL(
+                "ALTER TABLE cartoes ADD COLUMN limiteMaximo REAL NOT NULL DEFAULT 0.0"
+            )
+        }
         db.execSQL(
             "UPDATE cartoes SET limiteMaximo = limite WHERE limiteMaximo = 0.0"
         )
+        db.recreateCartoesTable(includeLimiteMaximo = true)
     }
 }
 
@@ -205,3 +221,91 @@ val ALL_MIGRATIONS = arrayOf(
     MIGRATION_8_9
     ,MIGRATION_9_10
 )
+
+private fun SupportSQLiteDatabase.hasColumn(tableName: String, columnName: String): Boolean {
+    query("PRAGMA table_info(`$tableName`)").use { cursor ->
+        val nameIndex = cursor.getColumnIndex("name")
+        while (cursor.moveToNext()) {
+            if (cursor.getString(nameIndex) == columnName) return true
+        }
+    }
+    return false
+}
+
+private fun SupportSQLiteDatabase.recreateCartoesTable(includeLimiteMaximo: Boolean) {
+    execSQL("DROP TABLE IF EXISTS cartoes_new")
+
+    val limiteMaximoColumn = if (includeLimiteMaximo) "`limiteMaximo` REAL NOT NULL, " else ""
+    execSQL(
+        """
+        CREATE TABLE IF NOT EXISTS cartoes_new (
+            `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            `nomeTitular` TEXT NOT NULL,
+            `finalNumero` TEXT NOT NULL,
+            `bandeira` TEXT NOT NULL,
+            `validade` TEXT NOT NULL,
+            `limite` REAL NOT NULL,
+            $limiteMaximoColumn
+            `template` TEXT NOT NULL,
+            `bloqueado` INTEGER NOT NULL
+        )
+        """.trimIndent()
+    )
+
+    val limiteMaximoInsert = if (includeLimiteMaximo) "limiteMaximo, " else ""
+    val limiteMaximoSelect = if (includeLimiteMaximo) "limiteMaximo, " else ""
+    execSQL(
+        """
+        INSERT INTO cartoes_new (
+            id, nomeTitular, finalNumero, bandeira, validade, limite,
+            ${limiteMaximoInsert}template, bloqueado
+        )
+        SELECT
+            id, nomeTitular, finalNumero, bandeira, validade, limite,
+            ${limiteMaximoSelect}template, bloqueado
+        FROM cartoes
+        """.trimIndent()
+    )
+
+    execSQL("DROP TABLE cartoes")
+    execSQL("ALTER TABLE cartoes_new RENAME TO cartoes")
+}
+
+private fun SupportSQLiteDatabase.recreateCadastroUsuarioTable() {
+    execSQL("DROP TABLE IF EXISTS CadastroUsuario_new")
+    execSQL(
+        """
+        CREATE TABLE IF NOT EXISTS CadastroUsuario_new (
+            `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            `userId` TEXT NOT NULL,
+            `nome` TEXT NOT NULL,
+            `cpf` TEXT NOT NULL,
+            `cep` TEXT NOT NULL,
+            `endereco` TEXT NOT NULL,
+            `number` TEXT NOT NULL,
+            `bairro` TEXT NOT NULL,
+            `cidade` TEXT NOT NULL,
+            `estado` TEXT NOT NULL,
+            `email` TEXT NOT NULL
+        )
+        """.trimIndent()
+    )
+    execSQL(
+        """
+        INSERT INTO CadastroUsuario_new (
+            id, userId, nome, cpf, cep, endereco, number, bairro, cidade, estado, email
+        )
+        SELECT
+            id, userId, nome, cpf, cep, endereco, number, bairro, cidade, estado, email
+        FROM CadastroUsuario
+        """.trimIndent()
+    )
+    execSQL("DROP TABLE CadastroUsuario")
+    execSQL("ALTER TABLE CadastroUsuario_new RENAME TO CadastroUsuario")
+    execSQL(
+        "CREATE UNIQUE INDEX IF NOT EXISTS index_CadastroUsuario_email ON CadastroUsuario(email)"
+    )
+    execSQL(
+        "CREATE UNIQUE INDEX IF NOT EXISTS index_CadastroUsuario_userId ON CadastroUsuario(userId)"
+    )
+}

@@ -20,4 +20,3 @@ data class AddCardRequest(
     val template    : String,
     val bloqueado   : Boolean,
 )
-

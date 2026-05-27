@@ -221,5 +221,3 @@ private fun RecuperarSenhaEnviandoPreview() {
         RecuperarSenhaContent(uiState = RecuperarSenhaUiState(enviando = true))
     }
 }
-
-

@@ -52,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -71,13 +72,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.app.gerenciadorcartoes.R
-import com.app.gerenciadorcartoes.ui.common.transformation.CepVisualTransformation
 import com.app.gerenciadorcartoes.ui.components.AppFormField
 import com.app.gerenciadorcartoes.ui.components.AppLoading
 import com.app.gerenciadorcartoes.ui.components.AppScaffold
 import com.app.gerenciadorcartoes.ui.components.AppSectionCard
 import com.app.gerenciadorcartoes.ui.components.AppTopAppBar
-import com.app.gerenciadorcartoes.ui.common.transformation.CpfVisualTransformation
 import com.app.gerenciadorcartoes.ui.feature.cadastrousuario.state.CadastroUsuarioUiState
 import com.app.gerenciadorcartoes.ui.theme.GerenciadorCartoesTheme
 import com.app.gerenciadorcartoes.ui.theme.LocalIconSize
@@ -745,3 +744,65 @@ private fun CadastroUsuarioPreenchidoPreview() {
     }
 }
 
+private object CpfVisualTransformation : VisualTransformation {
+    override fun filter(text: AnnotatedString): TransformedText {
+        val digits = text.text.take(11)
+        val out = buildString {
+            digits.forEachIndexed { i, c ->
+                if (i == 3 || i == 6) append('.')
+                if (i == 9) append('-')
+                append(c)
+            }
+        }
+        val offsetMapping = object : OffsetMapping {
+            override fun originalToTransformed(offset: Int): Int {
+                val o = offset.coerceIn(0, digits.length)
+                return when {
+                    o <= 2 -> o
+                    o <= 5 -> o + 1
+                    o <= 8 -> o + 2
+                    else   -> o + 3
+                }.coerceAtMost(out.length)
+            }
+            override fun transformedToOriginal(offset: Int): Int {
+                val o = offset.coerceIn(0, out.length)
+                return when {
+                    o <= 3  -> o
+                    o <= 7  -> o - 1
+                    o <= 11 -> o - 2
+                    else    -> o - 3
+                }.coerceIn(0, digits.length)
+            }
+        }
+        return TransformedText(AnnotatedString(out), offsetMapping)
+    }
+}
+
+private object CepVisualTransformation : VisualTransformation {
+    override fun filter(text: AnnotatedString): TransformedText {
+        val digits = text.text.take(8)
+        val out = buildString {
+            digits.forEachIndexed { i, c ->
+                if (i == 5) append('-')
+                append(c)
+            }
+        }
+        val offsetMapping = object : OffsetMapping {
+            override fun originalToTransformed(offset: Int): Int {
+                val o = offset.coerceIn(0, digits.length)
+                return when {
+                    o <= 4 -> o
+                    else   -> o + 1
+                }.coerceAtMost(out.length)
+            }
+            override fun transformedToOriginal(offset: Int): Int {
+                val o = offset.coerceIn(0, out.length)
+                return when {
+                    o <= 5 -> o
+                    else   -> o - 1
+                }.coerceIn(0, digits.length)
+            }
+        }
+        return TransformedText(AnnotatedString(out), offsetMapping)
+    }
+}

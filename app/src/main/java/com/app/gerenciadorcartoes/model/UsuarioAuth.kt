@@ -6,4 +6,3 @@ data class UsuarioAuth(
     val nome   : String?,  // null para email/senha (Firebase não popula displayName nesses casos)
                            // o nome canônico do usuário vem sempre de CadastroUsuario.nome (Room)
 )
-

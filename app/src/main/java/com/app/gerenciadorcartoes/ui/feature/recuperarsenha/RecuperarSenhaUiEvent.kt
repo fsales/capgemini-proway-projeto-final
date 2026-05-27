@@ -5,4 +5,3 @@ sealed interface RecuperarSenhaUiEvent {
     data class  MostrarErro(val mensagem: String)     : RecuperarSenhaUiEvent
     data class  MostrarMensagem(val mensagem: String) : RecuperarSenhaUiEvent
 }
-

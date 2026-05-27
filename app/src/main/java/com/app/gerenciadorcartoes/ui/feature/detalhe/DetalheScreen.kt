@@ -19,6 +19,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -57,21 +58,23 @@ private val PtBrLocale: Locale = Locale.forLanguageTag("pt-BR")
 fun DetalheScreen(
     navigateBack              : () -> Unit,
     onNavigateToAjustarLimite : (Long) -> Unit,
+    onNavigateToFatura        : (Long) -> Unit,
     viewModel                 : DetalheViewModel = hiltViewModel(),
 ) {
     val uiState           by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
-     LaunchedEffect(viewModel) {
-         viewModel.uiEvent.collect { event ->
-             when (event) {
-                 DetalheUiEvent.NavigateBack               -> navigateBack()
-                 is DetalheUiEvent.NavigateToAjustarLimite -> onNavigateToAjustarLimite(event.id)
-                 is DetalheUiEvent.MostrarErro             -> snackbarHostState.showSnackbar(event.mensagem)
-                 is DetalheUiEvent.MostrarMensagem         -> snackbarHostState.showSnackbar(event.mensagem)
-             }
-         }
-     }
+    LaunchedEffect(viewModel) {
+        viewModel.uiEvent.collect { event ->
+            when (event) {
+                DetalheUiEvent.NavigateBack               -> navigateBack()
+                is DetalheUiEvent.NavigateToAjustarLimite -> onNavigateToAjustarLimite(event.id)
+                is DetalheUiEvent.NavigateToFatura        -> onNavigateToFatura(event.id)
+                is DetalheUiEvent.MostrarErro             -> snackbarHostState.showSnackbar(event.mensagem)
+                is DetalheUiEvent.MostrarMensagem         -> snackbarHostState.showSnackbar(event.mensagem)
+            }
+        }
+    }
 
     DetalheContent(
         uiState           = uiState,
@@ -136,6 +139,7 @@ private fun DetalheBody(
          LimiteSection(
             detalhe          = detalhe,
             onAjustarLimite = { onEvent(DetalheEvent.AjustarLimite) },
+            onVerFaturas    = { onEvent(DetalheEvent.VerFaturas) },
         )
     }
 }
@@ -184,6 +188,7 @@ private fun BlockCardSection(
 private fun LimiteSection(
     detalhe          : CartaoDetalhe,
     onAjustarLimite : () -> Unit,
+    onVerFaturas    : () -> Unit,
 ) {
     val spacing              = LocalSpacing.current
     val currencyFormatter    = rememberCurrencyFormatter()
@@ -208,8 +213,13 @@ private fun LimiteSection(
                 text  = "Limite",
                 style = MaterialTheme.typography.titleLarge,
             )
-            Button(onClick = onAjustarLimite) {
-                Text(text = "Ajustar limite")
+            Row(horizontalArrangement = Arrangement.spacedBy(spacing.small)) {
+                OutlinedButton(onClick = onVerFaturas) {
+                    Text(text = "Faturas")
+                }
+                Button(onClick = onAjustarLimite) {
+                    Text(text = "Ajustar limite")
+                }
             }
         }
 

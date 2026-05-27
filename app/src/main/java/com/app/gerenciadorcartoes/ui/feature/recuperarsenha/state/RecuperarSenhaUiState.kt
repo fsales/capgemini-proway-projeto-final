@@ -5,4 +5,3 @@ data class RecuperarSenhaUiState(
     val erroEmail  : String? = null,
     val enviando   : Boolean = false,
 )
-

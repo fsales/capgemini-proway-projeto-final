@@ -13,4 +13,3 @@ data class BlockCardRequest(
     val idUsuario   : String,
     val id    : String,
 )
-
