@@ -1,27 +1,46 @@
 package com.app.gerenciadorcartoes.ui.feature.fatura
 
 import android.content.res.Configuration
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.app.gerenciadorcartoes.ui.components.AppLoading
@@ -99,18 +118,124 @@ private fun FaturaBody(
     paddingValues : PaddingValues,
 ) {
     val spacing = LocalSpacing.current
+    var selectedReferencia by remember(faturas) {
+        mutableStateOf(faturas.first().referencia)
+    }
+    val selectedFatura = faturas.firstOrNull { it.referencia == selectedReferencia } ?: faturas.first()
 
     LazyColumn(
         modifier            = Modifier.fillMaxSize(),
         contentPadding      = paddingValues,
-        verticalArrangement = Arrangement.spacedBy(spacing.small),
+        verticalArrangement = Arrangement.spacedBy(spacing.medium),
     ) {
-        items(items = faturas, key = { it.referencia }) { fatura ->
+        item(key = "month-selector") {
+            MonthSelector(
+                meses               = faturas,
+                selectedReferencia  = selectedFatura.referencia,
+                onReferenciaSelected = { selectedReferencia = it },
+                modifier            = Modifier.fillMaxWidth(),
+            )
+        }
+
+        item(key = selectedFatura.referencia) {
             FaturaMesSection(
-                fatura   = fatura,
+                fatura   = selectedFatura,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = spacing.medium),
+            )
+        }
+    }
+}
+
+@Composable
+private fun MonthSelector(
+    meses                : List<FaturaMesUiState>,
+    selectedReferencia   : String,
+    onReferenciaSelected : (String) -> Unit,
+    modifier             : Modifier = Modifier,
+) {
+    val spacing = LocalSpacing.current
+
+    LazyRow(
+        modifier              = modifier,
+        contentPadding        = PaddingValues(horizontal = spacing.medium, vertical = spacing.small),
+        horizontalArrangement = Arrangement.spacedBy(spacing.smallMedium),
+    ) {
+        items(items = meses, key = { it.referencia }) { mes ->
+            MonthSelectorItem(
+                referencia = mes.referencia,
+                selected   = mes.referencia == selectedReferencia,
+                onClick    = { onReferenciaSelected(mes.referencia) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun MonthSelectorItem(
+    referencia : String,
+    selected   : Boolean,
+    onClick    : () -> Unit,
+    modifier   : Modifier = Modifier,
+) {
+    val spacing = LocalSpacing.current
+    val shape   = RoundedCornerShape(28.dp)
+    val animationSpec = tween<Color>(durationMillis = 220)
+
+    val containerColor by animateColorAsState(
+        targetValue   = if (selected) Color.White else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+        animationSpec = animationSpec,
+        label         = "monthContainerColor",
+    )
+    val contentColor by animateColorAsState(
+        targetValue   = if (selected) Color(0xFF111827) else MaterialTheme.colorScheme.onSurfaceVariant,
+        animationSpec = animationSpec,
+        label         = "monthContentColor",
+    )
+    val borderColor by animateColorAsState(
+        targetValue   = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.42f) else Color.Transparent,
+        animationSpec = animationSpec,
+        label         = "monthBorderColor",
+    )
+    val shadowElevation by animateDpAsState(
+        targetValue   = if (selected) 6.dp else 0.dp,
+        animationSpec = tween(durationMillis = 220),
+        label         = "monthShadowElevation",
+    )
+    val scale by animateFloatAsState(
+        targetValue   = if (selected) 1f else 0.98f,
+        animationSpec = tween(durationMillis = 180),
+        label         = "monthScale",
+    )
+
+    Surface(
+        modifier = modifier
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .clickable(onClick = onClick),
+        shape           = shape,
+        color           = containerColor,
+        contentColor    = contentColor,
+        border          = BorderStroke(width = 1.dp, color = borderColor),
+        shadowElevation = shadowElevation,
+    ) {
+        Box(
+            modifier = Modifier
+                .widthIn(min = 104.dp)
+                .heightIn(min = 48.dp)
+                .padding(horizontal = spacing.medium, vertical = spacing.smallMedium),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text      = referencia,
+                style     = MaterialTheme.typography.labelLarge,
+                color     = contentColor,
+                maxLines  = 1,
+                textAlign = TextAlign.Center,
+                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
             )
         }
     }
