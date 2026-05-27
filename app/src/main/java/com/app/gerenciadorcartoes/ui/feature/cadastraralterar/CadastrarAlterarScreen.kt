@@ -28,8 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import com.app.gerenciadorcartoes.ui.components.ValidadeVisualTransformation
-import com.app.gerenciadorcartoes.ui.components.rememberCurrencyVisualTransformation
+import com.app.gerenciadorcartoes.ui.common.transformation.ValidadeVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -47,6 +46,7 @@ import com.app.gerenciadorcartoes.ui.theme.GerenciadorCartoesTheme
 import com.app.gerenciadorcartoes.ui.theme.LocalSpacing
 import com.app.gerenciadorcartoes.viewmodel.CadastrarAlterarViewModel
 import com.app.gerenciadorcartoes.model.Cartao
+import com.app.gerenciadorcartoes.ui.common.transformation.CurrencyVisualTransformation
 
 // =============================================================================
 // Screen — ponto de entrada; coleta ViewModel e roteia UiEvent.
@@ -231,7 +231,7 @@ private fun FormularioBody(
             value         = uiState.limite.toCurrencyDigits(),
             onValueChange = { onEvent(CadastrarAlterarEvent.LimiteAlterado(it.toCurrencyDouble())) },
             label         = { Text("Limite máximo (R$)") },
-            visualTransformation = rememberCurrencyVisualTransformation(),
+            visualTransformation = CurrencyVisualTransformation,
             isError       = uiState.erroLimite != null,
             supportingText = uiState.erroLimite?.let { { Text(it) } },
             keyboardOptions = KeyboardOptions(
@@ -244,7 +244,7 @@ private fun FormularioBody(
     }
 }
 
-// VisualTransformations moved to ui/components/MaskVisualTransformations.kt for reuse
+// VisualTransformations moved to ui/components/CurrencyVisualTransformation.kt for reuse
 
 // =============================================================================
 // Previews
