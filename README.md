@@ -17,7 +17,7 @@
 <p align="center">
   <strong>👥 Equipe</strong><br/><br/>
   Caio Albuquerque &nbsp;·&nbsp;
-  Fabio de Oliveira &nbsp;·&nbsp;
+  Fabio de Oliveira Sales &nbsp;·&nbsp;
   Felipe Suzuki &nbsp;·&nbsp;
   Gustavo de Souza &nbsp;·&nbsp;
   Rafael Alexandre &nbsp;·&nbsp;
@@ -114,10 +114,19 @@ Se você está aprendendo Android, estudar este código vai te ensinar:
 
 ## 🖼️ Capturas de Tela
 
-| Splash | Login | Lista | Detalhe |
-|:---:|:---:|:---:|:---:|
-| ![Tela 1](docs/screens/Screenshot_20260521_214259.png) | ![Tela 2](docs/screens/Screenshot_20260521_214529.png) | ![Tela 3](docs/screens/Screenshot_20260521_214703.png) | ![Tela 4](docs/screens/Screenshot_20260521_214723.png) |
+Galeria das telas do app (organizada pelo fluxo do usuário).
 
+| Login | Cadastro | Cadastro — Passo 1 | Cadastro — Passo 2 |
+|:-----:|:--------:|:------------------:|:------------------:|
+| ![Login](docs/screens/1.png) | ![Cadastro](docs/screens/2.png) | ![Cadastro — Passo 1](docs/screens/5.1.png) | ![Cadastro — Passo 2](docs/screens/5.2.png) |
+
+| Lista | Cartões (lista) | Menu / Ações | Logout (confirmação) |
+|:-----:|:---------------:|:-----------:|:--------------------:|
+| ![Lista](docs/screens/4.png) | ![Cartões](docs/screens/4.1.png) | ![Menu](docs/screens/4.2.png) | ![Logout](docs/screens/4.2.png) |
+
+| Ajustar Limite | Faturas | Perfil |
+|:---------------:|:-----:|:-----:|
+| ![Ajustar Limite](docs/screens/6.png) | ![Faturas](docs/screens/7.png) | ![Perfil](docs/screens/10.png) |
 ---
 
 ## 🗺️ Fluxo de Telas
