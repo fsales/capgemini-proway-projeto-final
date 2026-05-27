@@ -1,15 +1,22 @@
 package com.app.gerenciadorcartoes.repository
 
 import com.app.gerenciadorcartoes.data.local.dao.CartaoDao
+import com.app.gerenciadorcartoes.data.local.session.SessionManager
 import com.app.gerenciadorcartoes.model.Cartao
+import com.app.gerenciadorcartoes.network.model.AddCardRequest
+import com.app.gerenciadorcartoes.network.model.BlockCardRequest
+import com.app.gerenciadorcartoes.network.service.ApiService
 import com.app.gerenciadorcartoes.repository.mapper.toDomain
 import com.app.gerenciadorcartoes.repository.mapper.toEntity
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class CartaoRepositoryImpl @Inject constructor(
     private val cartaoDao: CartaoDao,
+    private val apiService: ApiService,
+    private val sessionManager: SessionManager,
 ) : CartaoRepository {
 
     override fun observarTodos(): Flow<List<Cartao>> =
@@ -35,4 +42,29 @@ class CartaoRepositoryImpl @Inject constructor(
 
     override suspend fun excluirPorId(id: Long) =
         cartaoDao.excluirPorId(id)
+
+    override suspend fun enviarParaApi(cartao: Cartao) {
+        val userId = sessionManager.getSessionUserId().firstOrNull() ?: return
+        apiService.addCard(
+            AddCardRequest(
+                idUsuario = userId,
+                id = cartao.id.toString(),
+                nomeTitular = cartao.nomeTitular,
+                finalNumero = cartao.finalNumero,
+                bandeira = cartao.bandeira,
+                validade = cartao.validade,
+                limite = cartao.limite,
+                template = cartao.template,
+                bloqueado = cartao.bloqueado,
+            )
+        )
+    }
+
+    override suspend fun bloquearRemotamente(id: Long, novoStatusBloqueio: Boolean) {
+        val userId = sessionManager.getSessionUserId().firstOrNull() ?: return
+        val request = BlockCardRequest(userId, id.toString())
+        if (novoStatusBloqueio) apiService.blockCard(request) else apiService.unblockCard(request)
+        // Atualiza banco local após chamada remota
+        cartaoDao.atualizarBloqueio(id, novoStatusBloqueio)
+    }
 }

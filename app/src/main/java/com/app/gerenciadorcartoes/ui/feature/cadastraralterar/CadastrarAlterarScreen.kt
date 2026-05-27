@@ -28,9 +28,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import com.app.gerenciadorcartoes.ui.components.ValidadeVisualTransformation
+import com.app.gerenciadorcartoes.ui.components.rememberCurrencyVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.app.gerenciadorcartoes.extensions.toCurrencyDigits
+import com.app.gerenciadorcartoes.extensions.toCurrencyDouble
+import com.app.gerenciadorcartoes.extensions.toValidadeFormatada
 import com.app.gerenciadorcartoes.ui.components.AppLoading
 import com.app.gerenciadorcartoes.ui.components.AppScaffold
 import com.app.gerenciadorcartoes.ui.components.AppTopAppBar
@@ -207,8 +212,9 @@ private fun FormularioBody(
         // Validade
         OutlinedTextField(
             value         = uiState.validade,
-            onValueChange = { onEvent(CadastrarAlterarEvent.ValidadeAlterada(it)) },
+            onValueChange = { onEvent(CadastrarAlterarEvent.ValidadeAlterada(it.toValidadeFormatada())) },
             label         = { Text("Validade (MM/AA)") },
+            visualTransformation = ValidadeVisualTransformation,
             isError       = uiState.erroValidade != null,
             supportingText = uiState.erroValidade?.let { { Text(it) } },
             placeholder   = { Text("12/28") },
@@ -222,9 +228,10 @@ private fun FormularioBody(
 
         // Limite
         OutlinedTextField(
-            value         = uiState.limite,
-            onValueChange = { onEvent(CadastrarAlterarEvent.LimiteAlterado(it)) },
+            value         = uiState.limite.toCurrencyDigits(),
+            onValueChange = { onEvent(CadastrarAlterarEvent.LimiteAlterado(it.toCurrencyDouble())) },
             label         = { Text("Limite máximo (R$)") },
+            visualTransformation = rememberCurrencyVisualTransformation(),
             isError       = uiState.erroLimite != null,
             supportingText = uiState.erroLimite?.let { { Text(it) } },
             keyboardOptions = KeyboardOptions(
@@ -236,6 +243,8 @@ private fun FormularioBody(
         )
     }
 }
+
+// VisualTransformations moved to ui/components/MaskVisualTransformations.kt for reuse
 
 // =============================================================================
 // Previews
@@ -257,7 +266,7 @@ private fun EditarComDadosPreview() {
                 finalNumero = "1234",
                 bandeira    = "Visa",
                 validade    = "12/28",
-                limite      = "5000.0",
+                limite      = 5000.0,
             ),
         )
     }

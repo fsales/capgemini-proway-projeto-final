@@ -4,9 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.app.gerenciadorcartoes.data.local.session.SessionManager
-import com.app.gerenciadorcartoes.network.model.BlockCardRequest
-import com.app.gerenciadorcartoes.network.service.ApiService
 import com.app.gerenciadorcartoes.repository.CartaoDetalheRepository
 import com.app.gerenciadorcartoes.repository.CartaoRepository
 import com.app.gerenciadorcartoes.ui.feature.detalhe.DetalheEvent
@@ -30,8 +27,6 @@ class DetalheViewModel @Inject constructor(
     savedStateHandle              : SavedStateHandle,
     private val detalheRepository : CartaoDetalheRepository,
     private val cartaoRepository : CartaoRepository,
-    private val sessionManager    : SessionManager,
-    private val apiService        : ApiService,
 ) : ViewModel() {
 
     private val route : DetalheRoute = savedStateHandle.toRoute()
@@ -87,15 +82,8 @@ class DetalheViewModel @Inject constructor(
 
                 // Chamar API para bloquear ou desbloquear
 
-                val userId = sessionManager.getSessionUserId().firstOrNull() ?: throw Exception("Usuário não autenticado")
-                if (novoStatusBloqueio) {
-                    apiService.blockCard(BlockCardRequest(userId,cartao.id.toString()))
-                } else {
-                    apiService.unblockCard(BlockCardRequest(userId, cartao.id.toString()))
-                }
-
-                // Atualizar no banco de dados local
-                cartaoRepository.atualizarBloqueio(cartao.id, novoStatusBloqueio)
+                // Executa chamada remota e atualiza o banco local via repositório
+                cartaoRepository.bloquearRemotamente(cartao.id, novoStatusBloqueio)
 
                 // Enviar mensagem de sucesso
                 val mensagem = if (novoStatusBloqueio) {
