@@ -56,9 +56,20 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(carregando = true) }
             runCatching {
-                sessaoRepository.entrar(_uiState.value.usuario, _uiState.value.senha)
+                val resultado = sessaoRepository.entrar(_uiState.value.usuario, _uiState.value.senha)
                 _uiState.update { it.copy(carregando = false) }
-                _uiEvent.send(LoginUiEvent.NavegaParaLista)
+                when (resultado) {
+                    ResultadoAutenticacaoExterna.Autenticado ->
+                        _uiEvent.send(LoginUiEvent.NavegaParaLista)
+                    is ResultadoAutenticacaoExterna.PrecisaCadastro ->
+                        _uiEvent.send(
+                            LoginUiEvent.NavegaParaCadastroExterno(
+                                userId = resultado.userId,
+                                email  = resultado.email,
+                                nome   = resultado.nome,
+                            )
+                        )
+                }
             }.onFailure { erro ->
                 if (erro is CancellationException) throw erro
                 _uiState.update { it.copy(carregando = false) }

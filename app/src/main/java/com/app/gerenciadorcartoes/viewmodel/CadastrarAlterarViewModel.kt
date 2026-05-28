@@ -125,7 +125,8 @@ class CadastrarAlterarViewModel @Inject constructor(
                         ?.coerceAtMost(limiteMaximo)
                         ?: limiteMaximo
                 }
-                val idUsuario = sessaoRepository.buscarIdUsuario();
+                val idUsuario = sessaoRepository.buscarIdUsuario()
+                    ?: error("Sessão local não encontrada. Faça login novamente.")
                 val cartao = Cartao.fromUi(
                     id          = id,
                     nomeTitular = s.nomeTitular,
@@ -195,6 +196,5 @@ class CadastrarAlterarViewModel @Inject constructor(
 
     // Chamadas remotas delegadas ao repositório; Erros de rede não propagam para o fluxo principal
 }
-
 
 

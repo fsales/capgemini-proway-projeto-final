@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface SessaoRepository {
 
-    suspend fun entrar(email: String, senha: String)
+    suspend fun entrar(email: String, senha: String): ResultadoAutenticacaoExterna
 
     suspend fun autenticarComToken(idToken: String): ResultadoAutenticacaoExterna
 

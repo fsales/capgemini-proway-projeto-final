@@ -13,6 +13,7 @@ fun CartaoEntity.toDomain(): Cartao = Cartao(
     limiteMaximo= limiteMaximo,
     template    = template,
     bloqueado   = bloqueado,
+    usuarioId   = usuarioId,
     clientId    = clientId,
 )
 

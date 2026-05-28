@@ -82,6 +82,16 @@
 
     <!-- Lista Screen — FAB -->
     <string name="lista_fab_novo_cartao">Novo cartão</string>
+    <string name="lista_fab_chat">Abrir chat</string>
+
+    <!-- Lista Screen — Chat -->
+    <string name="chat_titulo">Assistente G3</string>
+    <string name="chat_subtitulo">Cartões e faturas</string>
+    <string name="chat_fechar">Fechar chat</string>
+    <string name="chat_input_hint">Digite sua mensagem</string>
+    <string name="chat_enviar">Enviar mensagem</string>
+    <string name="chat_digitando">Digitando...</string>
+    <string name="chat_bot_avatar">Assistente</string>
 
     <!-- Lista Screen — BottomSheet de ações -->
     <string name="lista_acao_editar">Editar cartão</string>
