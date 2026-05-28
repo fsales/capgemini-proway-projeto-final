@@ -1,8 +1,10 @@
 package com.app.gerenciadorcartoes.di
 
 import com.app.gerenciadorcartoes.BuildConfig
+import com.app.gerenciadorcartoes.network.mastra.MastraBaseUrlProvider
 import com.app.gerenciadorcartoes.network.service.ApiService
 import com.app.gerenciadorcartoes.network.service.BuscaCep
+import com.app.gerenciadorcartoes.network.service.MastraAgentService
 import com.app.gerenciadorcartoes.network.ssl.UnsafeSslConfig
 import dagger.Module
 import dagger.Provides
@@ -77,4 +79,31 @@ object NetworkModule {
     @Singleton
     fun provideBuscaCep(@Named("viacep") retrofit: Retrofit): BuscaCep =
         retrofit.create(BuscaCep::class.java)
+
+    @Provides
+    @Singleton
+    @Named("mastra")
+    fun provideMastraOkHttpClient(okHttpClient: OkHttpClient): OkHttpClient =
+        okHttpClient
+            .newBuilder()
+            .readTimeout(0, TimeUnit.SECONDS)
+            .build()
+
+    @Provides
+    @Singleton
+    @Named("mastra")
+    fun provideMastraRetrofit(
+        @Named("mastra") okHttpClient: OkHttpClient,
+        json: Json,
+    ): Retrofit =
+        Retrofit.Builder()
+            .baseUrl(MastraBaseUrlProvider.resolveBaseUrl())
+            .client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .build()
+
+    @Provides
+    @Singleton
+    fun provideMastraAgentService(@Named("mastra") retrofit: Retrofit): MastraAgentService =
+        retrofit.create(MastraAgentService::class.java)
 }

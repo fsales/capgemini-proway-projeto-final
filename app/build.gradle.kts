@@ -7,6 +7,19 @@ plugins {
     alias(libs.plugins.google.services)
 }
 
+val mastraEmulatorBaseUrl = providers.gradleProperty("MASTRA_EMULATOR_BASE_URL")
+    .orElse(providers.environmentVariable("MASTRA_EMULATOR_BASE_URL"))
+    .orElse("http://10.0.2.2:4111/api/")
+val mastraDeviceBaseUrl = providers.gradleProperty("MASTRA_DEVICE_BASE_URL")
+    .orElse(providers.environmentVariable("MASTRA_DEVICE_BASE_URL"))
+    .orElse("http://192.168.0.100:4111/api/")
+val mastraAgentId = providers.gradleProperty("MASTRA_AGENT_ID")
+    .orElse(providers.environmentVariable("MASTRA_AGENT_ID"))
+    .orElse("card-spending-agent")
+val chatUseMock = providers.gradleProperty("CHAT_USE_MOCK")
+    .orElse(providers.environmentVariable("CHAT_USE_MOCK"))
+    .orElse("false")
+
 android {
     namespace = "com.app.gerenciadorcartoes"
     compileSdk {
@@ -31,6 +44,11 @@ android {
         versionCode               = 1
         versionName               = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "MASTRA_EMULATOR_BASE_URL", "\"${mastraEmulatorBaseUrl.get()}\"")
+        buildConfigField("String", "MASTRA_DEVICE_BASE_URL", "\"${mastraDeviceBaseUrl.get()}\"")
+        buildConfigField("String", "MASTRA_AGENT_ID", "\"${mastraAgentId.get()}\"")
+        buildConfigField("boolean", "CHAT_USE_MOCK", chatUseMock.get())
     }
 
     buildTypes {

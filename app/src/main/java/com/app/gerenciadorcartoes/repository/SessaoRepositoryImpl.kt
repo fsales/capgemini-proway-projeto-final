@@ -14,9 +14,13 @@ class SessaoRepositoryImpl @Inject constructor(
     private val cadastroUsuarioRepository  : CadastroUsuarioRepository,
 ) : SessaoRepository {
 
-    override suspend fun entrar(email: String, senha: String) {
+    override suspend fun entrar(email: String, senha: String): ResultadoAutenticacaoExterna {
         val auth = authRepository.entrar(email, senha)
-        sessionManager.saveSession(auth.userId)
+        return resolverSessao(
+            userId = auth.userId,
+            email  = auth.email.orEmpty(),
+            nome   = auth.nome.orEmpty(),
+        )
     }
 
     override suspend fun autenticarComToken(idToken: String): ResultadoAutenticacaoExterna {
@@ -54,7 +58,18 @@ class SessaoRepositoryImpl @Inject constructor(
         val firebaseAtivo = authRepository.usuarioAtual() != null
 
         return when {
-            sessaoAtiva && firebaseAtivo  -> true
+            sessaoAtiva && firebaseAtivo  -> {
+                val userId = sessionManager.getSessionUserId().first()
+                val perfilExiste = userId?.let {
+                    cadastroUsuarioRepository.buscarPorUserId(it)
+                } != null
+                if (perfilExiste) {
+                    true
+                } else {
+                    sessionManager.logout()
+                    false
+                }
+            }
             sessaoAtiva && !firebaseAtivo -> {
                 sessionManager.logout()
                 false
